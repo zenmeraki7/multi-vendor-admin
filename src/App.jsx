@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import AddProduct from "./pages/AddProduct";
 
 function App() {
   return (
@@ -14,9 +15,10 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           <Route
-            path="register"
-            element={<PrivateRoute component={<Register />} />}
+            path="add-product"
+            element={<PrivateRoute component={<AddProduct />} />}
           />
         </Route>
       </Routes>
