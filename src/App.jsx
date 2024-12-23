@@ -12,10 +12,10 @@ function App() {
   return (
     <>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
           <Route
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
