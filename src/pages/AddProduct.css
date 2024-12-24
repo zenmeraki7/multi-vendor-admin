@@ -1,0 +1,51 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+ }
+ 
+ .product-images {
+    margin-bottom: 24px;
+ }
+ 
+ .image-upload-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+ }
+ 
+ .image-upload-row label {
+    display: block;
+    cursor: pointer;
+ }
+ 
+ .image-upload-row label img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: opacity 0.2s ease;
+ }
+ 
+ .image-upload-row label img:hover {
+    opacity: 0.8;
+ }
+ 
+ .image-slot {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+ }
+ 
+ .image-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+ }
+ 
+ input[type="file"] {
+    display: none;
+ }

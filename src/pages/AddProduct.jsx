@@ -1,180 +1,232 @@
-import React, { useState, useRef } from "react";
-import {
-  Container,
-  Box,
-  Grid,
-  Card,
-  Typography,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
-import { PhotoCamera } from "@mui/icons-material";
+import React, { useState } from "react";
 import JoditEditor from "jodit-react";
 
 function AddProduct() {
+  const [productImages, setProductImages] = useState([]);
+  const [features, setFeatures] = useState([{ name: "", details: "" }]);
   const [description, setDescription] = useState("");
-  const editor = useRef(null);
+
+  const handleAddFeature = () => {
+    setFeatures([...features, { name: "", details: "" }]);
+  };
+
+  const handleRemoveFeature = (index) => {
+    const updatedFeatures = features.filter((_, i) => i !== index);
+    setFeatures(updatedFeatures);
+  };
 
   const config = {
-    readonly: false, // all options from https://xdsoft.net/jodit/doc/
-    height: 400,
+    readonly: false, // Set to true to make the editor readonly
   };
 
   return (
-    <>
-      <Container maxWidth="lg">
-        <Box mt={4} mb={3} textAlign="center">
-          <Typography variant="h4">Add Product</Typography>
-          <Typography variant="body1">
-            Here you can add products to your store.
-          </Typography>
-        </Box>
-
-        <Grid container spacing={2} justifyContent="center">
-          {/* Product Details */}
-          <Grid item xs={12} md={7}>
-            <Card elevation={3} sx={{ p: 3 }}>
-              <Typography variant="h6">PRODUCT DETAILS</Typography>
-              <Typography variant="body2" color="textSecondary" mb={2}>
-                Add product details here
-              </Typography>
-
-              <form>
-                <TextField
-                  fullWidth
-                  label="CHOOSE PRODUCT"
-                  select
-                  required
-                  margin="normal"
-                  defaultValue="Normal Product"
-                >
-                  <MenuItem value="Normal Product">Normal Product</MenuItem>
-                  <MenuItem value="Another Product">Another Product</MenuItem>
-                </TextField>
-
-                <TextField
-                  fullWidth
-                  label="SELLER EMAIL"
-                  required
-                  placeholder="Enter Seller Email Here"
-                  margin="normal"
-                />
-
-                <TextField
-                  fullWidth
-                  label="PRODUCT NAME"
-                  required
-                  placeholder="Enter Product Name Here"
-                  margin="normal"
-                />
-
-                <TextField
-                  fullWidth
-                  label="PRODUCT TYPE"
-                  placeholder="Enter Product Type Here"
-                  margin="normal"
-                />
-
-                {/* Jodit Editor for Product Description */}
-                <Box mt={2}>
-                  <Typography variant="body2" mb={1}>
-                    DESCRIPTION
-                  </Typography>
-                  <JoditEditor
-                    ref={editor}
-                    value={description}
-                    config={config}
-                    tabIndex={1} // tabIndex of textarea
-                    onBlur={(newContent) => setDescription(newContent)} // preferred to use only this option to update the value for performance reasons
-                    onChange={(newContent) => {}}
-                  />
-                </Box>
-
-                <TextField
-                  fullWidth
-                  label="PRODUCT TAGS"
-                  placeholder="Enter Product Tags Here"
-                  margin="normal"
-                />
-              </form>
-            </Card>
-          </Grid>
-
-          {/* Product Image */}
-          <Grid item xs={12} md={5}>
-            <Card elevation={3} sx={{ p: 3, height: 470 }}>
-              <Typography variant="h6">PRODUCT IMAGE</Typography>
-              <Typography variant="body2" color="textSecondary" mb={2}>
-                Here you can upload images of product. You are allowed to upload
-                10 images only.
-              </Typography>
-
-              <Box sx={{ textAlign: "center", mb: 2 }}>
+    <div className="container" style={{ maxWidth: "1200px", margin: "10px auto" }}>
+      <h2>Add Product</h2>
+      <br />
+      <div style={{ display: "flex", gap: "30px" }}>
+        {/* Image Upload Section */}
+        <div style={{ flex: "1" }}>
+          <h3>Product Images</h3>
+          <br />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+            {[...Array(4)].map((_, index) => (
+              <label key={index} style={{ cursor: "pointer" }}>
+                <input type="file" style={{ display: "none" }} />
                 <img
-                  src="https://t4.ftcdn.net/jpg/02/17/88/73/360_F_217887350_mDfLv2ootQNeffWXT57VQr8OX7IvZKvB.jpg"
-                  alt="Product"
-                  style={{ maxHeight: "150px" }}
+                  src="https://cdn.pixabay.com/photo/2017/11/10/04/47/image-2935360_1280.png"
+                  alt=""
+                  height={"100px"}
+                  width={"100px"}
                 />
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "block", marginTop: "1rem" }}
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<PhotoCamera />}
-                  sx={{ mt: 1 }}
-                >
-                  Upload Image
-                </Button>
-              </Box>
-
-              <Box sx={{ backgroundColor: "aliceblue", p: 2 }}>
-                <Typography variant="body2" color="error" fontWeight="bold">
-                  Note:
-                </Typography>
-                <Typography variant="body2" fontStyle="italic">
-                  Image can be uploaded of any dimension but we recommend you to
-                  upload image with dimension of 1024x1024 & its size must be
-                  less than 15MB.
-                </Typography>
-              </Box>
-            </Card>
-          </Grid>
-
-          {/* Shipping Details */}
-          <Grid item xs={12} md={7}>
-            <Card elevation={3} sx={{ p: 3 }}>
-              <Typography variant="h6">SHIPPING DETAILS</Typography>
-              <Typography variant="body2" color="textSecondary" mb={2}>
-                Add shipping details here
-              </Typography>
-
-              <FormControl fullWidth margin="normal">
-                <InputLabel>WEIGHT UNIT</InputLabel>
-                <Select defaultValue="Grams (g)">
-                  <MenuItem value="Grams (g)">Grams (g)</MenuItem>
-                  <MenuItem value="Kilogram (kg)">Kilogram (kg)</MenuItem>
-                  <MenuItem value="Ounce (oz)">Ounce (oz)</MenuItem>
-                  <MenuItem value="Pound (lb)">Pound (lb)</MenuItem>
-                </Select>
-              </FormControl>
-
-              <TextField
-                fullWidth
-                label="WEIGHT"
-                placeholder="Enter Product Weight Here"
-                margin="normal"
+              </label>
+            ))}
+          </div>
+          <div style={{ marginTop: "20px" }}>
+            <h3>Product Thumbnail</h3>
+            <br />
+            <label style={{ cursor: "pointer" }}>
+              <input type="file" style={{ display: "none" }} />
+              <img
+                src="https://cdn.pixabay.com/photo/2017/11/10/04/47/image-2935360_1280.png"
+                alt=""
+                height={"100px"}
+                width={"100px"}
               />
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-    </>
+            </label>
+          </div>
+
+          {/* Product Description Editor - Added below Product Thumbnail */}
+          <div style={{ marginTop: "20px" }}>
+            <h3>Product Description</h3>
+            <JoditEditor
+              value={description}
+              config={config}
+              onChange={(newContent) => setDescription(newContent)}
+            />
+          </div>
+        </div>
+
+        {/* Form Section */}
+        <div style={{ flex: "1" }}>
+          <form>
+            {/* Product Name */}
+            <div style={{ marginBottom: "20px" }}>
+              <label htmlFor="productName">Product Name</label>
+              <input
+                type="text"
+                id="productName"
+                name="productName"
+                placeholder="Enter product name"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  marginTop: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "5px",
+                  paddingRight: "2px",
+                }}
+              />
+            </div>
+
+            {/* Input Grid */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "20px",
+                marginBottom: "20px",
+              }}
+            >
+              {/* Input Fields */}
+              {[
+                { id: "brandName", label: "Brand Name", placeholder: "Enter brand name" },
+                { id: "category", label: "Category", placeholder: "Select Category", type: "select" },
+                { id: "subcategory", label: "Sub-Category ", placeholder: "Enter Sub-category price", type: "select" },
+                { id: "salePrice", label: "Sale Price", placeholder: "Enter sale price", type: "number" },
+               // { id: "about", label: "About", placeholder: "Enter product description" },
+               // { id: "stockStatus", label: "Stock Status", placeholder: "Select Stock Status", type: "select" },
+                //{ id: "seller", label: "Seller", placeholder: "Select Seller", type: "select" },
+               // { id: "stockQuantity", label: "Stock Quantity", placeholder: "Enter stock quantity", type: "number" },
+               // { id: "productType", label: "Product Type", placeholder: "Select Product Type", type: "select" },
+               // { id: "shipsFrom", label: "Ships From", placeholder: "Enter shipping location" },
+              ].map((input, index) => (
+                <div key={index}>
+                  <label htmlFor={input.id}>{input.label}</label>
+                  {input.type === "select" ? (
+                    <select
+                      id={input.id}
+                      name={input.id}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        marginTop: "5px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                      }}
+                    >
+                      <option value="">{input.placeholder}</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={input.type || "text"}
+                      id={input.id}
+                      name={input.id}
+                      placeholder={input.placeholder}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        marginTop: "5px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                        paddingRight: "2px",
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Features */}
+            <div style={{ marginBottom: "20px" }}>
+              <h3>Features</h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "20px",
+                }}
+              >
+                {features.map((feature, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <input
+                      type="text"
+                      placeholder="Enter feature name"
+                      value={feature.name}
+                      onChange={(e) => {
+                        const updatedFeatures = [...features];
+                        updatedFeatures[index].name = e.target.value;
+                        setFeatures(updatedFeatures);
+                      }}
+                      style={{
+                        flex: "1",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter feature details"
+                      value={feature.details}
+                      onChange={(e) => {
+                        const updatedFeatures = [...features];
+                        updatedFeatures[index].details = e.target.value;
+                        setFeatures(updatedFeatures);
+                      }}
+                      style={{
+                        flex: "1",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFeature(index)}
+                      style={{
+                        backgroundColor: "red",
+                        color: "white",
+                        border: "none",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddFeature}
+                style={{
+                  marginTop: "10px",
+                  backgroundColor: "blue",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 15px",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Add Feature
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 

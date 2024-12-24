@@ -12,14 +12,10 @@ import {
 const Dashboard = () => {
   return (
     <Container maxWidth="xl">
-      <Grid container spacing={2}>
+      <Grid container spacing={3}> {/* Increased spacing */}
         {/* Card 1 */}
         <Grid item xs={12} md={6} lg={3}>
-          <Card
-            className="scrollable-div"
-            elevation={3}
-            sx={{ width: "360px" }}
-          >
+          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
             <CardContent>
               <Box>
                 <img
@@ -73,11 +69,7 @@ const Dashboard = () => {
 
         {/* Card 2 */}
         <Grid item xs={12} md={6} lg={3}>
-          <Card
-            elevation={3}
-            className="scrollable-div"
-            sx={{ width: "360px" }}
-          >
+          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 All Functionalities
@@ -125,11 +117,7 @@ const Dashboard = () => {
 
         {/* Card 3 */}
         <Grid item xs={12} md={6} lg={3}>
-          <Card
-            elevation={3}
-            className="scrollable-div"
-            sx={{ width: "360px" }}
-          >
+          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Recent Updates
@@ -180,11 +168,7 @@ const Dashboard = () => {
 
         {/* Card 4 */}
         <Grid item xs={12} md={6} lg={3}>
-          <Card
-            elevation={3}
-            className="scrollable-div"
-            sx={{ width: "360px" }}
-          >
+          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
             <CardContent>
               <Box>
                 <img
@@ -226,11 +210,7 @@ const Dashboard = () => {
 
         {/* Card 5 (My Plans) */}
         <Grid item xs={12} md={6} lg={3}>
-          <Card
-            elevation={3}
-            className="scrollable-div"
-            sx={{ width: "360px" }}
-          >
+          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 My Plans
