@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import JoditEditor from "jodit-react";
+import AddVariant from "../components/AddVariant";
 
 function AddProduct() {
   const [productImages, setProductImages] = useState([]);
   const [features, setFeatures] = useState([{ name: "", details: "" }]);
+  const [offers, setOffers] = useState([{ name: "", details: "" }]); // Added missing offers state
   const [description, setDescription] = useState("");
 
   const handleAddFeature = () => {
@@ -15,8 +17,17 @@ function AddProduct() {
     setFeatures(updatedFeatures);
   };
 
+  const handleAddOffer = () => {
+    setOffers([...offers, { name: "", details: "" }]);
+  };
+
+  const handleRemoveOffer = (index) => {
+    const updatedOffers = offers.filter((_, i) => i !== index);
+    setOffers(updatedOffers);
+  };
+
   const config = {
-    readonly: false, // Set to true to make the editor readonly
+    readonly: false,
   };
 
   return (
@@ -55,7 +66,7 @@ function AddProduct() {
             </label>
           </div>
 
-          {/* Product Description Editor - Added below Product Thumbnail */}
+          {/* Product Description Editor */}
           <div style={{ marginTop: "20px" }}>
             <h3>Product Description</h3>
             <JoditEditor
@@ -103,12 +114,7 @@ function AddProduct() {
                 { id: "category", label: "Category", placeholder: "Select Category", type: "select" },
                 { id: "subcategory", label: "Sub-Category ", placeholder: "Enter Sub-category price", type: "select" },
                 { id: "salePrice", label: "Sale Price", placeholder: "Enter sale price", type: "number" },
-               // { id: "about", label: "About", placeholder: "Enter product description" },
-               // { id: "stockStatus", label: "Stock Status", placeholder: "Select Stock Status", type: "select" },
-                //{ id: "seller", label: "Seller", placeholder: "Select Seller", type: "select" },
-               // { id: "stockQuantity", label: "Stock Quantity", placeholder: "Enter stock quantity", type: "number" },
-               // { id: "productType", label: "Product Type", placeholder: "Select Product Type", type: "select" },
-               // { id: "shipsFrom", label: "Ships From", placeholder: "Enter shipping location" },
+                { id: "stockQuantity", label: "Stock Quantity", placeholder: "Enter stock quantity", type: "number" },
               ].map((input, index) => (
                 <div key={index}>
                   <label htmlFor={input.id}>{input.label}</label>
@@ -148,7 +154,7 @@ function AddProduct() {
 
             {/* Features */}
             <div style={{ marginBottom: "20px" }}>
-              <h3>Features</h3>
+              <h3>Specifications</h3>
               <div
                 style={{
                   display: "grid",
@@ -172,6 +178,7 @@ function AddProduct() {
                         padding: "10px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
+                         width:'200px'
                       }}
                     />
                     <input
@@ -188,6 +195,7 @@ function AddProduct() {
                         padding: "10px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
+                         width:'200px'
                       }}
                     />
                     <button
@@ -207,21 +215,119 @@ function AddProduct() {
                   </div>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={handleAddFeature}
+              <div
                 style={{
                   marginTop: "10px",
-                  backgroundColor: "blue",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 15px",
-                  borderRadius: "5px",
-                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
                 }}
               >
-                Add Feature
-              </button>
+                <button
+                  type="button"
+                  onClick={handleAddFeature}
+                  style={{
+                    backgroundColor: "black",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 15px",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Add Specifications
+                </button>
+                <AddVariant />
+              </div>
+            </div>
+
+            {/* Offers */}
+            <div style={{ marginBottom: "20px" }}>
+              <h3>Offers</h3>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "20px",
+                  
+                }}
+              >
+                {offers.map((offer, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <input
+                      type="text"
+                      placeholder="Enter offer name"
+                      value={offer.name}
+                      onChange={(e) => {
+                        const updatedOffers = [...offers];
+                        updatedOffers[index].name = e.target.value;
+                        setOffers(updatedOffers);
+                      }}
+                      style={{
+                        flex: "1",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                        width:'200px'
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Enter offer details"
+                      value={offer.details}
+                      onChange={(e) => {
+                        const updatedOffers = [...offers];
+                        updatedOffers[index].details = e.target.value;
+                        setOffers(updatedOffers);
+                      }}
+                      style={{
+                        flex: "1",
+                        padding: "10px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                        width:'200px'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveOffer(index)}
+                      style={{
+                        backgroundColor: "red",
+                        color: "white",
+                        border: "none",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div
+                style={{
+                  marginTop: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={handleAddOffer}
+                  style={{
+                    backgroundColor: "black",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 15px",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Add Offers
+                </button>
+              </div>
             </div>
           </form>
         </div>

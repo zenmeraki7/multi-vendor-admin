@@ -11,9 +11,16 @@ const Layout = () => {
     <>
       <ScrollToTop />
       <Header />
-      <Box sx={{ marginTop: "24px" }}> 
+      <Box sx={{ marginTop: "24px" }}>
         <Stack direction="row" spacing={2}>
-          <Box sx={{ width: '250px' }}>
+          <Box
+            sx={{
+              width: '250px',
+              position: 'sticky',
+              top: '0px', 
+              alignSelf: 'flex-start', 
+            }}
+          >
             <Navbox />
           </Box>
           <Box sx={{ flexGrow: 1, height: '90vh', overflow: 'scroll' }}>
