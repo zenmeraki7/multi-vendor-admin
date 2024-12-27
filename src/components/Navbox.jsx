@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Box,
-  Drawer,
+  Divider,
   List,
   ListItem,
   ListItemButton,
@@ -18,101 +18,67 @@ import EmailIcon from "@mui/icons-material/Email";
 import TranslateIcon from "@mui/icons-material/Translate";
 
 function Navbox() {
+  const [activeItem, setActiveItem] = useState("Dashboard");
+
+  const menuItems = [
+    { text: "Dashboard", icon: <DashboardIcon /> },
+    { text: "Configuration", icon: <SettingsIcon /> },
+    { text: "Sellers", icon: <PeopleIcon /> },
+    { text: "Products", icon: <WidgetsIcon /> },
+    { text: "Orders", icon: <AssignmentIcon /> },
+    { text: "Commission", icon: <MonetizationOnIcon /> },
+    { text: "Mail Configuration", icon: <EmailIcon /> },
+    { text: "Translation", icon: <TranslateIcon /> },
+  ];
+
   return (
-    <Drawer
-      variant="permanent"
+    <Box
       sx={{
         width: 240,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: 195,
-          boxSizing: "border-box",
-          marginTop: "64px", // Adjust this to the height of your header
-        },
+        backgroundColor: "#f0f4f8", // Light neutral color to match white body
+        height: "100vh",
+        boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
+        display: "flex",
+        flexDirection: "column",
+        pt: 2,
       }}
     >
       <List>
-        {/* Dashboard */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Configuration */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary="Configuration" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Sellers */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <PeopleIcon />
-            </ListItemIcon>
-            <ListItemText primary="Sellers" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Products */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <WidgetsIcon />
-            </ListItemIcon>
-            <ListItemText primary="Products" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Orders */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <AssignmentIcon />
-            </ListItemIcon>
-            <ListItemText primary="Orders" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Commission */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <MonetizationOnIcon />
-            </ListItemIcon>
-            <ListItemText primary="Commission" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Mail Configuration */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <EmailIcon />
-            </ListItemIcon>
-            <ListItemText primary="Mail Configuration" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Translation */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <TranslateIcon />
-            </ListItemIcon>
-            <ListItemText primary="Translation" />
-          </ListItemButton>
-        </ListItem>
+        {menuItems.map((item, index) => (
+          <React.Fragment key={item.text}>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => setActiveItem(item.text)}
+                sx={{
+                  backgroundColor:
+                    activeItem === item.text ? "#c8d8e4" : "inherit", // Muted blue for active item
+                  "&:hover": {
+                    backgroundColor: "#c8d8e4",
+                  },
+                  transition: "background-color 0.3s",
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: activeItem === item.text ? "#3a4b58" : "#556b78", // Darker tones for active icons
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontWeight: activeItem === item.text ? "bold" : "normal",
+                    color: activeItem === item.text ? "#3a4b58" : "#556b78", // Text color to match palette
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+            {index === 1 || index === 4 ? <Divider sx={{ marginY: 1 }} /> : null}
+          </React.Fragment>
+        ))}
       </List>
-    </Drawer>
+    </Box>
   );
 }
 
