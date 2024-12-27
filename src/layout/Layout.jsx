@@ -32,6 +32,7 @@ const Layout = () => {
               flexGrow: 1,
               height: "90vh",
               overflowY: "auto",
+              overflow: "scroll",
               "&::-webkit-scrollbar": {
                 display: "none",
               },
