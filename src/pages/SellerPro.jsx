@@ -1,102 +1,320 @@
-import React from "react";
-import "./SellerPro.css"; // Separate CSS file for styling
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  Grid,
+  TextField,
+  Divider,
+  Button,
+  Avatar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+} from "@mui/material";
+import {
+  Dashboard ,
+  AddShoppingCart ,
+  Assignment,
+  Settings,
+  Logout,
+} from "@mui/icons-material";
 
 const SellerPro = () => {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    companyName: "",
+    website: "",
+    panNumber: "",
+    gstinNumber: "",
+    gstinDocument: null,
+    panDocument: null,
+    accountHolderName: "",
+    accountNumber: "",
+    ifscCode: "",
+    bankName: "",
+    bankDocument: null,
+    companyLogo: null,
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: files[0] }));
+  };
+
+  const handleSubmit = () => {
+    console.log("Form Submitted: ", formData);
+    alert("Details Saved Successfully");
+  };
+
   return (
-    <div className="seller-profile-container">
-      <h1>Seller Profile</h1>
+    <Box sx={{ display: "flex", height: "100vh" , margin:'20px' }}>
+      {/* Sidebar */}
+      
+      <Box
+        sx={{
+          width: "250px",
+          backgroundColor: "#f8f9fa",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <List>
+        <ListItem button>
+  <ListItemIcon>
+    <Dashboard />
+  </ListItemIcon>
+  <ListItemText primary="DashBoard" />
+</ListItem>
+          <ListItem button>
+  <ListItemIcon>
+    <AddShoppingCart />
+  </ListItemIcon>
+  <ListItemText primary="AddProduct" />
+</ListItem>
+<ListItem button>
+  <ListItemIcon>
+    <Assignment />
+  </ListItemIcon>
+  <ListItemText primary="Orders" />
+</ListItem>
+          <ListItem button>
+            <ListItemIcon>
+              <Settings />
+            </ListItemIcon>
+            <ListItemText primary="Settings" />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>
+              <Logout />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItem>
+        </List>
+      </Box>
 
-      {/* Personal Details Section */}
-      <section className="profile-section">
-        <h3>Personal Details</h3>
-        <label htmlFor="fullName">Full Name</label>
-        <input type="text" id="fullName" placeholder="Enter your full name" />
+      {/* Main Content */}
+      <Box sx={{ flexGrow: 1, padding: "20px" }}>
+        <Typography variant="h4" gutterBottom>
+          Seller Profile
+        </Typography>
 
-        <label htmlFor="email">Email</label>
-        <input type="email" id="email" placeholder="Enter your email" />
+        <Box sx={{ display: "flex", gap: 3, marginBottom: "30px" }}>
+          {/* Company Logo Section */}
+          <Paper sx={{ 
+            padding: "20px", 
+            width: "300px", 
+            height: "fit-content",
+            border: "2px solid black",
+            borderRadius: "8px",
+            textAlign: "center"
+          }}>
+            <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+              Company Logo
+            </Typography>
+            <Divider sx={{ marginBottom: "20px" }} />
+            <Avatar
+              src={formData.companyLogo ? URL.createObjectURL(formData.companyLogo) : ""}
+              alt="Company Logo"
+              sx={{ 
+                width: 150, 
+                height: 150, 
+                margin: "0 auto 20px",
+                bgcolor: "#f5f5f5"
+              }}
+            />
+            <Button 
+              variant="contained" 
+              component="label" 
+              fullWidth
+              sx={{ 
+                backgroundColor: "black",
+                "&:hover": {
+                  backgroundColor: "#333"
+                }
+              }}
+            >
+              Choose Logo
+              <input
+                hidden
+                type="file"
+                name="companyLogo"
+                onChange={handleFileChange}
+                accept="image/*"
+              />
+            </Button>
+            {formData.companyLogo && (
+              <Typography variant="body2" sx={{ mt: 2, color: "green" }}>
+                Logo selected: {formData.companyLogo.name}
+              </Typography>
+            )}
+          </Paper>
 
-        <label htmlFor="phoneNum">Phone Number</label>
-        <input type="text" id="phoneNum" placeholder="Enter your phone number" />
+          {/* Personal Details */}
+          <Box sx={{ flexGrow: 1, padding: "20px",  border: "2px solid black",
+            borderRadius: "8px",}}>
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+              Personal Details
+            </Typography>
+            <Divider sx={{ marginBottom: "20px" }} />
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Full Name"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Email Address"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
 
-        <label htmlFor="address">Address</label>
-        <input type="text" id="address" placeholder="Enter your address" />
+        {/* Document Details */}
+        <Box sx={{ marginBottom: "30px", padding: "20px", border: "2px solid black", borderRadius: "8px" }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            Documents
+          </Typography>
+          <Divider sx={{ marginBottom: "20px" }} />
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="PAN Number"
+                name="panNumber"
+                value={formData.panNumber}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button variant="contained" component="label" style={{ backgroundColor: "black" }}>
+                Upload PAN Document
+                <input hidden type="file" name="panDocument" onChange={handleFileChange} />
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="GSTIN Number"
+                name="gstinNumber"
+                value={formData.gstinNumber}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button variant="contained" component="label" style={{ backgroundColor: "black" }}>
+                Upload GSTIN Document
+                <input hidden type="file" name="gstinDocument" onChange={handleFileChange} />
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
 
-        <label htmlFor="zipCode">Zip Code</label>
-        <input type="number" id="zipCode" placeholder="Enter your zip code" />
+        {/* Bank Details */}
+        <Box sx={{ marginBottom: "30px", padding: "20px", border: "2px solid black", borderRadius: "8px" }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            Bank Details
+          </Typography>
+          <Divider sx={{ marginBottom: "20px" }} />
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Account Holder Name"
+                name="accountHolderName"
+                value={formData.accountHolderName}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Account Number"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="IFSC Code"
+                name="ifscCode"
+                value={formData.ifscCode}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Bank Name"
+                name="bankName"
+                value={formData.bankName}
+                onChange={handleInputChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button variant="contained" component="label" style={{ backgroundColor: "black" }}>
+                Upload Bank Document
+                <input hidden type="file" name="bankDocument" onChange={handleFileChange} />
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
 
-        <label htmlFor="city">City</label>
-        <input type="text" id="city" placeholder="Enter your city" />
-
-        <label htmlFor="state">State</label>
-        <input type="text" id="state" placeholder="Enter your state" />
-
-        <label htmlFor="country">Country</label>
-        <input type="text" id="country" placeholder="Enter your country" />
-      </section>
-
-      {/* Company Details Section */}
-      <section className="profile-section">
-        <h3>Company Details</h3>
-        <label htmlFor="companyName">Company Name</label>
-        <input type="text" id="companyName" placeholder="Enter your company name" />
-
-        <label htmlFor="website">Website</label>
-        <input type="url" id="website" placeholder="Enter your website URL" />
-
-        <label htmlFor="companyIcon">Company Icon</label>
-        <input type="file" id="companyIcon" />
-      </section>
-
-      {/* Bank Details Section */}
-      <section className="profile-section">
-        <h3>Bank Details</h3>
-        <label htmlFor="accountHolderName">Account Holder Name</label>
-        <input type="text" id="accountHolderName" placeholder="Enter account holder name" />
-
-        <label htmlFor="accountNumber">Account Number</label>
-        <input type="text" id="accountNumber" placeholder="Enter account number" />
-
-        <label htmlFor="ifscCode">IFSC Code</label>
-        <input type="text" id="ifscCode" placeholder="Enter IFSC code" />
-
-        <label htmlFor="bankName">Bank Name</label>
-        <input type="text" id="bankName" placeholder="Enter bank name" />
-
-        <label htmlFor="bankDocument">Upload Bank Document (e.g., Canceled Cheque)</label>
-        <input type="file" id="bankDocument" />
-      </section>
-
-      {/* KYC Details Section */}
-      <section className="profile-section">
-        <h3>KYC Details</h3>
-        <label htmlFor="panNumber">PAN Number</label>
-        <input type="text" id="panNumber" placeholder="Enter PAN number" />
-
-        <label htmlFor="panDocument">Upload PAN Document</label>
-        <input type="file" id="panDocument" />
-
-        <label htmlFor="gstNumber">GSTIN Number</label>
-        <input type="text" id="gstNumber" placeholder="Enter GSTIN number" />
-
-        <label htmlFor="gstDocument">Upload GSTIN Document</label>
-        <input type="file" id="gstDocument" />
-      </section>
-
-      {/* Support Contact Section */}
-      <section className="profile-section">
-        <h3>Support Contact</h3>
-        <label htmlFor="supportEmail">Support Email</label>
-        <input type="email" id="supportEmail" placeholder="Enter support email" />
-
-        <label htmlFor="supportPhone">Support Phone</label>
-        <input type="text" id="supportPhone" placeholder="Enter support phone number" />
-      </section>
-
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button>Save Changes</button>
-      </div>
-    </div>
+        {/* Save Button */}
+        <Box sx={{ textAlign: "center" }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            style={{ backgroundColor: "black" , marginBottom: "20px"}}
+          >
+            Save Details
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
