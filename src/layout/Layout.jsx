@@ -11,23 +11,39 @@ const Layout = () => {
     <>
       <ScrollToTop />
       <Header />
+
       <Box sx={{ marginTop: "24px" }}>
         <Stack direction="row" spacing={2}>
+          {/* Sidebar */}
           <Box
             sx={{
-              width: '250px',
-              position: 'sticky',
-              top: '0px', 
-              alignSelf: 'flex-start', 
+              width: "250px",
+              position: "sticky",
+              top: "0px",
+              alignSelf: "flex-start",
             }}
           >
             <Navbox />
           </Box>
-          <Box sx={{ flexGrow: 1, height: '90vh', overflow: 'scroll' }}>
+
+          {/* Main Content */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              height: "90vh",
+              overflowY: "auto",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+              "-ms-overflow-style": "none", // For Internet Explorer and Edge
+              "scrollbar-width": "none", // For Firefox
+            }}
+          >
             <Outlet />
           </Box>
         </Stack>
       </Box>
+
       <Footer />
     </>
   );
