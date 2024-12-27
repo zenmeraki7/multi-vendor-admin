@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Layout from "./layout/Layout";
@@ -7,6 +6,9 @@ import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import AddProduct from "./pages/AddProduct";
+import AddVariant from "./components/AddVariant";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import SellerPro from "./pages/SellerPro";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
             element={<PrivateRoute component={<AddProduct />} />}
           />
         </Route>
+        <Route path="add-variant" element={<AddVariant/>}   />
+        <Route path = '/seller-profile' element = {<SellerPro/>}/>
       </Routes>
     </>
   );
