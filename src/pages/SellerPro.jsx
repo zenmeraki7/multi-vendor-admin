@@ -5,16 +5,45 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import {
-  Home,
-  Settings,
-  Store,
-  AttachMoney,
-  Analytics,
-  Support,
-} from "@mui/icons-material";
 
 function SellerPro() {
+  const [logo, setLogo] = useState(null);
+
+  const [documents, setDocuments] = useState({
+    pan: null,
+    gstin: null,
+    bankDocument: null,
+  });
+
+  const [documentDetails, setDocumentDetails] = useState({
+    panNumber: "",
+    gstinNumber: "",
+  });
+
+  const handleDocumentUpload = (event, key) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileURL = URL.createObjectURL(file);
+      setDocuments(prev => ({ ...prev, [key]: fileURL }));
+    }
+  };
+
+  const handleDocumentDetailsChange = (event, key) => {
+    const value = event.target.value;
+    setDocumentDetails(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const logoURL = URL.createObjectURL(file);
+      setLogo(logoURL);
+    }
+  };
+
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [personalInfo, setPersonalInfo] = useState({
     firstName: "Rafiquar",
@@ -24,10 +53,6 @@ function SellerPro() {
   });
 
   const [isEditingDocuments, setIsEditingDocuments] = useState(false);
-  const [documents, setDocuments] = useState({
-    pan: "123",
-    gstin: "345",
-  });
 
   const [isEditingBank, setIsEditingBank] = useState(false);
   const [bankDetails, setBankDetails] = useState({
@@ -43,6 +68,10 @@ function SellerPro() {
     companyAddress: "Leeds, United Kingdom",
   });
 
+  const handleInputChange = (e, stateObj, field, setStateObj) => {
+    setStateObj({ ...stateObj, [field]: e.target.value });
+  };
+
   const handleEditClick = (setEditState) => {
     setEditState(true);
   };
@@ -51,21 +80,12 @@ function SellerPro() {
     setEditState(false);
   };
 
-  const handleInputChange = (e, section, key, setSection) => {
-    setSection({
-      ...section,
-      [key]: e.target.value,
-    });
-  };
-
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      {/* Content Section */}
       <Box sx={{ flex: 1, padding: "20px", }}>
         <Box className="profile-container" sx={{ paddingLeft: "20px" }}>
-          <Typography variant="h4" sx={{color:'blue'}}>Seller Profile</Typography>
+          <Typography variant="h4" sx={{ color: 'blue' }}>Seller Profile</Typography>
           <Box sx={{ display: "flex", justifyContent: "space-evenly" }}>
-            {/* Profile Image and Company Details */}
             <Box
               sx={{
                 flex: 1,
@@ -78,18 +98,33 @@ function SellerPro() {
               }}
             >
               <label>
-                <input type="file" style={{ display: "none" }} />
+                <input
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={handleLogoUpload}
+                />
                 <img
-                  src="https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"
+                  src={
+                    logo ||
+                    "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"
+                  }
                   alt="Profile"
                   className="profile-image"
-                  style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    borderRadius: "50%",
+                    cursor: "pointer",
+                  }}
                 />
-                <br />
-                <Button variant="contained" sx={{ marginTop: "10px",backgroundColor: "black", color: "white"}}>
-                  Add Logo
-                </Button>
               </label>
+              <Button
+                variant="contained"
+                sx={{ marginTop: "10px", backgroundColor: "black", color: "white" }}
+                onClick={() => document.querySelector('input[type="file"]').click()}
+              >
+                Add Logo
+              </Button>
             </Box>
             <Box
               sx={{
@@ -142,7 +177,6 @@ function SellerPro() {
           </Box>
         </Box>
 
-        {/* Personal Information Section */}
         <Box className="personal-info-container mt-3">
           <Typography variant="h6">Personal Information</Typography>
           {isEditingPersonal ? (
@@ -212,9 +246,7 @@ function SellerPro() {
           )}
         </Box>
 
-        {/* Documents and Bank Details Section */}
         <Box sx={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-          {/* Documents Section */}
           <Box className="documents-container" sx={{ flex: 1 }}>
             <Typography variant="h6">Documents</Typography>
             {isEditingDocuments ? (
@@ -224,17 +256,23 @@ function SellerPro() {
                   <Box display="flex" alignItems="center">
                     <input
                       type="text"
-                      value={documents.pan}
-                      onChange={(e) =>
-                        handleInputChange(e, documents, "pan", setDocuments)
-                      }
+                      value={documentDetails.panNumber}
+                      onChange={(e) => handleDocumentDetailsChange(e, "panNumber")}
+                      placeholder="Enter PAN Number"
                     />
-                    <Button
-                      variant="contained"
-                      sx={{ marginLeft: "10px", width: "70px", backgroundColor: "black", color: "white" }}
-                    >
-                      Upload
-                    </Button>
+                    <label>
+                      <input
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={(e) => handleDocumentUpload(e, "pan")}
+                      />
+                      <img
+                        src={documents.pan || "https://cdn.pixabay.com/photo/2016/03/31/14/48/sheet-1292828_960_720.png"}
+                        alt="PAN"
+                        height="100px"
+                        width="90px"
+                      />
+                    </label>
                   </Box>
                 </Box>
                 <Box className="form-group">
@@ -242,17 +280,23 @@ function SellerPro() {
                   <Box display="flex" alignItems="center">
                     <input
                       type="text"
-                      value={documents.gstin}
-                      onChange={(e) =>
-                        handleInputChange(e, documents, "gstin", setDocuments)
-                      }
+                      value={documentDetails.gstinNumber}
+                      onChange={(e) => handleDocumentDetailsChange(e, "gstinNumber")}
+                      placeholder="Enter GSTIN Number"
                     />
-                    <Button
-                      variant="contained"
-                      sx={{ marginLeft: "10px", width: "70px", backgroundColor: "black", color: "white" }}
-                    >
-                      Upload 
-                    </Button>
+                    <label>
+                      <input
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={(e) => handleDocumentUpload(e, "gstin")}
+                      />
+                      <img
+                        src={documents.gstin || "https://cdn.pixabay.com/photo/2016/03/31/14/48/sheet-1292828_960_720.png"}
+                        alt="GSTIN"
+                        height="100px"
+                        width="90px"
+                      />
+                    </label>
                   </Box>
                 </Box>
                 <Button
@@ -265,8 +309,8 @@ function SellerPro() {
               </Box>
             ) : (
               <Box className="info-content">
-                <Typography><strong>PAN Number:</strong> {documents.pan}</Typography>
-                <Typography><strong>GSTIN Number:</strong> {documents.gstin}</Typography>
+                <Typography><strong>PAN Number:</strong> {documentDetails.panNumber}</Typography>
+                <Typography><strong>GSTIN Number:</strong> {documentDetails.gstinNumber}</Typography>
                 <Button
                   onClick={() => handleEditClick(setIsEditingDocuments)}
                   variant="contained"
@@ -278,94 +322,93 @@ function SellerPro() {
             )}
           </Box>
 
-          {/* Bank Details Section */}
-         {/* Bank Details Section */}
-<Box className="bank-details-container" sx={{ flex: 1 }}>
-  <Typography variant="h6">Bank Details</Typography>
-  {isEditingBank ? (
-    <Box className="info-content">
-      <Box className="form-group">
-        <label>Account Holder:</label>
-        <input
-          type="text"
-          value={bankDetails.accountHolder}
-          onChange={(e) =>
-            handleInputChange(e, bankDetails, "accountHolder", setBankDetails)
-          }
-        />
-      </Box>
-      <Box className="form-group">
-        <label>Account Number:</label>
-        <input
-          type="text"
-          value={bankDetails.accountNumber}
-          onChange={(e) =>
-            handleInputChange(e, bankDetails, "accountNumber", setBankDetails)
-          }
-        />
-      </Box>
-      <Box className="form-group">
-        <label>IFSC Code:</label>
-        <input
-          type="text"
-          value={bankDetails.ifsc}
-          onChange={(e) =>
-            handleInputChange(e, bankDetails, "ifsc", setBankDetails)
-          }
-        />
-      </Box>
-      <Box className="form-group">
-        <label>Bank Name:</label>
-        <input
-          type="text"
-          value={bankDetails.bankName}
-          onChange={(e) =>
-            handleInputChange(e, bankDetails, "bankName", setBankDetails)
-          }
-        />
-      </Box>
-      {/* Upload Document Button */}
-      <Box className="form-group">
-        <label>Upload Bank Document:</label>
-        <Box display="flex" alignItems="center">
-          <input type="file" style={{ marginRight: "10px" , display:'none'}} />
-          <Button
-            variant="contained"
-            sx={{
-              width: "150px",
-              backgroundColor: "black",
-              color: "white",
-            }}
-          >
-            Upload
-          </Button>
-        </Box>
-      </Box>
-      <Button
-        onClick={() => handleSaveClick(setIsEditingBank)}
-        variant="contained"
-        sx={{ marginTop: "10px", backgroundColor: "black", color: "white" }}
-      >
-        Save
-      </Button>
-    </Box>
-  ) : (
-    <Box className="info-content">
-      <Typography><strong>Account Holder:</strong> {bankDetails.accountHolder}</Typography>
-      <Typography><strong>Account Number:</strong> {bankDetails.accountNumber}</Typography>
-      <Typography><strong>IFSC Code:</strong> {bankDetails.ifsc}</Typography>
-      <Typography><strong>Bank Name:</strong> {bankDetails.bankName}</Typography>
-      <Button
-        onClick={() => handleEditClick(setIsEditingBank)}
-        variant="contained"
-        sx={{ marginTop: "10px", backgroundColor: "black", color: "white" }}
-      >
-        Edit
-      </Button>
-    </Box>
-  )}
-</Box>
-
+          <Box className="bank-details-container" sx={{ flex: 1 }}>
+            <Typography variant="h6">Bank Details</Typography>
+            {isEditingBank ? (
+              <Box className="info-content">
+                <Box className="form-group">
+                  <label>Account Holder:</label>
+                  <input
+                    type="text"
+                    value={bankDetails.accountHolder}
+                    onChange={(e) =>
+                      handleInputChange(e, bankDetails, "accountHolder", setBankDetails)
+                    }
+                  />
+                </Box>
+                <Box className="form-group">
+                  <label>Account Number:</label>
+                  <input
+                    type="text"
+                    value={bankDetails.accountNumber}
+                    onChange={(e) =>
+                      handleInputChange(e, bankDetails, "accountNumber", setBankDetails)
+                    }
+                  />
+                </Box>
+                <Box className="form-group">
+                  <label>IFSC Code:</label>
+                  <input
+                    type="text"
+                    value={bankDetails.ifsc}
+                    onChange={(e) =>
+                      handleInputChange(e, bankDetails, "ifsc", setBankDetails)
+                    }
+                  />
+                </Box>
+                <Box className="form-group">
+                  <label>Bank Name:</label>
+                  <input
+                    type="text"
+                    value={bankDetails.bankName}
+                    onChange={(e) =>
+                      handleInputChange(e, bankDetails, "bankName", setBankDetails)
+                    }
+                  />
+                </Box>
+                <Box className="form-group">
+                  <label>Upload Bank Document:</label>
+                  <Box display="flex" alignItems="center">
+                    <input type="file" style={{ marginRight: "10px", display: 'none' }} />
+                    <label>
+                      <input
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={(e) => handleDocumentUpload(e, "bankDocument")}
+                      />
+                      <img
+                        src={documents.bankDocument || "https://cdn.pixabay.com/photo/2016/03/31/14/48/sheet-1292828_960_720.png"}
+                        alt="Bank Document"
+                        height="100px"
+                        width="90px"
+                      />
+                    </label>
+                  </Box>
+                </Box>
+                <Button
+                  onClick={() => handleSaveClick(setIsEditingBank)}
+                  variant="contained"
+                  sx={{ marginTop: "10px", backgroundColor: "black", color: "white" }}
+                >
+                  Save
+                </Button>
+              </Box>
+            ) : (
+              <Box className="info-content">
+                <Typography><strong>Account Holder:</strong> {bankDetails.accountHolder}</Typography>
+                <Typography><strong>Account Number:</strong> {bankDetails.accountNumber}</Typography>
+                <Typography><strong>IFSC Code:</strong> {bankDetails.ifsc}</Typography>
+                <Typography><strong>Bank Name:</strong> {bankDetails.bankName}</Typography>
+                <Button
+                  onClick={() => handleEditClick(setIsEditingBank)}
+                  variant="contained"
+                  sx={{ marginTop: "10px", backgroundColor: "black", color: "white" }}
+                >
+                  Edit
+                </Button>
+              </Box>
+            )}
+          </Box>
         </Box>
       </Box>
     </Box>

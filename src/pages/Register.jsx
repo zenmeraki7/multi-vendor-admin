@@ -27,6 +27,7 @@ export default function Register() {
     city: '',
     state: '',
     country: '',
+    zipcode:'',
     companyName: '',
     website: '',
     gstinDocumentNumber: '',
@@ -89,6 +90,7 @@ export default function Register() {
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} />
               <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleInputChange} />
+              <TextField fullWidth label="zipCode" name="zipcode" value={formData.zipcode} onChange={handleInputChange} />
               <TextField fullWidth label="Country" name="country" value={formData.country} onChange={handleInputChange} />
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
