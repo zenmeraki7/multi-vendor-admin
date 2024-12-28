@@ -16,15 +16,21 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        
+        {/* Wrap all pages inside Layout to ensure header/footer are present */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
           />
+          <Route
+            path="/seller-profile"
+            element={<PrivateRoute component={<SellerPro />} />}
+          />
         </Route>
-        <Route path="add-variant" element={<AddVariant/>}   />
-        <Route path = '/seller-profile' element = {<SellerPro/>}/>
+        
+        <Route path="add-variant" element={<AddVariant />} />
       </Routes>
     </>
   );
