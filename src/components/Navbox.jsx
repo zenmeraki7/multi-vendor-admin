@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Drawer,
@@ -16,8 +16,11 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import TranslateIcon from "@mui/icons-material/Translate";
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import { useNavigate } from "react-router-dom";
 
 function Navbox() {
+  const navigate = useNavigate();
   return (
     <Drawer
       variant="permanent"
@@ -63,14 +66,24 @@ function Navbox() {
         </ListItem>
 
         {/* Products */}
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <WidgetsIcon />
+       <ListItem disablePadding>
+       <ListItemButton >
+       <ListItemIcon>
+            <WidgetsIcon />
             </ListItemIcon>
             <ListItemText primary="Products" />
           </ListItemButton>
         </ListItem>
+        
+        <ListItem disablePadding>
+        <ListItemButton onClick={() => navigate('/add-product')}>
+        <ListItemIcon>
+        <AddShoppingCartIcon />
+        </ListItemIcon>
+        <ListItemText primary="Add Products" />
+        </ListItemButton>
+        </ListItem>
+       
 
         {/* Orders */}
         <ListItem disablePadding>
