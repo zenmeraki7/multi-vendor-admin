@@ -25,7 +25,7 @@ function App() {
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
           />
-          <Route path="/list" element={<ProductList/>}/>
+          <Route path="/product-list" element={<ProductList/>}/>
           <Route
             path="/seller-profile"
             element={<PrivateRoute component={<SellerPro />} />}

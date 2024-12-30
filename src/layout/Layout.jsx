@@ -17,7 +17,7 @@ const Layout = () => {
           {/* Sidebar */}
           <Box
             sx={{
-              width: "250px",
+              // width: 300,
               position: "sticky",
               top: "0px",
               alignSelf: "flex-start",

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Box,
@@ -8,7 +7,12 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Typography,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PeopleIcon from "@mui/icons-material/People";
@@ -21,26 +25,33 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useNavigate } from "react-router-dom";
 
 function Navbox() {
-  const [activeItem, setActiveItem] = useState("Dashboard");
+  const [activeItem, setActiveItem] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
-  const menuItems = [
-    { text: "Dashboard", icon: <DashboardIcon /> },
-    { text: "Configuration", icon: <SettingsIcon /> },
-    { text: "Sellers", icon: <PeopleIcon /> },
-    { text: "Products", icon: <WidgetsIcon />, path: "/products" },
-    { text: "Add Products", icon: <AddShoppingCartIcon />, path: "/add-product" },
-    { text: "Orders", icon: <AssignmentIcon /> },
-    { text: "Commission", icon: <MonetizationOnIcon /> },
-    { text: "Mail Configuration", icon: <EmailIcon /> },
-    { text: "Translation", icon: <TranslateIcon /> },
-  ];
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const navigate = useNavigate();
+
+  const menuItems = [
+    { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
+    { text: "Configuration", icon: <SettingsIcon />, path: "/configuration" },
+    { text: "Sellers", icon: <PeopleIcon />, path: "/sellers" },
+    { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
+    { text: "Commission", icon: <MonetizationOnIcon />, path: "/commission" },
+    {
+      text: "Mail Configuration",
+      icon: <EmailIcon />,
+      path: "/mail-configuration",
+    },
+    { text: "Translation", icon: <TranslateIcon />, path: "/translation" },
+  ];
 
   return (
     <Box
       sx={{
-        width: 240,
+        width: 300,
         backgroundColor: "#f0f4f8",
         height: "100vh",
         boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
@@ -50,12 +61,12 @@ function Navbox() {
       }}
     >
       <List>
-        {menuItems.map((item, index) => (
+        {menuItems.map((item) => (
           <React.Fragment key={item.text}>
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
-                  setActiveItem(item.text);
+                  // setActiveItem(item.text);
                   if (item.path) navigate(item.path);
                 }}
                 sx={{
@@ -83,9 +94,72 @@ function Navbox() {
                 />
               </ListItemButton>
             </ListItem>
-            {index === 1 || index === 4 ? <Divider sx={{ marginY: 1 }} /> : null}
+            {item.text === "Configuration" || item.text === "Sellers" ? (
+              <Divider sx={{ marginY: 1 }} />
+            ) : null}
           </React.Fragment>
         ))}
+
+        {/* Products Accordion */}
+        <Accordion
+        elevation={0}
+          expanded={expanded === "products"}
+          onChange={handleAccordionChange("products")}
+          // sx={{
+          //   backgroundColor: expanded === "products" ? "#c8d8e4" : "inherit",
+          //   "&:hover": {
+          //     backgroundColor: "#c8d8e4",
+          //   },
+          // }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            // sx={{ color: expanded === "products" ? "#3a4b58" : "#556b78" }}
+          >
+            <WidgetsIcon sx={{ marginRight: 2 }} />
+            <Typography>Products</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <List disablePadding>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => navigate("/add-product")}
+                  // sx={{
+                  //   pl: 4,
+                  //   backgroundColor:
+                  //     activeItem === "Add Products" ? "#c8d8e4" : "inherit",
+                  //   "&:hover": {
+                  //     backgroundColor: "#c8d8e4",
+                  //   },
+                  // }}
+                >
+                  <ListItemIcon>
+                    <AddShoppingCartIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Add Products" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => navigate("/product-list")}
+                  // sx={{
+                  //   pl: 4,
+                  //   backgroundColor:
+                  //     activeItem === "Product Manage" ? "#c8d8e4" : "inherit",
+                  //   "&:hover": {
+                  //     backgroundColor: "#c8d8e4",
+                  //   },
+                  // }}
+                >
+                  <ListItemIcon>
+                    <WidgetsIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Product Manage" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </AccordionDetails>
+        </Accordion>
       </List>
     </Box>
   );
