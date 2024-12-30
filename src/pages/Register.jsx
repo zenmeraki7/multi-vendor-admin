@@ -17,21 +17,27 @@ export default function Register() {
   const steps = ["Basic Info", "Contact Info", "Company Info"];
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    newPassword: "",
-    confirmPassword: "",
-    phoneNumber: "",
-    address: "",
-    zipCode: "",
-    city: "",
-    state: "",
-    country: "",
-    companyName: "",
+    fullName: '',
+    email: '',
+    newPassword: '',
+    confirmPassword: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    state: '',
+    country: '',
+    companyName: '',
+    website: '',
+    gstinDocumentNumber: '',
+    gstinDocumentImage: null,
+    panCardDocumentNumber: '',
+    panCardDocumentImage: null,
+    accountHolderName: '',
+    accountNumber: '',
+    ifscCode: '',
+    bankName: '',
+    bankDocument: null,
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
 
@@ -103,43 +109,27 @@ export default function Register() {
     switch (step) {
       case 0:
         return (
-          <>
-            <TextField
-              label="Full Name"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Password"
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Confirm Password"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-          </>
+          <Stack spacing={2}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField fullWidth label="Full Name" name="fullName" value={formData.fullName} onChange={handleInputChange} />
+              <TextField fullWidth label="Email" name="email" type="email" value={formData.email} onChange={handleInputChange} />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField fullWidth label="New Password" name="newPassword" type="password" value={formData.newPassword} onChange={handleInputChange} />
+              <TextField fullWidth label="Confirm Password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} />
+            </Box>
+            <TextField fullWidth label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
+            <TextField fullWidth label="Address" name="address" multiline rows={2} value={formData.address} onChange={handleInputChange} />
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} />
+              <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleInputChange} />
+              <TextField fullWidth label="Country" name="country" value={formData.country} onChange={handleInputChange} />
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField fullWidth label="Company Name" name="companyName" value={formData.companyName} onChange={handleInputChange} />
+              <TextField fullWidth label="Website" name="website" value={formData.website} onChange={handleInputChange} />
+            </Box>
+          </Stack>
         );
       case 1:
         return (

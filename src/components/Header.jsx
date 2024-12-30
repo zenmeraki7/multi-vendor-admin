@@ -8,12 +8,18 @@ import {
   Box,
   Tooltip,
 } from "@mui/material";
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import HomeIcon from "@mui/icons-material/Home";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
+import LoginIcon from '@mui/icons-material/Login';
+import PersonIcon from '@mui/icons-material/Person';
+import { useNavigate } from "react-router-dom";
+
 function Header() {
+  const navigate = useNavigate();
   return (
     <AppBar
       position="static"
@@ -100,6 +106,36 @@ function Header() {
             <LogoutIcon sx={{ marginRight: 1 }} /> Logout
           </Button>
         </Box>
+        <IconButton color="inherit" sx={{ mr: 3 }}onClick={() => navigate('/')}>
+          <HomeIcon />
+        </IconButton>
+
+        <IconButton color="inherit" sx={{ mr: 3 }}>
+          <NotificationsIcon />
+        </IconButton>
+
+        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }}>
+          FAQ
+        </Button>
+
+        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }}>
+          Need Help?
+        </Button>
+        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }}   onClick={() => navigate('/register')}>
+          <HowToRegIcon /> SignUp
+        </Button>
+        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }} onClick={() => navigate('/login')}>
+          <LoginIcon /> SignIn
+        </Button>
+
+        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }} onClick={() => navigate('/')}>
+          <LogoutIcon /> Logout 
+        </Button>
+
+        <Button color="inherit"  className='fs-1' sx={{ mr: 3 }} onClick={() => navigate('/seller-profile')}>
+          <PersonIcon /> 
+        </Button>
+
       </Toolbar>
     </AppBar>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Box,
@@ -16,6 +17,8 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import EmailIcon from "@mui/icons-material/Email";
 import TranslateIcon from "@mui/icons-material/Translate";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import { useNavigate } from "react-router-dom";
 
 function Navbox() {
   const [activeItem, setActiveItem] = useState("Dashboard");
@@ -24,18 +27,21 @@ function Navbox() {
     { text: "Dashboard", icon: <DashboardIcon /> },
     { text: "Configuration", icon: <SettingsIcon /> },
     { text: "Sellers", icon: <PeopleIcon /> },
-    { text: "Products", icon: <WidgetsIcon /> },
+    { text: "Products", icon: <WidgetsIcon />, path: "/products" },
+    { text: "Add Products", icon: <AddShoppingCartIcon />, path: "/add-product" },
     { text: "Orders", icon: <AssignmentIcon /> },
     { text: "Commission", icon: <MonetizationOnIcon /> },
     { text: "Mail Configuration", icon: <EmailIcon /> },
     { text: "Translation", icon: <TranslateIcon /> },
   ];
 
+  const navigate = useNavigate();
+
   return (
     <Box
       sx={{
         width: 240,
-        backgroundColor: "#f0f4f8", // Light neutral color to match white body
+        backgroundColor: "#f0f4f8",
         height: "100vh",
         boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
         display: "flex",
@@ -48,10 +54,13 @@ function Navbox() {
           <React.Fragment key={item.text}>
             <ListItem disablePadding>
               <ListItemButton
-                onClick={() => setActiveItem(item.text)}
+                onClick={() => {
+                  setActiveItem(item.text);
+                  if (item.path) navigate(item.path);
+                }}
                 sx={{
                   backgroundColor:
-                    activeItem === item.text ? "#c8d8e4" : "inherit", // Muted blue for active item
+                    activeItem === item.text ? "#c8d8e4" : "inherit",
                   "&:hover": {
                     backgroundColor: "#c8d8e4",
                   },
@@ -60,7 +69,7 @@ function Navbox() {
               >
                 <ListItemIcon
                   sx={{
-                    color: activeItem === item.text ? "#3a4b58" : "#556b78", // Darker tones for active icons
+                    color: activeItem === item.text ? "#3a4b58" : "#556b78",
                   }}
                 >
                   {item.icon}
@@ -69,7 +78,7 @@ function Navbox() {
                   primary={item.text}
                   primaryTypographyProps={{
                     fontWeight: activeItem === item.text ? "bold" : "normal",
-                    color: activeItem === item.text ? "#3a4b58" : "#556b78", // Text color to match palette
+                    color: activeItem === item.text ? "#3a4b58" : "#556b78",
                   }}
                 />
               </ListItemButton>

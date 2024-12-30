@@ -5,10 +5,11 @@ import AddVariant from "../components/AddVariant";
 function AddProduct() {
   const [productImages, setProductImages] = useState([]);
   const [features, setFeatures] = useState([{ name: "", details: "" }]);
-  const [offers, setOffers] = useState([{ name: "", details: "" }]); // Added missing offers state
+  const [offers, setOffers] = useState([{ name: "", details: "" }]);
   const [description, setDescription] = useState("");
 
   const handleAddFeature = () => {
+    // Append a new feature input box at the end of the features list
     setFeatures([...features, { name: "", details: "" }]);
   };
 
@@ -18,6 +19,7 @@ function AddProduct() {
   };
 
   const handleAddOffer = () => {
+    // Append a new offer input box at the end of the offers list
     setOffers([...offers, { name: "", details: "" }]);
   };
 
@@ -37,7 +39,7 @@ function AddProduct() {
       <div style={{ display: "flex", gap: "30px" }}>
         {/* Image Upload Section */}
         <div style={{ flex: "1" }}>
-          <h3>Product Images</h3>
+          <h5>Product Images</h5>
           <br />
           <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
             {[...Array(4)].map((_, index) => (
@@ -53,7 +55,7 @@ function AddProduct() {
             ))}
           </div>
           <div style={{ marginTop: "20px" }}>
-            <h3>Product Thumbnail</h3>
+            <h5>Product Thumbnail</h5>
             <br />
             <label style={{ cursor: "pointer" }}>
               <input type="file" style={{ display: "none" }} />
@@ -68,7 +70,7 @@ function AddProduct() {
 
           {/* Product Description Editor */}
           <div style={{ marginTop: "20px" }}>
-            <h3>Product Description</h3>
+            <h5>Product Description</h5>
             <JoditEditor
               value={description}
               config={config}
@@ -109,10 +111,10 @@ function AddProduct() {
               }}
             >
               {/* Input Fields */}
-              {[
+              {[ 
                 { id: "brandName", label: "Brand Name", placeholder: "Enter brand name" },
                 { id: "category", label: "Category", placeholder: "Select Category", type: "select" },
-                { id: "subcategory", label: "Sub-Category ", placeholder: "Enter Sub-category price", type: "select" },
+                { id: "subcategory", label: "Sub-Category", placeholder: "Enter Sub-category price", type: "select" },
                 { id: "salePrice", label: "Sale Price", placeholder: "Enter sale price", type: "number" },
                 { id: "stockQuantity", label: "Stock Quantity", placeholder: "Enter stock quantity", type: "number" },
               ].map((input, index) => (
@@ -154,7 +156,7 @@ function AddProduct() {
 
             {/* Features */}
             <div style={{ marginBottom: "20px" }}>
-              <h3>Specifications</h3>
+              <h5>Specifications</h5>
               <div
                 style={{
                   display: "grid",
@@ -178,7 +180,7 @@ function AddProduct() {
                         padding: "10px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
-                         width:'200px'
+                        width: "200px",
                       }}
                     />
                     <input
@@ -195,14 +197,14 @@ function AddProduct() {
                         padding: "10px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
-                         width:'200px'
+                        width: "200px",
                       }}
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveFeature(index)}
                       style={{
-                        backgroundColor: "red",
+                        backgroundColor: "black",
                         color: "white",
                         border: "none",
                         padding: "5px 10px",
@@ -243,13 +245,12 @@ function AddProduct() {
 
             {/* Offers */}
             <div style={{ marginBottom: "20px" }}>
-              <h3>Offers</h3>
+              <h5>Offers</h5>
               <div
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
                   gap: "20px",
-                  
                 }}
               >
                 {offers.map((offer, index) => (
@@ -268,7 +269,7 @@ function AddProduct() {
                         padding: "10px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
-                        width:'200px'
+                        width: "200px",
                       }}
                     />
                     <input
@@ -285,14 +286,14 @@ function AddProduct() {
                         padding: "10px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
-                        width:'200px'
+                        width: "200px",
                       }}
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveOffer(index)}
                       style={{
-                        backgroundColor: "red",
+                        backgroundColor: "black",
                         color: "white",
                         border: "none",
                         padding: "5px 10px",
