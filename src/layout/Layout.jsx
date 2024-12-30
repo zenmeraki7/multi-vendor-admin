@@ -12,7 +12,7 @@ const Layout = () => {
       <ScrollToTop />
       <Header />
 
-      <Box sx={{ marginTop: "24px" }}>
+      <Box sx={{ }}>
         <Stack direction="row" spacing={2}>
           {/* Sidebar */}
           <Box
@@ -39,6 +39,7 @@ const Layout = () => {
               "-ms-overflow-style": "none", // For Internet Explorer and Edge
               "scrollbar-width": "none", // For Firefox
             }}
+            pt={2}
           >
             <Outlet />
           </Box>
