@@ -1,33 +1,44 @@
 import React, { useState } from "react";
-import { Box, Typography, Button, CircularProgress, TextField } from "@mui/material";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import OtpInput from "react-otp-input";
-
-// Assuming you're using axios for API calls
 import axios from "axios";
+import { toast } from "react-hot-toast";
+import { BASE_URL } from "../../utils/baseUrl";
 
-export default function OtpStep({ email }) {
+export default function OtpStep({ email, handleNext }) {
   const [otp, setOtp] = useState(""); // Store OTP value
-  const [otpError, setOtpError] = useState(""); // OTP error state
   const [loading, setLoading] = useState(false); // Loading state
 
   const handleOtpChange = (otp) => {
     setOtp(otp);
-    setOtpError(""); // Clear OTP error on new input
   };
 
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      // Send OTP verification request to the backend
-      const response = await axios.post("/api/verify-otp", { email, otp });
+      // Call the verifyVendor API
+      const response = await axios.post(
+        `${BASE_URL}/api/vendor/verify-vendor`,
+        {
+          email,
+          otp,
+        }
+      );
 
       if (response.status === 200) {
-        alert("OTP verified successfully.");
-        // Redirect or proceed with the next step
-        // onVerify(); // If you have a callback to proceed
+        const { token, user, message } = response.data;
+
+        // Save token and user data in localStorage
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("userData", JSON.stringify(user));
+
+        toast.success(message || "OTP verified successfully!");
+        handleNext(); // Proceed to the next step
       }
     } catch (error) {
-      setOtpError("Invalid OTP. Please try again.");
+      const errorMessage =
+        error.response?.data?.message || "An error occurred. Please try again.";
+      toast.error(errorMessage); // Show error message using Hot Toast
     } finally {
       setLoading(false);
     }
@@ -61,23 +72,15 @@ export default function OtpStep({ email }) {
         renderInput={(props) => <input {...props} />}
       />
 
-      {/* OTP Error message */}
-      {otpError && (
-        <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-          {otpError}
-        </Typography>
-      )}
-
       {/* Verify OTP Button */}
-      <Box sx={{ mt: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <Button
           variant="contained"
           color="primary"
           onClick={handleVerifyOtp}
-          disabled={loading || otp.length !== 6}
-          sx={{ minWidth: 120 }}
+          disabled={loading || otp.length !== 6} // Disable button if loading or OTP is incomplete
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Verify OTP"}
+          {loading ? <CircularProgress size={24} /> : "Verify OTP"}
         </Button>
       </Box>
     </Box>

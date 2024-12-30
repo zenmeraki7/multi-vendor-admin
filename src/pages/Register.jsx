@@ -27,18 +27,19 @@ const steps = [
 ];
 
 export default function Register() {
-  const [activeStep, setActiveStep] = useState(2);
+  const [activeStep, setActiveStep] = useState(0);
   const [error, setError] = useState(null); // To manage error state
   const [loading, setLoading] = useState(false); // To manage loading state
   const [otp, setOtp] = useState(""); // Store OTP value entered by the user
   const [otpError, setOtpError] = useState(""); // Manage OTP error
+  const [email, setEmail] = useState(""); // Manage OTP error
 
   const navigate = useNavigate();
 
   const handleNext = () => {
     setActiveStep((prev) => prev + 1);
   };
-
+  console.log(activeStep);
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -46,11 +47,11 @@ export default function Register() {
   const getStepContent = (step) => {
     switch (step) {
       case 0:
-        return <PersonalDetails />;
+        return <PersonalDetails setEmail={setEmail} handleNext={handleNext} />;
       case 1:
-        return <OtpStep />;
+        return <OtpStep email={email} handleNext={handleNext} />;
       case 2:
-        return <DocumentUpload />;
+        return <DocumentUpload handleNext={handleNext} />;
       case 3:
         return <BankDetailsUpload />;
       default:
@@ -146,59 +147,6 @@ export default function Register() {
             {/* Form Content */}
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
               {getStepContent(activeStep)}
-
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}
-              >
-                <Button
-                  disabled={activeStep === 0}
-                  onClick={handleBack}
-                  variant="contained"
-                  color="inherit"
-                >
-                  Back
-                </Button>
-                {activeStep === steps.length - 1 ? (
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Submit"
-                    )}
-                  </Button>
-                ) : activeStep === 1 ? (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleVerifyOtp}
-                    disabled={loading || otp.length !== 6}
-                  >
-                    {loading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Verify OTP"
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleNext}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : (
-                      "Next"
-                    )}
-                  </Button>
-                )}
-              </Box>
             </Box>
           </CardContent>
         </Card>
