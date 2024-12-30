@@ -1,55 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
+  Card,
+  CardContent,
   Stepper,
   Step,
   StepLabel,
+  Typography,
   Button,
   TextField,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-
-const steps = ['Personal Details', 'GST Documents', 'Bank Details'];
+} from "@mui/material";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const steps = ["Basic Info", "Contact Info", "Company Info"];
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    newPassword: '',
-    confirmPassword: '',
-    phoneNumber: '',
-    address: '',
-    city: '',
-    state: '',
-    country: '',
-    companyName: '',
-    website: '',
-    gstinDocumentNumber: '',
-    gstinDocumentImage: null,
-    panCardDocumentNumber: '',
-    panCardDocumentImage: null,
-    accountHolderName: '',
-    accountNumber: '',
-    ifscCode: '',
-    bankName: '',
-    bankDocument: null,
+    fullName: "",
+    email: "",
+    newPassword: "",
+    confirmPassword: "",
+    phoneNumber: "",
+    address: "",
+    zipCode: "",
+    city: "",
+    state: "",
+    country: "",
+    companyName: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
+  // Handle Input Changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -58,173 +44,198 @@ export default function Register() {
     }));
   };
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: files[0],
-    }));
+  // Handle Next Button
+  const handleNext = () => {
+    setError("");
+    setActiveStep((prevStep) => prevStep + 1);
   };
 
-  const handleSubmit = () => {
-    console.log(formData); // You can handle form submission logic here
-    navigate('/login'); // Redirect to the login page
+  // Handle Back Button
+  const handleBack = () => {
+    setError("");
+    setActiveStep((prevStep) => prevStep - 1);
   };
 
+  // Submit Form
+  const handleSubmit = async () => {
+    // Validate Password Match
+    if (formData.newPassword !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    const dataToSubmit = {
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.newPassword,
+      phoneNum: formData.phoneNumber, // Map frontend field to backend field
+      address: formData.address,
+      zipCode: formData.zipCode,
+      city: formData.city,
+      state: formData.state,
+      country: formData.country,
+      companyName: formData.companyName,
+    };
+
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
+      const response = await axios.post(
+        "http://localhost:5000/api/vendor/register",
+        dataToSubmit
+      );
+
+      setSuccess("Registration successful!");
+      setTimeout(() => navigate("/login"), 2000); // Redirect to login after 2 seconds
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get Content for Each Step
   const getStepContent = (step) => {
     switch (step) {
       case 0:
         return (
-          <Stack spacing={2}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField fullWidth label="Full Name" name="fullName" value={formData.fullName} onChange={handleInputChange} />
-              <TextField fullWidth label="Email" name="email" type="email" value={formData.email} onChange={handleInputChange} />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField fullWidth label="New Password" name="newPassword" type="password" value={formData.newPassword} onChange={handleInputChange} />
-              <TextField fullWidth label="Confirm Password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} />
-            </Box>
-            <TextField fullWidth label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
-            <TextField fullWidth label="Address" name="address" multiline rows={2} value={formData.address} onChange={handleInputChange} />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField fullWidth label="City" name="city" value={formData.city} onChange={handleInputChange} />
-              <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleInputChange} />
-              <TextField fullWidth label="Country" name="country" value={formData.country} onChange={handleInputChange} />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField fullWidth label="Company Name" name="companyName" value={formData.companyName} onChange={handleInputChange} />
-              <TextField fullWidth label="Website" name="website" value={formData.website} onChange={handleInputChange} />
-            </Box>
-          </Stack>
+          <>
+            <TextField
+              label="Full Name"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Password"
+              name="newPassword"
+              type="password"
+              value={formData.newPassword}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+          </>
         );
       case 1:
         return (
-          <Stack spacing={4}>
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Upload GSTIN
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  fullWidth
-                  label="GSTIN Document Number"
-                  name="gstinDocumentNumber"
-                  value={formData.gstinDocumentNumber || ''}
-                  onChange={handleInputChange}
-                />
-                <Button
-                  variant="outlined"
-                  component="label"
-                >
-                  Upload GSTIN Image
-                  <input
-                    type="file"
-                    name="gstinDocumentImage"
-                    hidden
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-                {formData.gstinDocumentImage && (
-                  <Typography variant="body2" color="text.secondary">
-                    File Uploaded: {formData.gstinDocumentImage.name}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Upload PAN Card
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  fullWidth
-                  label="PAN Card Document Number"
-                  name="panCardDocumentNumber"
-                  value={formData.panCardDocumentNumber || ''}
-                  onChange={handleInputChange}
-                />
-                <Button
-                  variant="outlined"
-                  component="label"
-                >
-                  Upload PAN Card Image
-                  <input
-                    type="file"
-                    name="panCardDocumentImage"
-                    hidden
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-                {formData.panCardDocumentImage && (
-                  <Typography variant="body2" color="text.secondary">
-                    File Uploaded: {formData.panCardDocumentImage.name}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-          </Stack>
+          <>
+            <TextField
+              label="Phone Number"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Zip Code"
+              name="zipCode"
+              type="number"
+              value={formData.zipCode}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="City"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="State"
+              name="state"
+              value={formData.state}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Country"
+              name="country"
+              value={formData.country}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+          </>
         );
       case 2:
         return (
-          <Stack spacing={2}>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField fullWidth label="Account Holder Name" name="accountHolderName" value={formData.accountHolderName} onChange={handleInputChange} />
-              <TextField fullWidth label="Account Number" name="accountNumber" value={formData.accountNumber} onChange={handleInputChange} />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField fullWidth label="IFSC Code" name="ifscCode" value={formData.ifscCode} onChange={handleInputChange} />
-              <TextField fullWidth label="Bank Name" name="bankName" value={formData.bankName} onChange={handleInputChange} />
-            </Box>
-            <Button
-              variant="outlined"
-              component="label"
-            >
-              Upload Bank Document
-              <input
-                type="file"
-                name="bankDocument"
-                hidden
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </Button>
-            {formData.bankDocument && (
-              <Typography variant="body2" color="text.secondary">
-                File Uploaded: {formData.bankDocument.name}
-              </Typography>
-            )}
-          </Stack>
+          <>
+            <TextField
+              label="Company Name"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+            />
+          </>
         );
       default:
-        return 'Unknown step';
+        return "Unknown step";
     }
   };
 
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: 3,
-        backgroundColor:'black'
+        backgroundColor: "black",
       }}
     >
       <Card
         sx={{
           maxWidth: 800,
-          width: '100%',
-          backgroundColor: 'white',
-          borderRadius: '16px',
-          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',
+          width: "100%",
+          backgroundColor: "white",
+          borderRadius: "16px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
         }}
       >
         <CardContent>
-          <Typography variant="h5" align="center" gutterBottom sx={{ marginBottom: 4 }}>
-            Register Now
+          <Typography variant="h5" align="center" gutterBottom>
+            Vendor Registration
           </Typography>
           <Stepper activeStep={activeStep}>
             {steps.map((label) => (
@@ -233,18 +244,38 @@ export default function Register() {
               </Step>
             ))}
           </Stepper>
-          <Box component="form" onSubmit={(e) => e.preventDefault()} sx={{ mt: 4 }}>
+          <Box component="form" sx={{ mt: 4 }}>
             {getStepContent(activeStep)}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-              <Button disabled={activeStep === 0} onClick={handleBack} variant="contained" color="inherit">
+            {error && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
+            {success && (
+              <Typography color="success" sx={{ mt: 2 }}>
+                {success}
+              </Typography>
+            )}
+            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+              <Button
+                disabled={activeStep === 0}
+                onClick={handleBack}
+                variant="contained"
+                color="inherit"
+              >
                 Back
               </Button>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
+                disabled={loading}
               >
-                {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+                {loading
+                  ? "Loading..."
+                  : activeStep === steps.length - 1
+                  ? "Submit"
+                  : "Next"}
               </Button>
             </Box>
           </Box>
