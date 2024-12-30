@@ -12,6 +12,8 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import { styled } from "@mui/system";
+import toast, { Toaster } from "react-hot-toast";
+import { BASE_URL } from "../../utils/baseUrl";
 
 // Custom InputField styled component
 const InputField = styled(TextField)({
@@ -36,7 +38,6 @@ const InputField = styled(TextField)({
 });
 
 const DocumentUpload = ({ handleNext }) => {
-  // Formik initialization
   const formik = useFormik({
     initialValues: {
       gstinDocumentNumber: "",
@@ -51,34 +52,65 @@ const DocumentUpload = ({ handleNext }) => {
       panCardDocumentNumber: Yup.string()
         .required("PAN Card Document Number is required")
         .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN format"),
-      gstinDocumentImage: Yup.mixed().required("GSTIN document is required"),
-      panCardDocumentImage: Yup.mixed().required(
-        "PAN card document is required"
-      ),
+      gstinDocumentImage: Yup.mixed()
+        .required("GSTIN document is required")
+        .test(
+          "fileSize",
+          "File size is too large. Max 5MB",
+          (value) => !value || value.size <= 5242880
+        ) // Max file size 5MB
+        .test(
+          "fileFormat",
+          "Invalid file format. Only jpg, jpeg, png, pdf are allowed",
+          (value) =>
+            !value ||
+            ["image/jpeg", "image/png", "application/pdf"].includes(value.type)
+        ),
+      panCardDocumentImage: Yup.mixed()
+        .required("PAN card document is required")
+        .test(
+          "fileSize",
+          "File size is too large. Max 5MB",
+          (value) => !value || value.size <= 5242880
+        )
+        .test(
+          "fileFormat",
+          "Invalid file format. Only jpg, jpeg, png, pdf are allowed",
+          (value) =>
+            !value ||
+            ["image/jpeg", "image/png", "application/pdf"].includes(value.type)
+        ),
     }),
     onSubmit: async (values) => {
       const formData = new FormData();
-      formData.append("gstinDocumentImage", values.gstinDocumentImage);
-      formData.append("panCardDocumentImage", values.panCardDocumentImage);
-      formData.append("gstinDocumentNumber", values.gstinDocumentNumber);
-      formData.append("panCardDocumentNumber", values.panCardDocumentNumber);
+      formData.append("GSTIN", values.gstinDocumentImage);
+      formData.append("PAN", values.panCardDocumentImage);
+      formData.append("gstinNumber", values.gstinDocumentNumber);
+      formData.append("panNumber", values.panCardDocumentNumber);
 
+      toast.loading("Uploading documents...");
+      const vendorId = JSON.parse(localStorage.getItem("userData"))._id;
+      console.log(vendorId);
       try {
-        const response = await axios.post("/api/upload-documents", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        console.log("Documents uploaded successfully", response.data);
+        const response = await axios.put(
+          `${BASE_URL}/api/vendor/add-document/${vendorId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        toast.dismiss();
+        toast.success("Documents uploaded successfully!");
+        handleNext(); // Proceed to the next step after successful upload
       } catch (error) {
+        toast.dismiss();
+        toast.error("Failed to upload documents. Please try again.");
         console.error("Error uploading documents", error);
       }
     },
   });
-
-  const handleApiCall = () => {
-    handleNext();
-  };
 
   return (
     <>
@@ -126,6 +158,12 @@ const DocumentUpload = ({ handleNext }) => {
                 </Typography>
               )}
             </Box>
+            {formik.errors.gstinDocumentImage &&
+              formik.touched.gstinDocumentImage && (
+                <Typography variant="body2" color="error">
+                  {formik.errors.gstinDocumentImage}
+                </Typography>
+              )}
             {formik.values.gstinDocumentImage && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2">Preview:</Typography>
@@ -184,6 +222,12 @@ const DocumentUpload = ({ handleNext }) => {
                 </Typography>
               )}
             </Box>
+            {formik.errors.panCardDocumentImage &&
+              formik.touched.panCardDocumentImage && (
+                <Typography variant="body2" color="error">
+                  {formik.errors.panCardDocumentImage}
+                </Typography>
+              )}
             {formik.values.panCardDocumentImage && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="body2">Preview:</Typography>
@@ -202,19 +246,10 @@ const DocumentUpload = ({ handleNext }) => {
         </Stack>
       </form>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-        {/* <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    variant="contained"
-                    color="inherit"
-                  >
-                    Back
-                  </Button> */}
         <Button
           variant="contained"
           color="primary"
-          onClick={handleApiCall}
-          //   disabled={loading || otp.length !== 6}
+          onClick={formik.handleSubmit} // Trigger Formik's submit
         >
           Save Documents
         </Button>
