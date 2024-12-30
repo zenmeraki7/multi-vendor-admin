@@ -9,6 +9,7 @@ import AddProduct from "./pages/AddProduct";
 import AddVariant from "./components/AddVariant";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import SellerPro from "./pages/SellerPro";
+import ProductList from "./pages/ProductList";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
           />
+          <Route path="/list" element={<ProductList/>}/>
           <Route
             path="/seller-profile"
             element={<PrivateRoute component={<SellerPro />} />}
