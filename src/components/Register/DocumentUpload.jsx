@@ -14,6 +14,8 @@ import { CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import { styled } from "@mui/system";
 import toast, { Toaster } from "react-hot-toast";
 import { BASE_URL } from "../../utils/baseUrl";
+import { useDispatch, useSelector } from "react-redux";
+import { uploadVendorDocuments } from "../../redux/slices/userSlice";
 
 // Custom InputField styled component
 const InputField = styled(TextField)({
@@ -38,6 +40,9 @@ const InputField = styled(TextField)({
 });
 
 const DocumentUpload = ({ handleNext }) => {
+  const dispatch = useDispatch();
+  const { loading, error, user, token } = useSelector((state) => state.user);
+  console.log(user);
   const formik = useFormik({
     initialValues: {
       gstinDocumentNumber: "",
@@ -58,7 +63,7 @@ const DocumentUpload = ({ handleNext }) => {
           "fileSize",
           "File size is too large. Max 5MB",
           (value) => !value || value.size <= 5242880
-        ) // Max file size 5MB
+        )
         .test(
           "fileFormat",
           "Invalid file format. Only jpg, jpeg, png, pdf are allowed",
@@ -89,24 +94,14 @@ const DocumentUpload = ({ handleNext }) => {
       formData.append("panNumber", values.panCardDocumentNumber);
 
       toast.loading("Uploading documents...");
-      const vendorId = JSON.parse(localStorage.getItem("userData"))._id;
-      console.log(vendorId);
       try {
-        const response = await axios.put(
-          `${BASE_URL}/api/vendor/add-document/${vendorId}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await dispatch(uploadVendorDocuments({ formData })).unwrap();
         toast.dismiss();
         toast.success("Documents uploaded successfully!");
         handleNext(); // Proceed to the next step after successful upload
       } catch (error) {
         toast.dismiss();
-        toast.error("Failed to upload documents. Please try again.");
+        toast.error(error || "Failed to upload documents. Please try again.");
         console.error("Error uploading documents", error);
       }
     },

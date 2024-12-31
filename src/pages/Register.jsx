@@ -27,7 +27,7 @@ const steps = [
 ];
 
 export default function Register() {
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(3);
   const [error, setError] = useState(null); // To manage error state
   const [loading, setLoading] = useState(false); // To manage loading state
   const [otp, setOtp] = useState(""); // Store OTP value entered by the user

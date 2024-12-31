@@ -19,6 +19,8 @@ import { styled } from "@mui/system";
 import { BASE_URL } from "../../utils/baseUrl";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { uploadBankDetails } from "../../redux/slices/userSlice";
 
 // Custom InputField styled component
 const InputField = styled(TextField)({
@@ -69,6 +71,8 @@ const CustomSelect = styled(Select)(({ theme }) => ({
 const BankDetailsUpload = () => {
   const [banks, setBanks] = useState([]); // State to hold the fetched banks
   const navigate = useNavigate();
+  const { loading, error, user, token } = useSelector((state) => state.user);
+  console.log(user);
 
   // Fetch the banks on component mount
   useEffect(() => {
@@ -84,7 +88,8 @@ const BankDetailsUpload = () => {
     fetchBanks();
   }, []);
 
-  // Formik initialization
+  const dispatch = useDispatch();
+
   const formik = useFormik({
     initialValues: {
       accountHolderName: "",
@@ -121,31 +126,16 @@ const BankDetailsUpload = () => {
       formData.append("ifscCode", values.ifscCode);
       formData.append("bankName", values.bankName);
       formData.append("image", values.bankDocument);
-
-      toast.loading("Uploading bank details...", {
-        id: "uploading",
-      }); // Loading toast during the upload
-
+      toast.loading("Uploading documents...");
       try {
-        const vendorId = JSON.parse(localStorage.getItem("userData"))._id;
-        const response = await axios.put(
-          `${BASE_URL}/api/vendor/add-bank/${vendorId}`, // Make sure to replace vendorId with actual vendor ID from state or props
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        toast.success(
-          "Bank details uploaded and Your accout created successfully!"
-        ); // Success notification
-        navigate("/"); // Redirect to home or other page
-      } catch (error) {
-        toast.error("Error uploading bank details. Please try again."); // Error notification
-        console.error("Error uploading bank details", error);
-      } finally {
-        toast.dismiss("uploading"); // Dismiss loading toast
+        await dispatch(uploadBankDetails({ formData, navigate })).unwrap();
+        toast.dismiss();
+        toast.success("Bank details uploaded successfully!");
+        navigate("/");
+      } catch (err) {
+        console.log(err);
+        toast.error(err || "Failed to upload documents. Please try again.");
+        toast.dismiss();
       }
     },
   });
