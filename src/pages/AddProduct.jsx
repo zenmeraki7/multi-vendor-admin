@@ -1,9 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import JoditEditor from "jodit-react";
 import AddVariant from "../components/AddVariant";
-import TextField from '@mui/material/TextField';
-import { Select, MenuItem, InputLabel, FormControl } from '@mui/material'; // Import MUI components for select fields
-import { Switch, FormControlLabel } from '@mui/material';
+import TextField from "@mui/material/TextField";
+import { Select, MenuItem, InputLabel, FormControl } from "@mui/material"; // Import MUI components for select fields
+import { Switch, FormControlLabel } from "@mui/material";
+import axios from "axios";
+import CustomInput from "../components/SharedComponents/CustomInput";
+import CustomSelect from "../components/SharedComponents/CustomSelect";
 
 function AddProduct() {
   const [productImages, setProductImages] = useState([null, null, null, null]);
@@ -11,12 +14,37 @@ function AddProduct() {
   const [features, setFeatures] = useState([{ name: "", details: "" }]);
   const [offers, setOffers] = useState([{ name: "", details: "" }]);
   const [description, setDescription] = useState("");
+  const [categoryTypes, setCategoryType] = useState("");
   const [category, setCategory] = useState(""); // State for Category
   const [subcategory, setSubcategory] = useState(""); // State for Sub-Category
-
+  const [categories, setCategories] = useState([]); // For storing fetched categories
+  const [subcategories, setSubcategories] = useState([]); // For storing fetched subcategories
   const [isFreeShipping, setIsFreeShipping] = useState(false);
   const [shippingCharge, setShippingCharge] = useState("");
   const [weight, setWeight] = useState("");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("/api/category/all");
+        setCategories(response.data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    const fetchSubcategories = async () => {
+      try {
+        const response = await axios.get("/api/subcategory/all");
+        setSubcategories(response.data.subcategories);
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+      }
+    };
+
+    fetchCategories();
+    fetchSubcategories();
+  }, []);
 
   const handleFreeShippingToggle = (event) => {
     setIsFreeShipping(event.target.checked);
@@ -68,18 +96,21 @@ function AddProduct() {
     setThumbnail(newThumbnailURL);
   };
 
-    const [isReturnPolicyEnabled, setIsReturnPolicyEnabled] = useState(false);
-    const [returnDays, setReturnDays] = useState('');
-  
-    const handleSwitchChange = (event) => {
-      setIsReturnPolicyEnabled(event.target.checked);
-    };
-  
-    const handleInputChange = (event) => {
-      setReturnDays(event.target.value);
-    };
+  const [isReturnPolicyEnabled, setIsReturnPolicyEnabled] = useState(false);
+  const [returnDays, setReturnDays] = useState("");
+
+  const handleSwitchChange = (event) => {
+    setIsReturnPolicyEnabled(event.target.checked);
+  };
+
+  const handleInputChange = (event) => {
+    setReturnDays(event.target.value);
+  };
   return (
-    <div className="container" style={{ maxWidth: "1200px", margin: "10px auto" }}>
+    <div
+      className="container"
+      style={{ maxWidth: "1200px", margin: "10px auto" }}
+    >
       <h2>Add Product</h2>
       <br />
       <div style={{ display: "flex", gap: "30px" }}>
@@ -96,7 +127,10 @@ function AddProduct() {
                   onChange={(e) => handleProductImageChange(e, index)}
                 />
                 <img
-                  src={image || "https://cdn.pixabay.com/photo/2017/11/10/04/47/image-2935360_1280.png"}
+                  src={
+                    image ||
+                    "https://cdn.pixabay.com/photo/2017/11/10/04/47/image-2935360_1280.png"
+                  }
                   alt={`Product Image ${index + 1}`}
                   height={"100px"}
                   width={"100px"}
@@ -109,9 +143,16 @@ function AddProduct() {
             <h5>Product Thumbnail</h5>
             <br />
             <label style={{ cursor: "pointer" }}>
-              <input type="file" style={{ display: "none" }} onChange={handleThumbnailChange} />
+              <input
+                type="file"
+                style={{ display: "none" }}
+                onChange={handleThumbnailChange}
+              />
               <img
-                src={thumbnail || "https://cdn.pixabay.com/photo/2017/11/10/04/47/image-2935360_1280.png"}
+                src={
+                  thumbnail ||
+                  "https://cdn.pixabay.com/photo/2017/11/10/04/47/image-2935360_1280.png"
+                }
                 alt="Thumbnail"
                 height="100px"
                 width="100px"
@@ -134,38 +175,54 @@ function AddProduct() {
         <div style={{ flex: "1" }}>
           <form>
             {/* Product Name */}
-            <div style={{ marginBottom: "20px" }}>
-              <label htmlFor="productName">Product Name</label>
-              <TextField
-                id="productName"
-                name="productName"
-                label="Product Name"
-                placeholder="Enter product name"
-                fullWidth
-                variant="outlined"
-                sx={{
-                  marginTop: "5px",
-                  borderRadius: "10px", // Rounded corners
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "10px", // Apply to input field
-                    backgroundColor: "#f9f9f9", // Light background color
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "#777", // Soft label color
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "lightblue", // Light blue border color
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "blue", // Darker blue border on hover
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "darkblue", // Even darker blue border on focus
-                  },
-                }}
+            <CustomInput
+              id="productname"
+              name="productName"
+              label="Product Name"
+              placeholder="Enter product name"
+            />
+            <div style={{ display: "flex", gap: "20px" }}>
+              <CustomInput
+                id="brandname"
+                name="brandName"
+                label="Brand Name"
+                placeholder="Enter brand name"
+              />
+              <CustomSelect
+                id="categoryType"
+                label="Category Type"
+                MenuItems={["Electronics", "Fashion", "Home"]}
               />
             </div>
+            <div style={{ display: "flex", gap: "20px" }}>
+              <CustomSelect
+               id="category"
+               label="Category"
+               MenuItems={["Clothes", "Footwear"]}
+              />
+              <CustomSelect
+                id="Sub-category"
+                label="Sub-Category"
+                MenuItems={["Mens", "Women"]}
+              />
+            </div>
+            <div style={{ display: "flex", gap: "20px" }}>
+              <CustomInput
+               id="originalprice"
+               name="originalprice"
+               label="Original Price"
+               placeholder="Enter Original Price"
+              type="number"
+              />
+              <CustomInput
+                id="salePrice"
+                name="salePrice"
+                label="Sale Price"
+                placeholder="Enter Sale Price"
+                type="number"
 
+              />
+            </div>
             {/* Input Grid */}
             <div
               style={{
@@ -177,14 +234,21 @@ function AddProduct() {
             >
               {/* Input Fields */}
               {[
-                { id: "brandName", label: "Brand Name", placeholder: "Enter brand name" },
-                { id: "category", label: "Category", placeholder: "Select Category", type: "select" },
-                { id: "subcategory", label: "Sub-Category", placeholder: "Enter Sub-category price", type: "select" },
-                { id: "originalPrice", label: "Original Price", placeholder: "Enter Original price", type: "number" },
-                { id: "salePrice", label: "Sale Price", placeholder: "Enter sale price", type: "number" },
-                { id: "stockQuantity", label: "Stock Quantity", placeholder: "Enter stock quantity", type: "number" },
-                { id: "Tags", label: "Tags", placeholder: "Enter Tags", type: "text" },
-
+               
+                
+               
+                {
+                  id: "stockQuantity",
+                  label: "Stock Quantity",
+                  placeholder: "Enter stock quantity",
+                  type: "number",
+                },
+                {
+                  id: "Tags",
+                  label: "Tags",
+                  placeholder: "Enter Tags",
+                  type: "text",
+                },
               ].map((input, index) => (
                 <div key={index}>
                   <label htmlFor={input.id}>{input.label}</label>
@@ -214,12 +278,15 @@ function AddProduct() {
                         },
                       }}
                     >
-                      <InputLabel htmlFor={input.id}>{input.placeholder}</InputLabel>
+                      <InputLabel htmlFor={input.id}>
+                        {input.placeholder}
+                      </InputLabel>
                       <Select
                         id={input.id}
                         value={input.id === "category" ? category : subcategory}
                         onChange={(e) => {
-                          if (input.id === "category") setCategory(e.target.value);
+                          if (input.id === "category")
+                            setCategory(e.target.value);
                           else setSubcategory(e.target.value);
                         }}
                         label={input.placeholder}
@@ -234,8 +301,6 @@ function AddProduct() {
                         <MenuItem value="sports">Sports</MenuItem>
                       </Select>
                     </FormControl>
-
-
                   ) : (
                     <TextField
                       id={input.id}
@@ -282,7 +347,14 @@ function AddProduct() {
                 }}
               >
                 {features.map((feature, index) => (
-                  <div key={index} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
                     <TextField
                       type="text"
                       placeholder="Enter feature name"
@@ -388,7 +460,6 @@ function AddProduct() {
                 >
                   Add Specifications
                 </button>
-
               </div>
             </div>
             <div style={{ marginBottom: "20px" }}>
@@ -404,119 +475,120 @@ function AddProduct() {
               </div>
             </div>
 
-   {/* Shipping Details Section */}
-   <div style={{ marginBottom: "20px" }}>
-          <h5>Shipping Details</h5>
-          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            {/* Weight Input */}
-            <div style={{ flex: 1 }}>
-              <TextField
-                id="weight"
-                label="Weight"
-                type="text"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                fullWidth
-                variant="outlined"
-                sx={{
-                  marginTop: "5px",
-                  borderRadius: "10px",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "10px",
-                    backgroundColor: "#f9f9f9",
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "#777",
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "lightblue",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "blue",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "darkblue",
-                  },
-                }}
-              />
-            </div>
+            {/* Shipping Details Section */}
+            <div style={{ marginBottom: "20px" }}>
+              <h5>Shipping Details</h5>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "20px" }}
+              >
+                {/* Weight Input */}
+                <div style={{ flex: 1 }}>
+                  <TextField
+                    id="weight"
+                    label="Weight"
+                    type="text"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    sx={{
+                      marginTop: "5px",
+                      borderRadius: "10px",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "10px",
+                        backgroundColor: "#f9f9f9",
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#777",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "lightblue",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "blue",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "darkblue",
+                      },
+                    }}
+                  />
+                </div>
 
-            {/* Toggle Switch for Free Shipping */}
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isFreeShipping}
-                  onChange={handleFreeShippingToggle}
-                  name="freeShipping"
-                  color="primary"
+                {/* Toggle Switch for Free Shipping */}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isFreeShipping}
+                      onChange={handleFreeShippingToggle}
+                      name="freeShipping"
+                      color="primary"
+                    />
+                  }
+                  label="Free Shipping"
                 />
-              }
-              label="Free Shipping"
-            />
-          </div>
+              </div>
 
-          {/* Shipping Charge Input if Free Shipping is Disabled */}
-          {!isFreeShipping && (
-            <div style={{ marginTop: "10px" }}>
-              <TextField
-                id="shippingCharge"
-                label="Shipping Charge"
-                type="number"
-                value={shippingCharge}
-                onChange={(e) => setShippingCharge(e.target.value)}
-                fullWidth
-                variant="outlined"
-                sx={{
-                  marginTop: "5px",
-                  borderRadius: "10px",
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "10px",
-                    backgroundColor: "#f9f9f9",
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "#777",
-                  },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "lightblue",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "blue",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "darkblue",
-                  },
-                }}
-              />
+              {/* Shipping Charge Input if Free Shipping is Disabled */}
+              {!isFreeShipping && (
+                <div style={{ marginTop: "10px" }}>
+                  <TextField
+                    id="shippingCharge"
+                    label="Shipping Charge"
+                    type="number"
+                    value={shippingCharge}
+                    onChange={(e) => setShippingCharge(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    sx={{
+                      marginTop: "5px",
+                      borderRadius: "10px",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "10px",
+                        backgroundColor: "#f9f9f9",
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#777",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "lightblue",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "blue",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "darkblue",
+                      },
+                    }}
+                  />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={isReturnPolicyEnabled}
-            onChange={handleSwitchChange}
-            name="returnPolicySwitch"
-            color="primary"
-          />
-        }
-        label="Enable Return Policy"
-      />
-      {isReturnPolicyEnabled && (
-        <TextField
-          label="Days up to which return can be done"
-          type="number"
-          value={returnDays}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-      )}
-    </div>
- 
-    <div style={{ marginBottom: "20px" }}>
-      <h5>              Meta Field
-      </h5>
+            <div>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isReturnPolicyEnabled}
+                    onChange={handleSwitchChange}
+                    name="returnPolicySwitch"
+                    color="primary"
+                  />
+                }
+                label="Enable Return Policy"
+              />
+              {isReturnPolicyEnabled && (
+                <TextField
+                  label="Days up to which return can be done"
+                  type="number"
+                  value={returnDays}
+                  onChange={handleInputChange}
+                  fullWidth
+                  margin="normal"
+                />
+              )}
+            </div>
+
+            <div style={{ marginBottom: "20px" }}>
+              <h5> Meta Field</h5>
               <TextField
                 id="metaName"
                 name="metaName"
@@ -546,7 +618,7 @@ function AddProduct() {
                 }}
               />
             </div>
-    
+
             <div
               style={{
                 display: "grid",
@@ -557,9 +629,18 @@ function AddProduct() {
             >
               {/* Input Fields */}
               {[
-                { id: "Description", label: "Description", placeholder: "Enter Description ",type:'text' },
-                { id: "keywords", label: "Keywords", placeholder: "Enter Keywords", type: "text" },
-
+                {
+                  id: "Description",
+                  label: "Description",
+                  placeholder: "Enter Description ",
+                  type: "text",
+                },
+                {
+                  id: "keywords",
+                  label: "Keywords",
+                  placeholder: "Enter Keywords",
+                  type: "text",
+                },
               ].map((input, index) => (
                 <div key={index}>
                   <label htmlFor={input.id}>{input.label}</label>
@@ -588,11 +669,7 @@ function AddProduct() {
                           borderColor: "darkblue", // Even darker blue border on focus
                         },
                       }}
-                    >
-                      
-                    </FormControl>
-
-
+                    ></FormControl>
                   ) : (
                     <TextField
                       id={input.id}
