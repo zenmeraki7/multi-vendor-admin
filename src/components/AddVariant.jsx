@@ -42,7 +42,7 @@ function AddVariant() {
             <div className="col-6">
           <label>
             <input type="file" style={{display:'none'}}/>
-            <img src="https://files.oaiusercontent.com/file-62uCHgnfmiGB3eUXfYXYQA?se=2024-12-27T05%3A02%3A03Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D11560fdc-5a0c-4613-9c83-4615aaa88b02.webp&sig=G2Xt5Sh9gBRVtt0Fvnf9R%2BVN1MoWwEl8j3XU3Y3iXbo%3D" alt="" height={'350px'} width={'350px'} />
+            <img src="https://cdn.pixabay.com/photo/2013/07/12/12/55/oldtimer-146524_640.png" alt="variant" height={'350px'} width={'350px'} />
           </label>
             </div>
             <div className="col-6">
