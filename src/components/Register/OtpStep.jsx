@@ -4,44 +4,30 @@ import OtpInput from "react-otp-input";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { BASE_URL } from "../../utils/baseUrl";
+import { useDispatch, useSelector } from "react-redux";
+import { verifyOtp } from "../../redux/slices/userSlice";
 
 export default function OtpStep({ email, handleNext }) {
   const [otp, setOtp] = useState(""); // Store OTP value
-  const [loading, setLoading] = useState(false); // Loading state
-
+  const dispatch = useDispatch();
+  const { loading, error, user, token } = useSelector((state) => state.user);
+  console.log(token);
+  console.log(user);
   const handleOtpChange = (otp) => {
     setOtp(otp);
   };
 
-  const handleVerifyOtp = async () => {
-    setLoading(true);
-    try {
-      // Call the verifyVendor API
-      const response = await axios.post(
-        `${BASE_URL}/api/vendor/verify-vendor`,
-        {
-          email,
-          otp,
-        }
-      );
-
-      if (response.status === 200) {
-        const { token, user, message } = response.data;
-
-        // Save token and user data in localStorage
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("userData", JSON.stringify(user));
-
-        toast.success(message || "OTP verified successfully!");
+  const handleVerifyOtp = () => {
+    dispatch(verifyOtp({ email, otp }))
+      .unwrap()
+      .then((res) => {
+        toast.success(res.message || "OTP verified successfully!");
+        // Proceed to the next step
         handleNext(); // Proceed to the next step
-      }
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "An error occurred. Please try again.";
-      toast.error(errorMessage); // Show error message using Hot Toast
-    } finally {
-      setLoading(false);
-    }
+      })
+      .catch((err) => {
+        toast.error(err || "Failed to verify OTP");
+      });
   };
 
   return (
