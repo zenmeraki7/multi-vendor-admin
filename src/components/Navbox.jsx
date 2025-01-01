@@ -28,6 +28,9 @@ function Navbox() {
   const [activeItem, setActiveItem] = useState("");
   const [expanded, setExpanded] = useState(false);
 
+  // Dummy variable for admin status, replace with actual logic
+  const isAdmin = true; // Replace with actual logic to check user role
+
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
@@ -61,105 +64,123 @@ function Navbox() {
       }}
     >
       <List>
-        {menuItems.map((item) => (
-          <React.Fragment key={item.text}>
+        {menuItems.map(
+          (item) =>
+            (!isAdmin || item.text !== "Products") && ( // Hide "Products" for non-admin
+              <React.Fragment key={item.text}>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      if (item.path) navigate(item.path);
+                    }}
+                    sx={{
+                      backgroundColor:
+                        activeItem === item.text ? "#c8d8e4" : "inherit",
+                      "&:hover": {
+                        backgroundColor: "#c8d8e4",
+                      },
+                      transition: "background-color 0.3s",
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        color: activeItem === item.text ? "#3a4b58" : "#556b78",
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.text}
+                      primaryTypographyProps={{
+                        fontWeight: activeItem === item.text ? "bold" : "normal",
+                        color: activeItem === item.text ? "#3a4b58" : "#556b78",
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                {item.text === "Configuration" || item.text === "Sellers" ? (
+                  <Divider sx={{ marginY: 1 }} />
+                ) : null}
+              </React.Fragment>
+            )
+        )}
+
+        {/* Admin specific menu items */}
+        {isAdmin && (
+          <>
             <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  // setActiveItem(item.text);
-                  if (item.path) navigate(item.path);
-                }}
-                sx={{
-                  backgroundColor:
-                    activeItem === item.text ? "#c8d8e4" : "inherit",
-                  "&:hover": {
-                    backgroundColor: "#c8d8e4",
-                  },
-                  transition: "background-color 0.3s",
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    color: activeItem === item.text ? "#3a4b58" : "#556b78",
-                  }}
-                >
-                  {item.icon}
+              <ListItemButton onClick={() => navigate("/user")}>
+                <ListItemIcon>
+                  <PeopleIcon />
                 </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontWeight: activeItem === item.text ? "bold" : "normal",
-                    color: activeItem === item.text ? "#3a4b58" : "#556b78",
-                  }}
-                />
+                <ListItemText primary="User Details" />
               </ListItemButton>
             </ListItem>
-            {item.text === "Configuration" || item.text === "Sellers" ? (
-              <Divider sx={{ marginY: 1 }} />
-            ) : null}
-          </React.Fragment>
-        ))}
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/transactions")}>
+                <ListItemIcon>
+                  <AssignmentIcon />
+                </ListItemIcon>
+                <ListItemText primary="Transactions" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/reviews")}>
+                <ListItemIcon>
+                  <AssignmentIcon />
+                </ListItemIcon>
+                <ListItemText primary="Reviews" />
+              </ListItemButton>
+            </ListItem>
+            <Divider sx={{ marginY: 1 }} />
+          </>
+        )}
 
-        {/* Products Accordion */}
-        <Accordion
-        elevation={0}
-          expanded={expanded === "products"}
-          onChange={handleAccordionChange("products")}
-          // sx={{
-          //   backgroundColor: expanded === "products" ? "#c8d8e4" : "inherit",
-          //   "&:hover": {
-          //     backgroundColor: "#c8d8e4",
-          //   },
-          // }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            // sx={{ color: expanded === "products" ? "#3a4b58" : "#556b78" }}
+        {/* Admin: Product Management (no accordion) */}
+        {isAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => navigate("/product-list")}>
+              <ListItemIcon>
+                <WidgetsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Product Management" />
+            </ListItemButton>
+          </ListItem>
+        )}
+
+        {/* Accordion for non-admin users */}
+        {!isAdmin && (
+          <Accordion
+            elevation={0}
+            expanded={expanded === "products"}
+            onChange={handleAccordionChange("products")}
           >
-            <WidgetsIcon sx={{ marginRight: 2 }} />
-            <Typography>Products</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <List disablePadding>
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => navigate("/add-product")}
-                  // sx={{
-                  //   pl: 4,
-                  //   backgroundColor:
-                  //     activeItem === "Add Products" ? "#c8d8e4" : "inherit",
-                  //   "&:hover": {
-                  //     backgroundColor: "#c8d8e4",
-                  //   },
-                  // }}
-                >
-                  <ListItemIcon>
-                    <AddShoppingCartIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Add Products" />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton
-                  onClick={() => navigate("/product-list")}
-                  // sx={{
-                  //   pl: 4,
-                  //   backgroundColor:
-                  //     activeItem === "Product Manage" ? "#c8d8e4" : "inherit",
-                  //   "&:hover": {
-                  //     backgroundColor: "#c8d8e4",
-                  //   },
-                  // }}
-                >
-                  <ListItemIcon>
-                    <WidgetsIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Product Manage" />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </AccordionDetails>
-        </Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <WidgetsIcon sx={{ marginRight: 2 }} />
+              <Typography>Products</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <List disablePadding>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => navigate("/add-product")}>
+                    <ListItemIcon>
+                      <AddShoppingCartIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Add Products" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => navigate("/product-list")}>
+                    <ListItemIcon>
+                      <WidgetsIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Product Manage" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </AccordionDetails>
+          </Accordion>
+        )}
       </List>
     </Box>
   );

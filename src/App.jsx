@@ -11,7 +11,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import SellerPro from "./pages/SellerPro";
 import ProductList from "./pages/ProductList";
 import { Toaster } from "react-hot-toast";
-
+  import AdminLogin from "./pages/AdminLogin";
+import Admin from "./pages/Admin";
+import VendorDetails from "./pages/VendorDetails";
+import OrderDetails from "./pages/OrderDetails";
+import UserManagement from "./pages/UserManagement";
+import Review from "./pages/Review";
 function App() {
   return (
     <>
@@ -19,10 +24,15 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="admin-login" element={<AdminLogin/>}/>
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
+          <Route path='/admin' element={<Admin/>}/>
+          <Route path="/sellers" element={<VendorDetails/>} />
+          <Route path="/orders" element={<OrderDetails/>}/>
+          <Route path="/user" element={<UserManagement/>} />
+          <Route path="/reviews" element={<Review/>} />
           <Route
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
