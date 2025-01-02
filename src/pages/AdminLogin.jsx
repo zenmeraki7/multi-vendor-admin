@@ -1,14 +1,75 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import './AdminLogin.css'
-import signinImage from '../assets/adminlogin.avif'
+import * as yup from "yup";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "./AdminLogin.css";
+import signinImage from "../assets/adminlogin.avif";
+
+// Yup validation schema
+const loginSchema = yup.object({
+  email: yup
+    .string()
+    .email("Email must be a valid email address.")
+    .required("Email is required."),
+  password: yup.string().required("Password is required."),
+});
+
 function AdminLogin() {
   const navigate = useNavigate();
 
-  const handleSignIn = (e) => {
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [validationErrors, setValidationErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    navigate("/admin");
+    setValidationErrors({}); // Reset validation errors
+console.log("first")
+    try {
+      // Validate the form data
+      await loginSchema.validate(formData, { abortEarly: false });
+
+      setLoading(true);
+
+      // Construct API URL
+     
+
+      // Make the API call
+      const response = await axios.post("http://localhost:5000/api/auth/login", formData);
+console.log(response);
+
+      // Save token in localStorage
+      localStorage.setItem("token", response.data.token);
+
+      // Show success toast and navigate
+      toast.success("Login successful!");
+      navigate("/admin");
+    } catch (error) {
+      setLoading(false);
+
+      // Handle validation errors from Yup
+      if (error.name === "ValidationError") {
+        const errors = {};
+        error.inner.forEach((err) => {
+          errors[err.path] = err.message;
+        });
+        setValidationErrors(errors);
+      } else {
+        // Handle API errors
+        toast.error(
+          error.response?.data?.message || "Something went wrong. Please try again."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = (e) => {
@@ -46,28 +107,41 @@ function AdminLogin() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Sign In
+            Admin Sign In
           </motion.h2>
 
           <motion.form
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            
           >
             <div className="form-group">
               <input
                 type="email"
+                name="email"
                 placeholder="Email Address"
                 className="form-control"
+                value={formData.email}
+                onChange={handleInputChange}
               />
+              {validationErrors.email && (
+                <p className="error-text">{validationErrors.email}</p>
+              )}
             </div>
 
             <div className="form-group">
               <input
                 type="password"
+                name="password"
                 placeholder="Password"
                 className="form-control"
+                value={formData.password}
+                onChange={handleInputChange}
               />
+              {validationErrors.password && (
+                <p className="error-text">{validationErrors.password}</p>
+              )}
             </div>
 
             <motion.button
@@ -75,9 +149,10 @@ function AdminLogin() {
               className="submit-btn"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              disabled={loading}
               onClick={handleSignIn}
             >
-              CONTINUE
+              {loading ? "Signing In..." : "CONTINUE"}
             </motion.button>
 
             <div
@@ -88,15 +163,6 @@ function AdminLogin() {
               Forget Password?
             </div>
           </motion.form>
-
-          <motion.div
-            className="auth-link"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-           
-          </motion.div>
         </div>
       </motion.div>
     </motion.div>

@@ -17,6 +17,8 @@ import VendorDetails from "./pages/VendorDetails";
 import OrderDetails from "./pages/OrderDetails";
 import UserManagement from "./pages/UserManagement";
 import Review from "./pages/Review";
+import VendorApprove from "./pages/VendorApprove";
+import VendorView from "./pages/VendorView";
 function App() {
   return (
     <>
@@ -33,6 +35,8 @@ function App() {
           <Route path="/orders" element={<OrderDetails/>}/>
           <Route path="/user" element={<UserManagement/>} />
           <Route path="/reviews" element={<Review/>} />
+          <Route path="/vendor-approve" element={<VendorApprove/>} />
+          <Route path="/vendor-view" element={<VendorView/>}/>
           <Route
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
