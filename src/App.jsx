@@ -120,13 +120,13 @@ function App() {
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/sellers" element={<VendorDetails />} />
-          <Route path="/orders" element={<OrderDetails />} />
-          <Route path="/user" element={<UserManagement />} />
-          <Route path="/reviews" element={<Review />} />
-          <Route path="/vendor-approve" element={<VendorApprove />} />
-          <Route path="/vendor-view" element={<VendorView />} />
+          <Route path='/admin' element={<Admin/>}/>
+          <Route path="/sellers" element={<VendorDetails/>} />
+          <Route path="/orders" element={<OrderDetails/>}/>
+          <Route path="/user" element={<UserManagement/>} />
+          <Route path="/reviews" element={<Review/>} />
+          <Route path="/vendor-approve" element={<VendorApprove/>} />
+          <Route path="/vendor-view/:vendorId" element={<VendorView />} />
           <Route
             path="view-product/:id"
             element={<PrivateRoute component={<ViewProduct />} />}
