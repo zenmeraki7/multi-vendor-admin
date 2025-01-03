@@ -31,7 +31,7 @@ function VendorDetails() {
       city: "San Francisco",
       state: "California",
       country: "United States",
-      status: "Active",
+      status: "Accepted",
       industry: "Technology",
     },
     {
@@ -107,9 +107,8 @@ function VendorDetails() {
 
   const getStatusChip = (status) => {
     const colors = {
-      Active: "success",
+      Accepted: "success",
       Pending: "warning",
-      Inactive: "error",
     };
     return <Chip label={status} color={colors[status]} />;
   };
@@ -222,7 +221,7 @@ function VendorDetails() {
                   label="Status"
                 >
                   <MenuItem value="">All</MenuItem>
-                  <MenuItem value="Active">Active</MenuItem>
+                  <MenuItem value="">Accepted</MenuItem>
                   <MenuItem value="Pending">Pending</MenuItem>
                 </Select>
               </FormControl>
@@ -273,6 +272,7 @@ function VendorDetails() {
                   <TableCell>State</TableCell>
                   <TableCell>Country</TableCell>
                   <TableCell>Status</TableCell>
+                  <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -286,6 +286,12 @@ function VendorDetails() {
                       <TableCell>{vendor.state}</TableCell>
                       <TableCell>{vendor.country}</TableCell>
                       <TableCell>{getStatusChip(vendor.status)}</TableCell>
+                      {/* Action Column */}
+                      <TableCell>
+                        <Button variant="contained" color="primary">
+                          View
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (

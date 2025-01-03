@@ -7,6 +7,12 @@
    background-color:  #c1b8b8;
     padding: 1rem;
   }
+  .error-text {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+  
   
   /* Card styles */
   .auth-card {
