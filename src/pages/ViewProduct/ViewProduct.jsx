@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -15,26 +16,41 @@ import {
 import { styled } from "@mui/system";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
+import { useParams } from "react-router-dom";
+import { BASE_URL } from "../../utils/baseUrl";
 
-const ViewProduct = ({ product }) => {
-  const {
-    title,
-    description,
-    brand,
-    price,
-    discountedPrice,
-    thumbnail,
-    images,
-    specifications,
-    offers,
-    variants,
-    rating,
-    shippingDetails,
-    returnPolicy,
-    metaTitle, // Metadata
-    metaDescription, // Metadata
-    seller, // Seller details
-  } = product;
+function removeHtmlTags(str) {
+  return str.replace(/<[^>]*>/g, "");
+}
+
+const ViewProduct = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchProductData = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/api/product/get-one/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming the token is stored in localStorage
+          },
+        }
+      );
+      console.log(response);
+      setProduct(response.data.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Error fetching product data");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductData();
+  }, [id]);
 
   const renderRating = (rating) => {
     const stars = [];
@@ -45,6 +61,14 @@ const ViewProduct = ({ product }) => {
     }
     return stars;
   };
+
+  if (loading) return <Typography variant="h6">Loading...</Typography>;
+  if (error)
+    return (
+      <Typography variant="h6" color="error">
+        {error}
+      </Typography>
+    );
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -57,26 +81,51 @@ const ViewProduct = ({ product }) => {
               alt={product.thumbnail.altText}
               height="300"
               image={product.thumbnail.url}
+              sx={{ objectFit: "contain" }}
             />
             <CardContent>
               <Typography variant="h5">{product.title}</Typography>
               <Typography variant="body1" color="text.secondary" paragraph>
-                {product.description}
+                {removeHtmlTags(product.description)}
               </Typography>
               <Divider sx={{ marginBottom: 1 }} />
               <Typography variant="h6">
-                Price: ${product.discountedPrice || product.price}
+                Price: ₹{product.discountedPrice || product.price}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Brand: {product.brand}
               </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Category: {product.category?.name || "Not available"}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Sub-category: {product.subcategory?.name || "Not available"}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Main Category Type:{" "}
+                {product.categoryType?.name || "Not available"}
+              </Typography>
               <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
               <Typography variant="h6">Stock: {product.stock}</Typography>
-              <Chip
-                label={product.inStock ? "In Stock" : "Out of Stock"}
-                color={product.inStock ? "success" : "error"}
-                sx={{ marginTop: 1 }}
-              />
+              <Typography variant="body2" color="text.secondary">
+                Sold: {product.productSold} units
+              </Typography>
+              <Stack sx={{ marginTop: 2 }} direction={"row"} spacing={2}>
+                <Chip
+                  label={product.inStock ? "In Stock" : "Out of Stock"}
+                  color={product.inStock ? "success" : "error"}
+                />
+                {/* Chip for isActive */}
+                <Chip
+                  label={product.isActive ? "Active" : "Inactive"}
+                  color={product.isActive ? "success" : "default"}
+                />
+                {/* Chip for isApproved */}
+                <Chip
+                  label={product.isApproved ? "Approved" : "Not Approved"}
+                  color={product.isApproved ? "success" : "error"}
+                />
+              </Stack>
             </CardContent>
           </Card>
           {/* Offers */}
@@ -84,20 +133,26 @@ const ViewProduct = ({ product }) => {
             <Paper sx={{ padding: 2 }}>
               <Typography variant="h6">Special Offers</Typography>
               <Divider sx={{ marginBottom: 2 }} />
-              {product.offers.map((offer, index) => (
-                <Box key={index} sx={{ marginBottom: 2 }}>
-                  <Typography variant="body2">
-                    <strong>{offer.title}</strong>
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {offer.description}
-                  </Typography>
-                  <Typography variant="body2">
-                    Discount: {offer.discountPercentage}% | Valid until:{" "}
-                    {new Date(offer.validUntil).toLocaleDateString()}
-                  </Typography>
-                </Box>
-              ))}
+              {product.offers && product.offers.length > 0 ? (
+                product.offers.map((offer, index) => (
+                  <Box key={index} sx={{ marginBottom: 2 }}>
+                    <Typography variant="body2">
+                      <strong>{offer.title}</strong>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {offer.description}
+                    </Typography>
+                    <Typography variant="body2">
+                      Discount: {offer.discountPercentage}% | Valid until:{" "}
+                      {new Date(offer.validUntil).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No special offers provided yet.
+                </Typography>
+              )}
             </Paper>
           </Grid>
         </Grid>
@@ -110,11 +165,19 @@ const ViewProduct = ({ product }) => {
               <Paper sx={{ padding: 2 }}>
                 <Typography variant="h6">Specifications</Typography>
                 <Divider sx={{ marginBottom: 2 }} />
-                {product.specifications.map((spec, index) => (
-                  <Typography key={index} variant="body2">
-                    <strong>{spec.key}:</strong> {spec.value}
+                {product.specifications &&
+                product.specifications.length > 0 &&
+                product.specifications[0].key ? (
+                  product.specifications.map((spec, index) => (
+                    <Typography key={index} variant="body2">
+                      <strong>{spec.key}:</strong> {spec.value}
+                    </Typography>
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Specifications not provided.
                   </Typography>
-                ))}
+                )}
               </Paper>
             </Grid>
 
@@ -123,17 +186,23 @@ const ViewProduct = ({ product }) => {
               <Paper sx={{ padding: 2 }}>
                 <Typography variant="h6">Variants</Typography>
                 <Divider sx={{ marginBottom: 2 }} />
-                {product.variants.map((variant, index) => (
-                  <Box key={index} sx={{ marginBottom: 2 }}>
-                    <Typography variant="body2">
-                      <strong>{variant.attribute}:</strong> {variant.value} |
-                      Additional Price: ${variant.additionalPrice}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Stock: {variant.stock}
-                    </Typography>
-                  </Box>
-                ))}
+                {product.variants && product.variants.length > 0 ? (
+                  product.variants.map((variant, index) => (
+                    <Box key={index} sx={{ marginBottom: 2 }}>
+                      <Typography variant="body2">
+                        <strong>{variant.attribute}:</strong> {variant.value} |
+                        Additional Price: ${variant.additionalPrice}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Stock: {variant.stock}
+                      </Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Variants not provided.
+                  </Typography>
+                )}
               </Paper>
             </Grid>
 
@@ -162,11 +231,11 @@ const ViewProduct = ({ product }) => {
                 <Divider sx={{ marginBottom: 2 }} />
                 <Typography variant="body2">
                   <strong>SEO Meta Title:</strong>{" "}
-                  {metaTitle || "Not available"}
+                  {product.meta.title || "Not available"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   <strong>SEO Meta Description:</strong>{" "}
-                  {metaDescription || "Not available"}
+                  {product.meta.description || "Not available"}
                 </Typography>
               </Paper>
             </Grid>
@@ -177,11 +246,12 @@ const ViewProduct = ({ product }) => {
                 <Typography variant="h6">Seller Information</Typography>
                 <Divider sx={{ marginBottom: 2 }} />
                 <Typography variant="body2">
-                  <strong>Seller Name:</strong> {seller.name || "Not available"}
+                  <strong>Seller :</strong>{" "}
+                  {product.seller?.companyName || "Not available"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   <strong>Contact Info:</strong>{" "}
-                  {seller.contact || "Not available"}
+                  {product.seller?.email || "Not available"}
                 </Typography>
               </Paper>
             </Grid>
@@ -201,6 +271,7 @@ const ViewProduct = ({ product }) => {
                   alt={image.altText}
                   height="200"
                   image={image.url}
+                  sx={{ objectFit: "contain" }}
                 />
               </Card>
             </Grid>

@@ -36,7 +36,7 @@ const ProductList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const itemsPerPage = 5; // Adjust items per page as needed
+  const itemsPerPage = 10; // Adjust items per page as needed
 
   // Fetch products from the API
   const fetchProducts = async (page = 1) => {
@@ -267,7 +267,7 @@ const ProductList = () => {
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={() => navigate("/view-product")} // Replace with your logic
+                    onClick={() => navigate(`/view-product/${product._id}`)} // Replace with your logic
                   >
                     View
                   </Button>

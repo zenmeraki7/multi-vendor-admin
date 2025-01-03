@@ -128,12 +128,8 @@ function App() {
           <Route path="/vendor-approve" element={<VendorApprove />} />
           <Route path="/vendor-view" element={<VendorView />} />
           <Route
-            path="view-product"
-            element={
-              <PrivateRoute
-                component={<ViewProduct product={dummyProduct} />}
-              />
-            }
+            path="view-product/:id"
+            element={<PrivateRoute component={<ViewProduct />} />}
           />
           <Route path="/product-list" element={<ProductList />} />
           <Route
