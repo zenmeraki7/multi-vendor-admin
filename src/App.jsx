@@ -36,7 +36,7 @@ function App() {
           <Route path="/user" element={<UserManagement/>} />
           <Route path="/reviews" element={<Review/>} />
           <Route path="/vendor-approve" element={<VendorApprove/>} />
-          <Route path="/vendor-view" element={<VendorView/>}/>
+          <Route path="/vendor-view/:vendorId" element={<VendorView />} />
           <Route
             path="add-product"
             element={<PrivateRoute component={<AddProduct />} />}
