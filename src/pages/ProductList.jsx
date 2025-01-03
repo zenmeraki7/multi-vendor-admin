@@ -24,9 +24,11 @@ import {
 import { Search, Refresh, Edit } from "@mui/icons-material";
 import axios from "axios"; // Alternatively, use your axiosInstance
 import { BASE_URL } from "../utils/baseUrl";
+import { useNavigate } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -115,7 +117,7 @@ const ProductList = () => {
         <Typography variant="h5">Products Management</Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
-          <IconButton color="primary" >
+          <IconButton color="primary">
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -265,7 +267,7 @@ const ProductList = () => {
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={() => console.log("View button clicked")} // Replace with your logic
+                    onClick={() => navigate("/view-product")} // Replace with your logic
                   >
                     View
                   </Button>
