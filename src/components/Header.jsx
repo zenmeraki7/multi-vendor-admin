@@ -18,14 +18,14 @@ import { useNavigate } from "react-router-dom";
 function Header() {
   const navigate = useNavigate();
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#405D72" }}>
+    <AppBar position="static" sx={{ backgroundColor: "#A45EE5" }}>
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1, ml: 3 }}>
-          Demo-Zen-Meraki
+          Admin-Zen-Meraki
         </Typography>
 
         <Button color="inherit" sx={{ mr: 4, textTransform: "none" }}>
-          Seller Dashboard
+          Admin Dashboard
         </Button>
 
         <IconButton
@@ -40,20 +40,8 @@ function Header() {
           <NotificationsIcon />
         </IconButton>
 
-        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }}>
-          FAQ
-        </Button>
-
-        <Button color="inherit" sx={{ mr: 3, textTransform: "none" }}>
-          Need Help?
-        </Button>
-        <Button
-          color="inherit"
-          sx={{ mr: 3, textTransform: "none" }}
-          onClick={() => navigate("/register")}
-        >
-          <HowToRegIcon /> SignUp
-        </Button>
+       
+        
         <Button
           color="inherit"
           sx={{ mr: 3, textTransform: "none" }}
@@ -74,7 +62,7 @@ function Header() {
           color="inherit"
           className="fs-1"
           sx={{ mr: 3 }}
-          onClick={() => navigate("/seller-profile")}
+          onClick={() => navigate("/admin")}
         >
           <PersonIcon />
         </Button>
