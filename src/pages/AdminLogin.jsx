@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "./AdminLogin.css";
 import signinImage from "../assets/adminlogin.avif";
+import { BASE_URL } from "../utils/baseUrl";
 
 // Yup validation schema
 const loginSchema = yup.object({
@@ -42,7 +43,7 @@ console.log("first")
      
 
       // Make the API call
-      const response = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const response = await axios.post(`${BASE_URL}/api/auth/login`, formData);
 console.log(response);
 
       // Save token in localStorage

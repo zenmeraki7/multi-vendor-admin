@@ -19,6 +19,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom"; // For navigation
+import { BASE_URL } from "../utils/baseUrl";
 
 function VendorDetails() {
   const [vendors, setVendors] = useState([]);
@@ -44,7 +45,7 @@ function VendorDetails() {
       try {
         setLoading(true);
         const response = await axios.get(
-          "http://localhost:5000/api/vendor/all",
+          `${BASE_URL}/api/vendor/all`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -85,7 +86,7 @@ function VendorDetails() {
     if (isVerified) {
         navigate(`/vendor-view/${id}`);
     } else {
-      navigate("/vendor-approve"); // Navigate to the approval page
+      navigate(`/vendor-approve/${id}`); // Navigate to the approval page
     }
   };
   
