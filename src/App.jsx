@@ -114,9 +114,8 @@ function App() {
     <>
       <Toaster />
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
-        <Route path="admin-login" element={<AdminLogin />} />
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />

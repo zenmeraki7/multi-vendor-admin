@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import * as yup from "yup";
@@ -29,10 +29,15 @@ function AdminLogin() {
     setFormData({ ...formData, [name]: value });
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    token && navigate("/");
+  }, []);
+
   const handleSignIn = async (e) => {
     e.preventDefault();
     setValidationErrors({}); // Reset validation errors
-console.log("first")
+    console.log("first");
     try {
       // Validate the form data
       await loginSchema.validate(formData, { abortEarly: false });
@@ -40,11 +45,10 @@ console.log("first")
       setLoading(true);
 
       // Construct API URL
-     
 
       // Make the API call
       const response = await axios.post(`${BASE_URL}/api/auth/login`, formData);
-console.log(response);
+      console.log(response);
 
       // Save token in localStorage
       localStorage.setItem("token", response.data.token);
@@ -65,7 +69,8 @@ console.log(response);
       } else {
         // Handle API errors
         toast.error(
-          error.response?.data?.message || "Something went wrong. Please try again."
+          error.response?.data?.message ||
+            "Something went wrong. Please try again."
         );
       }
     } finally {
@@ -115,7 +120,6 @@ console.log(response);
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            
           >
             <div className="form-group">
               <input
