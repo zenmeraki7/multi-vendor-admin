@@ -125,7 +125,7 @@ function App() {
           <Route path="/orders" element={<OrderDetails/>}/>
           <Route path="/user" element={<UserManagement/>} />
           <Route path="/reviews" element={<Review/>} />
-          <Route path="/vendor-approve" element={<VendorApprove/>} />
+          <Route path="/vendor-approve/:vendorId" element={<VendorApprove/>} />
           <Route path="/vendor-view/:vendorId" element={<VendorView />} />
           <Route
             path="view-product/:id"
