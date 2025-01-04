@@ -12,12 +12,21 @@ import {
   Button,
   Paper,
   Stack,
+  TextField,
+} from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
 import { useParams } from "react-router-dom";
 import { BASE_URL } from "../../utils/baseUrl";
+import toast from "react-hot-toast";
 
 function removeHtmlTags(str) {
   return str.replace(/<[^>]*>/g, "");
@@ -28,6 +37,74 @@ const ViewProduct = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
+  const [loadingBtn, setLoadingBtn] = useState(false);
+  const [action, setAction] = useState("");
+  const [blockReason, setBlockReason] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  const handleOpen = (act) => {
+    setAction(act);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setAction("");
+  };
+
+  const handleApproveProduct = async () => {
+    try {
+      setLoadingBtn(true);
+      const response = await axios.put(
+        `${BASE_URL}/api/product/approve/${id}`,
+        {},
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      fetchProductData();
+      toast.success(response.data.message); // Success message
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to approve product."
+      );
+    } finally {
+      setLoadingBtn(false);
+      handleClose(); // Close modal after API call
+    }
+  };
+
+  const handleRejectProduct = async () => {
+    if (!blockReason) {
+      setValidationError("Provide a reason");
+    } else {
+      setValidationError("");
+      try {
+        setLoadingBtn(true);
+        const response = await axios.put(
+          `${BASE_URL}/api/product/reject/${id}`,
+          { verificationRemarks: blockReason },
+          {
+            headers: {
+              authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        fetchProductData();
+        toast.success(response.data.message); // Success message
+        setBlockReason("");
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Failed to approve product."
+        );
+      } finally {
+        setLoadingBtn(false);
+        handleClose(); // Close modal after API call
+      }
+    }
+  };
 
   const fetchProductData = async () => {
     try {
@@ -295,13 +372,83 @@ const ViewProduct = () => {
               ({product.rating.count} Reviews)
             </Typography>
           </Box>
-          <Box sx={{ marginTop: 2 }}>
-            <Button variant="contained" color="primary">
-              Edit Product
+          <Box sx={{ marginTop: 2, display: "flex", gap: "5px" }}>
+            <Button
+              variant="contained"
+              onClick={() => handleOpen("reject")}
+              color="error"
+            >
+              Reject
             </Button>
+            {!product.isApproved && (
+              <Button
+                variant="contained"
+                onClick={() => handleOpen("approve")}
+                color="primary"
+              >
+                Approve
+              </Button>
+            )}
           </Box>
         </Stack>
       </Box>
+      {/* Confirmation Modal */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="confirm-approve-title"
+        aria-describedby="confirm-approve-description"
+      >
+        <DialogTitle id="confirm-approve-title">
+          Confirm {action == "approve" ? "Approval" : "Rejection"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-approve-description">
+            Are you sure you want to{" "}
+            {action == "approve" ? "approve" : "reject"} this product?
+          </DialogContentText>
+          {action == "reject" && (
+            <TextField
+              helperText={validationError}
+              autoFocus
+              margin="dense"
+              id="block-reason"
+              label="Block Reason"
+              type="text"
+              fullWidth
+              multiline
+              rows={3}
+              value={blockReason}
+              onChange={(e) => setBlockReason(e.target.value)}
+              variant="outlined"
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          {action == "approve" ? (
+            <Button
+              onClick={handleApproveProduct}
+              color="primary"
+              variant="contained"
+              disabled={loadingBtn}
+            >
+              {loadingBtn ? "Approving..." : "Confirm"}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleRejectProduct}
+              color="error"
+              variant="contained"
+              disabled={loadingBtn}
+            >
+              {loadingBtn ? "Rejecting..." : "Reject"}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
