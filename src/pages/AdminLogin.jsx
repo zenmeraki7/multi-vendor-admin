@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import * as yup from "yup";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import "./AdminLogin.css";
 import signinImage from "../assets/adminlogin.avif";
 import { BASE_URL } from "../utils/baseUrl";
@@ -37,41 +37,40 @@ function AdminLogin() {
   const handleSignIn = async (e) => {
     e.preventDefault();
     setValidationErrors({}); // Reset validation errors
-    console.log("first");
+  
     try {
       // Validate the form data
       await loginSchema.validate(formData, { abortEarly: false });
-
+  
       setLoading(true);
-
-      // Construct API URL
-
+  
       // Make the API call
-      const response = await axios.post(`${BASE_URL}/api/auth/login`, formData);
-      console.log(response);
-
+      const { data } = await axios.post(`${BASE_URL}/api/auth/login`, formData);
+  
       // Save token in localStorage
-      localStorage.setItem("token", response.data.token);
-
+      localStorage.setItem("token", data.token);
+  
       // Show success toast and navigate
       toast.success("Login successful!");
       navigate("/admin");
     } catch (error) {
       setLoading(false);
-
-      // Handle validation errors from Yup
+  
       if (error.name === "ValidationError") {
-        const errors = {};
-        error.inner.forEach((err) => {
-          errors[err.path] = err.message;
-        });
-        setValidationErrors(errors);
-      } else {
-        // Handle API errors
-        toast.error(
-          error.response?.data?.message ||
-            "Something went wrong. Please try again."
+        // Handle Yup validation errors
+        const errors = error.inner.reduce(
+          (acc, err) => ({ ...acc, [err.path]: err.message }),
+          {}
         );
+        setValidationErrors(errors);
+      } else if (error.response) {
+        // Handle API errors
+        const errorMessage =
+          error.response.data?.message || "Something went wrong. Please try again.";
+        toast.error(errorMessage);
+      } else {
+        // Handle unexpected errors
+        toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
