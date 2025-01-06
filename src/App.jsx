@@ -19,6 +19,8 @@ import UserManagement from "./pages/UserManagement";
 import Review from "./pages/Review";
 import VendorApprove from "./pages/VendorApprove";
 import VendorView from "./pages/VendorView";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 function App() {
   return (
     <>
