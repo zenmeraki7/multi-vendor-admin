@@ -33,6 +33,7 @@ const CustomStepIcon = styled(Box)(({ active }) => ({
   alignItems: "center",
   color: "#fff",
   boxShadow: active ? "0 0 8px rgba(66, 16, 165, 0.8)" : "none",
+  marginBottom:'30px',
 }));
 
 const StepConnector = styled("div")(({ active }) => ({
@@ -42,6 +43,7 @@ const StepConnector = styled("div")(({ active }) => ({
     ? "linear-gradient(90deg,rgb(222, 29, 225),rgb(166, 18, 174))"
     : "#555555",
   margin: "0 8px",
+  marginBottom:'30px',
 }));
 
 const steps = [
@@ -78,6 +80,10 @@ const VendorApprove = () => {
   const [openApproveModal, setOpenApproveModal] = useState(false);
   const [openRejectModal, setOpenRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+
   const { vendorId } = useParams();
   const token = localStorage.getItem("token");
 
@@ -290,8 +296,8 @@ const VendorApprove = () => {
   const handleReject = () => setOpenRejectModal(true);
 
   const handleConfirmApprove = async () => {
+    setLoading(true); // Start loading
     try {
-      // Approve the vendor via API call
       await axios.put(
         `${BASE_URL}/api/vendor/approve/${vendorId}`,
         {},
@@ -314,13 +320,16 @@ const VendorApprove = () => {
         message: "Failed to approve vendor",
         severity: "error",
       });
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
+  
 
   const handleConfirmReject = async () => {
+    setLoading(true); // Start loading
     try {
-      // Reject the vendor via API call with the rejection reason
-      const response = await axios.put(
+      await axios.put(
         `${BASE_URL}/api/vendor/reject/${vendorId}`,
         { verificationRemarks: rejectReason },
         {
@@ -337,22 +346,16 @@ const VendorApprove = () => {
       setOpenRejectModal(false); // Close modal after rejection
     } catch (error) {
       console.error("Error rejecting vendor:", error);
-      if (error.response) {
-        console.error("API Error response:", error.response.data);
-        setSnackbar({
-          open: true,
-          message: `Failed to reject vendor: ${error.response.data.message || error.response.data}`,
-          severity: "error",
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to reject vendor",
-          severity: "error",
-        });
-      }
+      setSnackbar({
+        open: true,
+        message: "Failed to reject vendor",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
+  
   
 
   const handleNext = () => {
@@ -408,38 +411,70 @@ const VendorApprove = () => {
       </Box>
 
       {/* Approve Modal */}
-      <Dialog
-        open={openApproveModal}
-        onClose={() => setOpenApproveModal(false)}
+      <Dialog open={openApproveModal} onClose={() => setOpenApproveModal(false)}>
+  <DialogTitle>Approve Vendor</DialogTitle>
+  <DialogContent>
+    <Typography>Are you sure you want to approve this vendor?</Typography>
+    {loading && (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        mt={2}
+        minHeight="50px"
       >
-        <DialogTitle>Approve Vendor</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to approve this vendor?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenApproveModal(false)}>Cancel</Button>
-          <Button onClick={handleConfirmApprove}>Confirm</Button>
-        </DialogActions>
-      </Dialog>
+        <CircularProgress size={24} />
+      </Box>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenApproveModal(false)} disabled={loading}>
+      Cancel
+    </Button>
+    <Button onClick={handleConfirmApprove} disabled={loading}>
+      Confirm
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
 
       {/* Reject Modal */}
       <Dialog open={openRejectModal} onClose={() => setOpenRejectModal(false)}>
-        <DialogTitle>Reject Vendor</DialogTitle>
-        <DialogContent>
-          <Typography>Enter reason for rejection:</Typography>
-          <TextField
-            fullWidth
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            multiline
-            rows={4}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenRejectModal(false)}>Cancel</Button>
-          <Button onClick={handleConfirmReject}>Confirm</Button>
-        </DialogActions>
-      </Dialog>
+  <DialogTitle>Reject Vendor</DialogTitle>
+  <DialogContent>
+    <Typography>Enter reason for rejection:</Typography>
+    <TextField
+      fullWidth
+      value={rejectReason}
+      onChange={(e) => setRejectReason(e.target.value)}
+      multiline
+      rows={4}
+      disabled={loading}
+    />
+    {loading && (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        mt={2}
+        minHeight="50px"
+      >
+        <CircularProgress size={24} />
+      </Box>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenRejectModal(false)} disabled={loading}>
+      Cancel
+    </Button>
+    <Button onClick={handleConfirmReject} disabled={loading}>
+      Confirm
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
 
       {/* Snackbar for alerts */}
       <Snackbar

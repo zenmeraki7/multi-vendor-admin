@@ -20,6 +20,8 @@ import Review from "./pages/Review";
 import VendorApprove from "./pages/VendorApprove";
 import VendorView from "./pages/VendorView";
 import ViewProduct from "./pages/ViewProduct/ViewProduct";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 function App() {
   const dummyProduct = {
     title: "Smartphone XYZ 128GB",

@@ -1,265 +1,249 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Box,
-  Container,
-} from "@mui/material";
+  BarChart,
+  Bar,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
+import { FaCodePullRequest } from "react-icons/fa6";
+import { MdProductionQuantityLimits } from "react-icons/md";
+// Data for Recharts chart
+const rechartsData = [
+  { name: "January", uv: 4000, pv: 2400, amt: 2400, year: "2023" },
+  { name: "February", uv: 3000, pv: 1398, amt: 2210, year: "2023" },
+  { name: "March", uv: 2000, pv: 9800, amt: 2290, year: "2023" },
+  { name: "April", uv: 2780, pv: 3908, amt: 2000, year: "2023" },
+  { name: "May", uv: 1890, pv: 4800, amt: 2181, year: "2023" },
+  { name: "June", uv: 2390, pv: 3800, amt: 2500, year: "2023" },
+  { name: "July", uv: 3490, pv: 4300, amt: 2100, year: "2023" },
+  { name: "August", uv: 2000, pv: 4300, amt: 2100, year: "2023" },
+  { name: "September", uv: 2500, pv: 4300, amt: 2100, year: "2023" },
+  { name: "October", uv: 2100, pv: 4300, amt: 2100, year: "2023" },
+  { name: "November", uv: 1500, pv: 4300, amt: 2100, year: "2023" },
+  { name: "December", uv: 1234, pv: 4300, amt: 2100, year: "2023" },
+  { name: "January", uv: 1500, pv: 4300, amt: 2100, year: "2024" },
+  { name: "February", uv: 1234, pv: 4300, amt: 2100, year: "2024" },
+];
 
 const Dashboard = () => {
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("2023");
+
+  // Filter data based on selected month
+  const filteredData = rechartsData.filter((data) => data.name === selectedMonth)[0];
+
+  // Filter data based on selected year
+  const filteredChartData = rechartsData.filter((data) => data.year === selectedYear);
+
   return (
-    <Container maxWidth="xl">
-      <Grid container spacing={3}> {/* Increased spacing */}
-        {/* Card 1 */}
-        <Grid item xs={12} md={6} lg={3}>
-          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
-            <CardContent>
-              <Box>
-                <img
-                  src="https://sp-seller.webkul.com/img/admin_sliced/icon-dashboard.png"
-                  alt="dashboard-icon"
-                />
-              </Box>
-              <Typography variant="h4" gutterBottom>
-                Holla!
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                Here are the Current Activities on your Store.
-              </Typography>
-
-              {[
-                "Today Total Sales",
-                "This Week Total Sales",
-                "Overall Sales",
-              ].map((text) => (
-                <Box
-                  sx={{
-                    marginBottom: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    {text}
-                  </Typography>
-                  <Box
-                    sx={{ backgroundColor: "lightblue", padding: "4px 12px" }}
+    <div className="container py-5">
+      {/* Overview Section */}
+      <div className="row mb-4">
+        <div className="col-md-8 border shadow-sm p-5">
+          {/* Filter Dropdown for Month */}
+          <div className="row mb-3">
+            <div className="col-md-6">
+              <div className="card ">
+                <div className="card-body">
+                  <h6 className="card-title"> View Monthly Data</h6>
+                  <select
+                    className="form-select"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
                   >
-                    0.00
-                  </Box>
-                </Box>
-              ))}
+                    <option value="">Select a month</option>
+                    {rechartsData.map((data) => (
+                      <option key={data.name} value={data.name}>
+                        {data.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row">
+            {/* First Box - Total Orders */}
+            <div className="col-md-6">
+              <div className="card shadow-sm">
+                <div className="card-body text-center">
+                  <p className="text-muted mb-1"><AssignmentTurnedInIcon className="fs-1 "/> Total Orders</p>
+                  <h3 className="mb-1">{filteredData ? filteredData.uv : "0"}</h3>
+                  <small className="text-success">+12% vs previous 28 days</small>
+                </div>
+              </div>
+            </div>
+            {/* Second Box - Cancelled Orders */}
+            <div className="col-md-6">
+              <div className="card shadow-sm">
+                <div className="card-body text-center">
+                  <p className="text-muted mb-1"><EventBusyIcon className="fs-1 "/> Cancelled Orders</p>
+                  <h3 className="mb-1">{filteredData ? filteredData.pv : "0"}</h3>
+                  <small className="text-success">+4% vs previous 28 days</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="row mt-3">
+            {/* Third Box - Seller Requests */}
+            <div className="col-md-6">
+              <div className="card shadow-sm">
+                <div className="card-body text-center">
+                  <p className="text-muted mb-1"> <FaCodePullRequest className="fs-1 " />  Seller Requests</p>
+                  <h3 className="mb-1">{filteredData ? filteredData.amt : "0"}</h3>
+                  <small className="text-danger">-0.89% vs previous 28 days</small>
+                </div>
+              </div>
+            </div>
+            {/* Fourth Box - Product Requests */}
+            <div className="col-md-6">
+              <div className="card shadow-sm">
+                <div className="card-body text-center">
+                  <p className="text-muted mb-1"><MdProductionQuantityLimits className="fs-1 "/> Product Requests</p>
+                  <h3 className="mb-1">{filteredData ? filteredData.amt : "0"}</h3>
+                  <small className="text-success">+2% vs previous 28 days</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Popular Products Section */}
+        <div className="col-md-4">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h5 className="card-title">Popular Products</h5>
+              <table className="table mt-3">
+                <thead>
+                  <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col" className="text-end">Earnings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Product A */}
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      <img
+                        src={`https://m.media-amazon.com/images/I/61t+UHcrOrL._SX522_.jpg`}
+                        alt="Product A"
+                        className="rounded me-3"
+                        width="40px"
+                        height="40px"
+                      />
+                      <div>
+                        <h6 className="mb-0">CHANELL GABRIELLE SPRAY </h6>
+                      </div>
+                    </td>
+                    <td className="text-end fw-bold">$5461</td>
+                  </tr>
 
-              <Button
-                variant="contained"
-                color="success"
-                sx={{ marginTop: "16px", my: 2 }}
+                  {/* Product B */}
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      <img
+                        src={`https://m.media-amazon.com/images/I/81LskAU5h1L._AC_UL480_FMwebp_QL65_.jpg`}
+                        alt="Product B"
+                        className="rounded me-3"
+                        width="40px"
+                        height="40px"
+                      />
+                      <div>
+                        <h6 className="mb-0">Canon EOS R50 </h6>
+                      </div>
+                    </td>
+                    <td className="text-end fw-bold">$5461</td>
+                  </tr>
+
+                  {/* Product C */}
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      <img
+                        src={`https://m.media-amazon.com/images/I/71qlYpwQTxL._SX679_.jpg`}
+                        alt="Product C"
+                        className="rounded me-3"
+                        width="40px"
+                        height="40px"
+                      />
+                      <div>
+                        <h6 className="mb-0">Apple iPad Air 11</h6>
+                      </div>
+                    </td>
+                    <td className="text-end fw-bold">$5461</td>
+                  </tr>
+
+                  {/* Product D */}
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      <img
+                        src={`https://m.media-amazon.com/images/I/41Fz1tPJkHL._SX300_SY300_QL70_FMwebp_.jpg`}
+                        alt="Product D"
+                        className="rounded me-3"
+                        width="40px"
+                        height="40px"
+                      />
+                      <div>
+                        <h6 className="mb-0">Blaupunkt Atomik PS30</h6>
+                      </div>
+                    </td>
+                    <td className="text-end fw-bold">$5461</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Chart Filter Section */}
+      <div className="row mb-4">
+        <div className="col-md-12">
+          <div className="d-flex justify-content-between">
+            <div>
+              <label className="mr-2">Year</label>
+              <select
+                className="form-select"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
               >
-                GO TO DASHBOARD
-              </Button>
-              <Typography variant="body2" fontStyle="italic">
-                Go To Dashboard to view all your Stats Related to your Store.
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+            <div>
+              <button className="btn btn-dark" onClick={() => console.log("Generate report clicked")}>
+                Generate Report
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Card 2 */}
-        <Grid item xs={12} md={6} lg={3}>
-          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                All Functionalities
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Here are the list of the functionalities on Multivendor
-                Marketplace.
-              </Typography>
-
-              {[
-                {
-                  img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuyjMbigtBTz2HlXZ7wC6WmlBhta3ppkgjKg&s",
-                  text: "All Products",
-                },
-                {
-                  img: "https://cdn-icons-png.flaticon.com/512/306/306458.png",
-                  text: "All Orders",
-                },
-                {
-                  img: "https://cdn1.iconfinder.com/data/icons/business-and-finance-2-5/130/77-512.png",
-                  text: "Unfulfilled Orders",
-                },
-                {
-                  img: "https://cdn-icons-png.freepik.com/512/5003/5003538.png",
-                  text: "Payment Methods",
-                },
-              ].map(({ img, text }) => (
-                <Box
-                  key={text}
-                  sx={{
-                    marginBottom: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <img src={img} alt={text} height={90} />
-                  <Typography variant="h6" sx={{ marginLeft: "20px" }}>
-                    {text}
-                  </Typography>
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Card 3 */}
-        <Grid item xs={12} md={6} lg={3}>
-          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Recent Updates
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Here you can check the Recent Updates.
-              </Typography>
-
-              {[
-                {
-                  title: "Grouping of Custom Fields",
-                  description:
-                    "Now, the admin can group multiple custom fields together into different groups for improved display structure.",
-                },
-                {
-                  title: "Low Inventory Email Notifications",
-                  description:
-                    "A configuration has been added to send email notifications to sellers if product inventory is low.",
-                },
-                {
-                  title: "Multivendor API Enhancement",
-                  description:
-                    "The Multivendor API now supports Ask a Question and Make an Offer listings for both admin and seller sides.",
-                },
-              ].map(({ title, description }) => (
-                <Box sx={{ marginBottom: "16px", position: "relative" }}>
-                  <Typography variant="h6">{title}</Typography>
-                  <Typography variant="body2">{description}</Typography>
-                  <a href="#" style={{ position: "absolute", right: 0 }}>
-                    Explore
-                  </a>
-                </Box>
-              ))}
-
-              <Button
-                variant="contained"
-                color="success"
-                sx={{ marginTop: "16px", my: 2 }}
-              >
-                VIEW ALL
-              </Button>
-              <Typography variant="body2" fontStyle="italic">
-                Click on the Button above to View all recent updates.
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Card 4 */}
-        <Grid item xs={12} md={6} lg={3}>
-          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
-            <CardContent>
-              <Box>
-                <img
-                  src="https://sp-seller.webkul.com/img/admin_sliced/icon-feature-apps.png"
-                  alt="feature-apps"
-                />
-              </Box>
-              <Typography variant="h5" gutterBottom>
-                Feature Apps
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Here you can check the recent Add-Ons added to your Market
-                Store.
-              </Typography>
-
-              {[
-                {
-                  title: "Shipping",
-                  description:
-                    "Shipping features allow the admin to configure shipping methods from his end for sellers and sellers can configure shipping methods based on price or weight.",
-                },
-                {
-                  title: "Hyperlocal Marketplace",
-                  description:
-                    'Hyperlocal marketplace helps scan the nearest registered service provider and delivers services/goods in a very short time based on "Near Me" concept.',
-                },
-              ].map(({ title, description }) => (
-                <Box sx={{ marginBottom: "16px", position: "relative" }}>
-                  <Typography variant="h6">{title}</Typography>
-                  <Typography variant="body2">{description}</Typography>
-                  <a href="#" style={{ position: "absolute", right: 0 }}>
-                    Explore
-                  </a>
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Card 5 (My Plans) */}
-        <Grid item xs={12} md={6} lg={3}>
-          <Card elevation={3} sx={{ width: "100%", height: "100%" }}> {/* 100% height */}
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                My Plans
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Here you can check all your Marketplace Plans with Different
-                Features & Functionalities.
-              </Typography>
-
-              <Box sx={{ marginBottom: "16px" }}>
-                <Typography variant="h6">Current Plan</Typography>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  Basic Plan
-                </Typography>
-                <Typography>Pricing - $15.00/Month</Typography>
-                <Typography>Storage - 3GB</Typography>
-              </Box>
-
-              <Box sx={{ marginBottom: "16px" }}>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  Executive Plan
-                </Typography>
-                <Typography>Pricing - $40.00/Month</Typography>
-                <Typography>Storage - 5GB</Typography>
-              </Box>
-
-              <Box sx={{ marginBottom: "16px" }}>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  Pro Plan
-                </Typography>
-                <Typography>Pricing - $60.00/Month</Typography>
-                <Typography>Storage - 15GB</Typography>
-              </Box>
-
-              <Button
-                variant="contained"
-                color="success"
-                sx={{ marginTop: "16px", my: 2 }}
-              >
-                VIEW DETAILS
-              </Button>
-              <Typography variant="body2" fontStyle="italic">
-                Click on the Button above to check all the Details of plans.
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+      {/* Recharts Section */}
+      <div className="row">
+        
+        <div className="col-md-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h5 className="card-title">Yearly Data Overview</h5>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={filteredChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Bar dataKey="uv" fill="#8884d8" />
+                  <Bar dataKey="pv" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
