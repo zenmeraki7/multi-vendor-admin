@@ -55,7 +55,7 @@ const Dashboard = () => {
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                   >
-                    <option value="">Select a month</option>
+                    <option value="hidden" >Select a month</option>
                     {rechartsData.map((data) => (
                       <option key={data.name} value={data.name}>
                         {data.name}
