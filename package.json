@@ -37,6 +37,7 @@
     "react-toastify": "^11.0.2",
     "recharts": "^2.15.0",
     "redux": "^5.0.1",
+    "swiper": "^11.2.0",
     "yup": "^1.6.1"
   },
   "devDependencies": {

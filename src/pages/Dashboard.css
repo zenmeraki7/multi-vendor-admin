@@ -1,0 +1,29 @@
+.card:hover {
+    transform: scale(1.05);
+  }
+  .d-flex::-webkit-scrollbar {
+    height: 8px;
+  }
+  .d-flex::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 4px;
+  }
+  .d-flex::-webkit-scrollbar-thumb:hover {
+    background: #ccc;
+  }
+  /* Pagination dots */
+.swiper-pagination-bullet {
+    background-color: black !important; /* Change dots to black */
+  }
+  
+  /* Active pagination dot */
+  .swiper-pagination-bullet-active {
+    background-color: black !important; /* Active dot color */
+  }
+  
+  /* Navigation arrows */
+  .swiper-button-next,
+  .swiper-button-prev {
+    color: black !important; /* Change navigation arrow color */
+  }
+  
