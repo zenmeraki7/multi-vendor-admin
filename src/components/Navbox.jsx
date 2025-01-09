@@ -47,9 +47,11 @@ function Navbox() {
     // },
     // { text: "Translation", icon: <TranslateIcon />, path: "/translation" },
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
-    { text: "Transactions", icon: <AssignmentIcon />, path: "/transactions" },
+    { text: "Transactions", icon: <MonetizationOnIcon />, path: "/transactions" },
     { text: "Reviews", icon: <AssignmentIcon />, path: "/reviews" },
     { text: "Product Management", icon: <WidgetsIcon />, path: "/product-list" },
+    { text: "Manage Category-type", icon: <WidgetsIcon />, path: "/catType" },
+
     
   ];
 

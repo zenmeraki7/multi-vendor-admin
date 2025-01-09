@@ -21,6 +21,8 @@ import VendorApprove from "./pages/VendorApprove";
 import VendorView from "./pages/VendorView";
 import ViewProduct from "./pages/ViewProduct/ViewProduct";
 import "bootstrap/dist/css/bootstrap.min.css";
+import CategoryType from "./pages/Categories/CategoryType";
+import ViewCategory from "./pages/Categories/ViewCategory";
 
 function App() {
   const dummyProduct = {
@@ -128,6 +130,8 @@ function App() {
           <Route path="/reviews" element={<Review/>} />
           <Route path="/vendor-approve/:vendorId" element={<VendorApprove/>} />
           <Route path="/vendor-view/:vendorId" element={<VendorView />} />
+          <Route path="/catType"  element={<CategoryType/>} />
+          <Route path="/view-category" element={<ViewCategory/>} />
           <Route
             path="view-product/:id"
             element={<PrivateRoute component={<ViewProduct />} />}
