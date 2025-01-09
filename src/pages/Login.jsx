@@ -6,11 +6,6 @@ import signinImage from '../assets/signin.avif'
 function Login() {
   const navigate = useNavigate();
 
-  const handleSignUp = (e) => {
-    e.preventDefault();
-    navigate("/register");
-  };
-
   const handleForgotPassword = (e) => {
     e.preventDefault();
     navigate("/forget-pwd");
@@ -94,12 +89,7 @@ function Login() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <p>
-              Don't have an account?{" "}
-              <a href="#" onClick={handleSignUp}>
-                Sign Up
-              </a>
-            </p>
+            
           </motion.div>
         </div>
       </motion.div>

@@ -13,11 +13,22 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonIcon from "@mui/icons-material/Person";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom"; 
 function Header() {
   const navigate = useNavigate();
-  return (
+   // Handle logout functionality
+   const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove the token from localStorage
+    navigate("/login"); // Navigate to the login page
+  };
+
+  // Handle login functionality (if token is already set, redirect to dashboard or another page)
+  const handleLogin = () => {
+    // Assuming you'd set a token after successful login
+    // localStorage.setItem("token", "your_token_here"); // Uncomment this after successful login
+    navigate("/login"); // Navigate to the login page
+  };
+    return (
     <AppBar position="static" sx={{ backgroundColor: "#A45EE5" }}>
       <Toolbar>
         <Typography variant="h6" sx={{ flexGrow: 1, ml: 3 }}>
@@ -42,22 +53,23 @@ function Header() {
 
        
         
-        <Button
+          {/* Login Button */}
+          <Button
           color="inherit"
           sx={{ mr: 3, textTransform: "none" }}
-          onClick={() => navigate("/login")}
+          onClick={handleLogin}
         >
           <LoginIcon /> SignIn
         </Button>
 
+        {/* Logout Button */}
         <Button
           color="inherit"
           sx={{ mr: 3, textTransform: "none" }}
-          onClick={() => navigate("/")}
+          onClick={handleLogout}
         >
           <LogoutIcon /> Logout
         </Button>
-
         <Button
           color="inherit"
           className="fs-1"
