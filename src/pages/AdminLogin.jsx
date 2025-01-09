@@ -45,7 +45,7 @@ function AdminLogin() {
       setLoading(true);
   
       // Make the API call
-      const { data } = await axios.post(`${BASE_URL}/api/auth/login`, formData);
+      const { data } = await axios.post(`${BASE_URL}/api/admin/login`, formData);
   
       // Save token in localStorage
       localStorage.setItem("token", data.token);
