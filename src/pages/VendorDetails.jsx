@@ -188,17 +188,17 @@ function VendorDetails() {
           <Typography>
             Vendors: <strong>{vendors.length}</strong>
           </Typography>
-          <TableContainer sx={{ overflowX: "auto" }}>
+          <TableContainer sx={{ overflowX: "auto" , marginTop:"40px"}}>
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell>Company Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Total Sales</TableCell>
-                  <TableCell>State</TableCell>
-                  <TableCell>Country</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Action</TableCell>
+                <TableRow sx={{ backgroundColor: "primary.main" }}>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Company Name</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Total Sales</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>State</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Country</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Status</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

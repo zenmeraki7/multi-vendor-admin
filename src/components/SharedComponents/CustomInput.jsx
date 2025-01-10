@@ -13,24 +13,21 @@ function CustomInput({ id, name, label, placeholder, value, onChange,type="text"
       onChange={onChange}
       type={type}
       sx={{
-        marginTop: "5px",
-        marginBottom: "15px",
-        borderRadius: "10px", // Rounded corners
+        backgroundColor: "#f5f5f5",
+        borderRadius: "8px",
         "& .MuiOutlinedInput-root": {
-          borderRadius: "10px", // Apply to input field
-          backgroundColor: "#f9f9f9", // Light background color
-        },
-        "& .MuiInputLabel-root": {
-          color: "#777", // Soft label color
-        },
-        "& .MuiOutlinedInput-notchedOutline": {
-          borderColor: "lightblue", // Light blue border color
-        },
-        "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: "blue", // Darker blue border on hover
-        },
-        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-          borderColor: "darkblue", // Even darker blue border on focus
+          backgroundColor: "#f5f5f5", // Light background when readonly
+          borderRadius: "8px",
+          "& fieldset": {
+            borderColor: "#1976d2", // Blue border by default
+            borderRadius: "8px",
+          },
+          "&:hover fieldset": {
+            borderColor: "#1976d2", // Blue border on hover as well
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#1976d2", // Blue border when focused
+          },
         },
       }}
     />

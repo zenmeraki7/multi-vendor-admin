@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import AddIcon from '@mui/icons-material/Add';
 
 function CategoryType() {
   const navigate = useNavigate();
@@ -164,7 +165,15 @@ function CategoryType() {
         <Button variant="outlined" onClick={clearFilters}>
           Clear
         </Button>
-      </Box>
+   
+      <Button variant="contained" color="primary"
+      style={{marginLeft:'400px'}}
+      onClick={() => navigate("/add-Categorytype")} 
+
+      >
+     <AddIcon/>Add
+  </Button>
+  </Box>
 
       {/* Category Type Table */}
       <TableContainer
@@ -255,18 +264,19 @@ function CategoryType() {
             />
           </TableCell>
           <TableCell>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => navigate(`/view-category`)}
-              sx={{
-                textTransform: "none",
-                fontWeight: "medium",
-              }}
-            >
-              View
-            </Button>
+          <Button
+  variant="contained"
+  color="primary"
+  size="small"
+  onClick={() => navigate("/viewcategorytype", { state: categoryType })} 
+  sx={{
+    textTransform: "none",
+    fontWeight: "medium",
+  }}
+>
+  View
+</Button>
+
           </TableCell>
         </TableRow>
       ))}
