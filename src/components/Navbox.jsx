@@ -19,9 +19,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import WidgetsIcon from "@mui/icons-material/Widgets";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import EmailIcon from "@mui/icons-material/Email";
-import TranslateIcon from "@mui/icons-material/Translate";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useNavigate } from "react-router-dom";
 
 function Navbox() {
@@ -36,23 +33,21 @@ function Navbox() {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
-    // { text: "Configuration", icon: <SettingsIcon />, path: "/configuration" },
     { text: "Sellers", icon: <PeopleIcon />, path: "/sellers" },
     { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
-    // { text: "Commission", icon: <MonetizationOnIcon />, path: "/commission" },
-    // {
-    //   text: "Mail Configuration",
-    //   icon: <EmailIcon />,
-    //   path: "/mail-configuration",
-    // },
-    // { text: "Translation", icon: <TranslateIcon />, path: "/translation" },
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
     { text: "Transactions", icon: <MonetizationOnIcon />, path: "/transactions" },
     { text: "Reviews", icon: <AssignmentIcon />, path: "/reviews" },
     { text: "Product Management", icon: <WidgetsIcon />, path: "/product-list" },
-    { text: "Manage Category-type", icon: <WidgetsIcon />, path: "/catType" },
-
-    
+    {
+      text: "Manage Categories",
+      icon: <WidgetsIcon />,
+      subItems: [
+        { text: "Category-Type", path: "/category-type" },
+        { text: "Category", path: "/category" },
+        { text: "Subcategory", path: "/sub-category" },
+      ],
+    },
   ];
 
   return (
@@ -70,7 +65,6 @@ function Navbox() {
       <List>
         {menuItems.map((item) => (
           <React.Fragment key={item.text}>
-            {/* Regular List Items */}
             {item.subItems ? (
               <Accordion
                 elevation={0}
@@ -85,9 +79,20 @@ function Navbox() {
                   <List disablePadding>
                     {item.subItems.map((subItem) => (
                       <ListItem disablePadding key={subItem.text}>
-                        <ListItemButton onClick={() => navigate(subItem.path)}>
-                          <ListItemIcon>{subItem.icon}</ListItemIcon>
-                          <ListItemText primary={subItem.text} />
+                        <ListItemButton
+                          onClick={() => navigate(subItem.path)}
+                          sx={{
+                            "&:hover": { backgroundColor: "#e0e7eb" },
+                            transition: "background-color 0.3s",
+                          }}
+                        >
+                          <ListItemText
+                            primary={subItem.text}
+                            primaryTypographyProps={{
+                              fontWeight: "normal",
+                              color: "#556b78",
+                            }}
+                          />
                         </ListItemButton>
                       </ListItem>
                     ))}

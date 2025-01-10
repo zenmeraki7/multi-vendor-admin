@@ -205,18 +205,18 @@ const ProductList = () => {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: "primary.main" }} >
               <TableCell></TableCell>
-              <TableCell sx={{ color: "primary.main" }}>PRODUCT NAME</TableCell>
-              <TableCell sx={{ color: "primary.main" }}>STOCK</TableCell>
-              <TableCell sx={{ color: "primary.main" }}>PRICE</TableCell>
-              <TableCell sx={{ color: "primary.main" }}>CATEGORY</TableCell>
-              <TableCell sx={{ color: "primary.main" }}>SELLER</TableCell>
-              <TableCell sx={{ color: "primary.main" }}>STATUS</TableCell>
-              <TableCell sx={{ color: "primary.main" }}>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>PRODUCT NAME</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STOCK</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>PRICE</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>CATEGORY</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>SELLER</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 LAST MODIFIED
               </TableCell>
-              <TableCell sx={{ color: "primary.main" }}>ACTIONS</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
