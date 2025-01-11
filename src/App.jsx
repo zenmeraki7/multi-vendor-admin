@@ -141,7 +141,7 @@ function App() {
           <Route path="/category-Type"  element={<CategoryType/>} />
           <Route path='/category' element={<Category/>}/>
           <Route path="/view-category" element={<ViewCategories/>} />
-          <Route path ='/viewcategorytype' element={<ViewCategoryType/>}/>
+          <Route path="/viewcategorytype/:id" element={<ViewCategoryType />} />
           <Route path="/add-Categorytype" element={<AddCategoryType/>}/>
           <Route path="/add-category" element={<AddCategory/>} />
           <Route path='/sub-category' element={<SubCategories/>}/>
