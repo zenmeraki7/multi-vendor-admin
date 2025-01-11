@@ -1,12 +1,13 @@
 import React from "react";
 import TextField from "@mui/material/TextField";
-function CustomInput({ id, name, label, placeholder, value, onChange,type="text" }) {
+function CustomInput({ id, name, label, placeholder, value, onChange,type="text" ,readOnly}) {
   return (
     <TextField
       id={id}
       name={name}
       label={label}
       placeholder={placeholder}
+      readOnly={readOnly}
       fullWidth
       variant="outlined"
       value={value}
