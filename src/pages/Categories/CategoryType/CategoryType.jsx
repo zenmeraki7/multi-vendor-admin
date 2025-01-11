@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios"; 
 import {
   Box,
   Button,
@@ -23,43 +24,49 @@ import {
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
+import { BASE_URL } from "../../../utils/baseUrl"; 
 
 function CategoryType() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All"); // Default is "All"
-  const [categoryTypes] = useState([
-    {
-      id: 1,
-      name: "Electronics",
-      description:
-        "Discover cutting-edge electronics that elevate your lifestyle",
-      iconUrl:
-        "https://cdn.pixabay.com/photo/2020/10/21/18/07/laptop-5673901_1280.jpg",
-      status: true,
-    },
-    {
-      id: 2,
-      name: "Fashion",
-      description: "Unleash your style with the latest fashion trends.",
-      iconUrl:
-        "https://cdn.pixabay.com/photo/2022/02/12/21/37/woman-7009979_1280.jpg",
-      status: false,
-    },
-    {
-      id: 3,
-      name: "Beauty",
-      description: "Glow from within with our premium beauty products.",
-      iconUrl:
-        "https://cdn.pixabay.com/photo/2018/01/14/00/05/makeup-3081015_1280.jpg",
-      status: true,
-    },
-  ]);
-  const [filteredCategoryTypes, setFilteredCategoryTypes] =
-    useState(categoryTypes);
+  const [categoryTypes, setCategoryTypes] = useState([]); // Stores the original data
+  const [filteredCategoryTypes, setFilteredCategoryTypes] = useState([]); // For filtered data
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Fetch Data from API using axios
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      console.error("No authentication token found. Please log in.");
+      navigate("/login"); // Redirect to the login page
+      return;
+    }
+
+    axios
+      .get(`${BASE_URL}/api/category-type/all-admin`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        console.log("API Response:", response.data);  // Check if isActive and icon are present
+        if (response.data && Array.isArray(response.data.data)) {
+          setCategoryTypes(response.data.data);
+          setFilteredCategoryTypes(response.data.data);
+        } else {
+          setCategoryTypes([]);
+          setFilteredCategoryTypes([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        alert("Failed to fetch category types. Please try again later.");
+      });
+  }, []);
 
   // Handle Search
   const handleSearch = (e) => {
@@ -74,30 +81,32 @@ function CategoryType() {
 
   // Filter Logic
   const filterCategories = (searchTerm, statusFilter) => {
-    let filtered = categoryTypes;
+    let filtered = [...categoryTypes]; // Ensure it's an array
 
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter((categoryType) =>
         categoryType.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
+    // Filter by status
     if (statusFilter !== "All") {
       const isActive = statusFilter === "Active";
       filtered = filtered.filter(
-        (categoryType) => categoryType.status === isActive
+        (categoryType) => categoryType.isActive === isActive
       );
     }
 
     setFilteredCategoryTypes(filtered);
   };
 
-  // Handle Apply Filter
+  // Apply Filter
   const applyFilter = () => {
     filterCategories(searchTerm, statusFilter);
   };
 
-  // Handle Clear Filters
+  // Clear Filters
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
@@ -109,16 +118,19 @@ function CategoryType() {
     setCurrentPage(value);
   };
 
+  // Paginate Data
+  const paginatedData = filteredCategoryTypes.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Typography variant="h4"><b>Category Type Management</b></Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h4">
+          <b>Category Type Management</b>
+        </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
           <IconButton color="primary">
@@ -165,128 +177,110 @@ function CategoryType() {
         <Button variant="outlined" onClick={clearFilters}>
           Clear
         </Button>
-   
-      <Button variant="contained" color="primary"
-      style={{marginLeft:'400px'}}
-      onClick={() => navigate("/add-Categorytype")} 
-
-      >
-     <AddIcon/>Add
-  </Button>
-  </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ marginLeft: "400px" }}
+          onClick={() => navigate("/add-Categorytype")}
+        >
+          <AddIcon />
+          Add
+        </Button>
+      </Box>
 
       {/* Category Type Table */}
       <TableContainer
-  component={Paper}
-  elevation={3}
-  sx={{
-    borderRadius: 3,
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-  }}
->
-  <Table>
-    <TableHead>
-      <TableRow
+        component={Paper}
+        elevation={3}
         sx={{
-          backgroundColor: "primary.main",
+          borderRadius: 3,
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <TableCell sx={{ color: "white", fontWeight: "bold" }}></TableCell>
-        <TableCell sx={{ color: "white", fontWeight: "bold" }}>NAME</TableCell>
-        <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-          DESCRIPTION
-        </TableCell>
-        <TableCell sx={{ color: "white", fontWeight: "bold" }}>ICON</TableCell>
-        <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
-        <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {filteredCategoryTypes.map((categoryType, index) => (
-        <TableRow
-          key={categoryType.id}
-          sx={{
-            "&:nth-of-type(odd)": {
-              backgroundColor: "#f9f9f9",
-            },
-            "&:hover": {
-              backgroundColor: "#f1f1f1",
-              transition: "background-color 0.3s",
-            },
-          }}
-        >
-          <TableCell
-            sx={{
-              color: "text.secondary",
-              fontWeight: "bold",
-            }}
-          >
-            {index + 1}
-          </TableCell>
-          <TableCell
-            sx={{
-              color: "text.primary",
-              fontWeight: "medium",
-            }}
-          >
-            {categoryType.name}
-          </TableCell>
-          <TableCell
-            sx={{
-              color: "text.secondary",
-              fontSize: "0.9rem",
-            }}
-          >
-            {categoryType.description}
-          </TableCell>
-          <TableCell>
-            <Avatar
-              variant="rounded"
-              src={categoryType.iconUrl}
+        <Table>
+          <TableHead>
+            <TableRow
               sx={{
-                width: 80,
-                height: 80,
-                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                backgroundColor: "primary.main",
               }}
-            />
-          </TableCell>
-          <TableCell>
-            <Chip
-              label={categoryType.status ? "Active" : "Inactive"}
-              color={categoryType.status ? "success" : "error"}
-              variant="outlined"
-              sx={{
-                fontWeight: "bold",
-                textTransform: "uppercase",
-                borderWidth: 1.5,
-                fontSize: "0.85rem",
-              }}
-            />
-          </TableCell>
-          <TableCell>
-          <Button
-  variant="contained"
-  color="primary"
-  size="small"
-  onClick={() => navigate("/viewcategorytype", { state: categoryType })} 
-  sx={{
-    textTransform: "none",
-    fontWeight: "medium",
-  }}
->
-  View
-</Button>
-
-          </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</TableContainer>
-
+            >
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}></TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>NAME</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>DESCRIPTION</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ICON</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedData.map((categoryType, index) => (
+              <TableRow
+                key={categoryType._id}
+                sx={{
+                  "&:nth-of-type(odd)": {
+                    backgroundColor: "#f9f9f9",
+                  },
+                  "&:hover": {
+                    backgroundColor: "#f1f1f1",
+                    transition: "background-color 0.3s",
+                  },
+                }}
+              >
+                <TableCell sx={{ color: "text.secondary", fontWeight: "bold" }}>
+                  {(currentPage - 1) * itemsPerPage + index + 1}
+                </TableCell>
+                <TableCell sx={{ color: "text.primary", fontWeight: "medium" }}>
+                  {categoryType.name}
+                </TableCell>
+                <TableCell sx={{ color: "text.secondary", fontSize: "0.9rem" }}>
+                  {categoryType.description}
+                </TableCell>
+                <TableCell>
+                  <Avatar
+                    variant="rounded"
+                    src={categoryType.icon || "path/to/default/icon.jpg"}  // Fallback to a default icon
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                    }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={categoryType.isActive ? "Active" : "Inactive"}
+                    color={categoryType.isActive ? "success" : "error"}
+                    variant="outlined"
+                    sx={{
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                      borderWidth: 1.5,
+                      fontSize: "0.85rem",
+                    }}
+                  />
+                </TableCell>
+               <TableCell>
+  <Button
+    variant="contained"
+    color="primary"
+    size="small"
+    onClick={() => navigate(`/viewcategorytype/${categoryType._id}`)} // Only pass the ID
+    sx={{
+      textTransform: "none",
+      fontWeight: "medium",
+    }}
+  >
+    View
+  </Button>
+</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* Pagination */}
-      <Box display="flex" justifyContent="center" mt={3}>
+      <Box display="flex" justifyContent="center" mt={2}>
         <Pagination
           count={Math.ceil(filteredCategoryTypes.length / itemsPerPage)}
           page={currentPage}

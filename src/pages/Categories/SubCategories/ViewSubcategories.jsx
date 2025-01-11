@@ -143,6 +143,7 @@ function ViewCategories() {
               fontSize: "1rem",
               padding: "0.5rem",
               borderRadius: "4px",
+           
             }}
           />
         </Box>
