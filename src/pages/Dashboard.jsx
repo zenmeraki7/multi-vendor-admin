@@ -31,8 +31,7 @@ const rechartsData = [
   { name: "October", uv: 2100, pv: 4300, amt: 2100, year: "2023" },
   { name: "November", uv: 1500, pv: 4300, amt: 2100, year: "2023" },
   { name: "December", uv: 1234, pv: 4300, amt: 2100, year: "2023" },
-  { name: "January", uv: 1500, pv: 4300, amt: 2100, year: "2024" },
-  { name: "February", uv: 1234, pv: 4300, amt: 2100, year: "2024" },
+
 ];
 
 const Dashboard = () => {

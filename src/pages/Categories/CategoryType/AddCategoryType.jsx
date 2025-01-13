@@ -11,30 +11,42 @@ import {
 import { Save } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../../../components/SharedComponents/CustomInput"; // Import CustomInput
+import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
+import * as yup from "yup";
+
+const validationSchema = yup.object().shape({
+  name: yup.string().required("Category Name is required"),
+  description: yup.string().required("Description is required"),
+  isActive: yup.boolean().nullable().required("Status is required"),
+  image: yup.mixed().required("Icon is required"),
+});
 
 function AddCategoryType() {
   const navigate = useNavigate();
   const [categoryType, setCategoryType] = useState({
     name: "",
     description: "",
-    image: null, // Changed to store the file instead of base64
-    isActive: " ", // default to Active (true)
+    image: null,
+    isActive: true, // Or `null` or `false`, depending on your needs
   });
-  const [alertVisible, setAlertVisible] = useState(false); // State to manage alert visibility
+
+  const [errors, setErrors] = useState({});
+  const [alertVisible, setAlertVisible] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
-    // For the 'isActive' field, map the string value ("Active"/"Inactive") to a boolean
+    console.log("Change detected", name, value);
+
     if (name === "isActive") {
+      const newIsActive = value === "Active"; // Convert "Active" to true, "Inactive" to false
+      console.log("New isActive value:", newIsActive); // This should log `true` or `false`
       setCategoryType((prev) => ({
         ...prev,
-        [name]: value === "Active", // 'Active' becomes true, 'Inactive' becomes false
+        isActive: newIsActive, // Update state with the correct boolean value
       }));
     } else {
       setCategoryType((prev) => ({
@@ -44,6 +56,7 @@ function AddCategoryType() {
     }
   };
 
+  // Rest of your component code remains the same...
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -52,8 +65,8 @@ function AddCategoryType() {
         setCategoryType((prev) => ({
           ...prev,
           image: {
-            file: file, // Store the actual file for submission
-            preview: reader.result, // Store base64 for preview
+            file: file,
+            preview: reader.result,
           },
         }));
       };
@@ -61,53 +74,64 @@ function AddCategoryType() {
     }
   };
 
+  const validateForm = async () => {
+    try {
+      await validationSchema.validate(categoryType, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (validationErrors) {
+      const newErrors = {};
+      validationErrors.inner.forEach((error) => {
+        newErrors[error.path] = error.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
+  };
+
   const handleSave = async () => {
-    const token = localStorage.getItem("token"); // Retrieve token from localStorage
-  
+    const isValid = await validateForm();
+    if (!isValid) return;
+
+    const token = localStorage.getItem("token");
     if (!token) {
       alert("Authentication token is missing. Please log in again.");
       navigate("/login");
       return;
     }
-  
+
     try {
-      // Create FormData object to send the data
       const formData = new FormData();
       formData.append("name", categoryType.name);
       formData.append("description", categoryType.description);
-      formData.append("isActive", categoryType.isActive ? "true" : "false"); // Convert boolean to string
+      formData.append("isActive", categoryType.isActive ? "true" : "false");
       if (categoryType.image && categoryType.image.file) {
-        formData.append("image", categoryType.image.file); // Use the actual file
+        formData.append("image", categoryType.image.file);
       }
-  
-      // Make API request
+
       const response = await axios.post(
         `${BASE_URL}/api/category-type/create`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data", // Required for sending files
-            authorization: `Bearer ${token}`, // Add the token
+            "Content-Type": "multipart/form-data",
+            authorization: `Bearer ${token}`,
           },
         }
       );
-  
+
       console.log("Category Type Created Successfully:", response.data);
-  
-      // Show success alert
       setAlertVisible(true);
-  
-      // Hide the alert after 3 seconds
+
       setTimeout(() => {
         setAlertVisible(false);
       }, 3000);
-  
-      // Reset form fields
+
       setCategoryType({
         name: "",
         description: "",
         image: null,
-        isActive: true,
+        isActive: null,
       });
     } catch (error) {
       if (error.response) {
@@ -119,11 +143,9 @@ function AddCategoryType() {
       }
     }
   };
-  
 
   return (
     <Box padding={2}>
-      {/* Header Section */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -147,7 +169,6 @@ function AddCategoryType() {
         </Button>
       </Box>
 
-      {/* Show Success Alert if Category Type is Saved */}
       {alertVisible && (
         <Alert
           variant="filled"
@@ -159,9 +180,7 @@ function AddCategoryType() {
         </Alert>
       )}
 
-      {/* Icon Upload and Category Name in Two Columns */}
       <Grid container spacing={2} mb={3} mt={8} p={7}>
-        {/* Image Column */}
         <Grid
           item
           xs={12}
@@ -182,7 +201,6 @@ function AddCategoryType() {
             }
             sx={{ width: 100, height: 150, borderRadius: "8px" }}
           />
-          ;
           <IconButton color="primary" component="label">
             <input
               type="file"
@@ -192,9 +210,11 @@ function AddCategoryType() {
             />
             <UploadIcon style={{ fontSize: "40px" }} />
           </IconButton>
+          {errors.image && (
+            <Typography color="error">{errors.image}</Typography>
+          )}
         </Grid>
 
-        {/* Category Name, Description, and Status Columns */}
         <Grid item xs={12} sm={6}>
           <Box display="flex" flexDirection="column" gap={2}>
             <CustomInput
@@ -206,6 +226,9 @@ function AddCategoryType() {
               onChange={handleInputChange}
               sx={{ width: "100%" }}
             />
+            {errors.name && (
+              <Typography color="error">{errors.name}</Typography>
+            )}
             <CustomInput
               id="category-description"
               name="description"
@@ -216,20 +239,25 @@ function AddCategoryType() {
               type="text"
               sx={{ width: "100%" }}
             />
+            {errors.description && (
+              <Typography color="error">{errors.description}</Typography>
+            )}
             <CustomSelect
               id="status"
               name="isActive"
-              value={categoryType.isActive ? "Active" : "Inactive"} // Map boolean to string
+              value={categoryType.isActive ? "Active" : "Inactive"}
               onChange={handleInputChange}
               label="Status"
               MenuItems={["Active", "Inactive"]}
-              sx={{ width: "100%" }}
             />
+
+            {errors.isActive && (
+              <Typography color="error">{errors.isActive}</Typography>
+            )}
           </Box>
         </Grid>
       </Grid>
 
-      {/* Save Button */}
       <Box display="flex" justifyContent="center" mt={3}>
         <Button
           variant="contained"
