@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -24,76 +24,77 @@ import {
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "axios"; // Import Axios for API calls
+import { BASE_URL } from "../../../utils/baseUrl";
 
 function Category() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [categoryTypeFilter, setCategoryTypeFilter] = useState("All");
-  const [categories] = useState([
-    {
-      id: 1,
-      name: "Electronics",
-      category: "Laptops",
-      description: "Discover cutting-edge electronics that elevate your lifestyle",
-      iconUrl: "https://cdn.pixabay.com/photo/2020/10/21/18/07/laptop-5673901_1280.jpg",
-      status: true,
-    },
-    {
-      id: 2,
-      name: "Fashion",
-      category: "Men's",
-      description: "Unleash your style with the latest fashion trends.",
-      iconUrl: "https://cdn.pixabay.com/photo/2022/02/12/21/37/woman-7009979_1280.jpg",
-      status: false,
-    },
-    {
-      id: 3,
-      name: "Beauty",
-      category: "Lipsticks",
-      description: "Glow from within with our premium beauty products.",
-      iconUrl: "https://cdn.pixabay.com/photo/2018/01/14/00/05/makeup-3081015_1280.jpg",
-      status: true,
-    },
-  ]);
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState(categories);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Fetch Categories
+  const fetchCategories = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${BASE_URL}/api/category/admin-all`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data.data || []; // Adjust based on API structure
+      setCategories(data);
+      setFilteredCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+      setFilteredCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Search and Filter Logic
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    filterCategories(e.target.value, statusFilter, categoryTypeFilter);
+    filterCategories(e.target.value, statusFilter, categoryFilter);
   };
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
-    filterCategories(searchTerm, e.target.value, categoryTypeFilter);
+    filterCategories(searchTerm, e.target.value, categoryFilter);
   };
 
-  const handleCategoryTypeFilterChange = (e) => {
-    setCategoryTypeFilter(e.target.value);
+  const handleCategoryFilterChange = (e) => {
+    setCategoryFilter(e.target.value);
     filterCategories(searchTerm, statusFilter, e.target.value);
   };
 
-  const filterCategories = (searchTerm, statusFilter, categoryTypeFilter) => {
+  const filterCategories = (searchTerm, statusFilter, categoryFilter) => {
     let filtered = categories;
 
     // Filter by category type
-    if (categoryTypeFilter !== "All") {
-      filtered = filtered.filter((category) => category.name === categoryTypeFilter);
+    if (categoryFilter !== "All") {
+      filtered = filtered.filter((category) => category.categoryType.name === categoryFilter);
     }
 
-    // Filter by category
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter((category) =>
-        category.category.toLowerCase().includes(searchTerm.toLowerCase())
+        category.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Filter by status
     if (statusFilter !== "All") {
       const isActive = statusFilter === "Active";
-      filtered = filtered.filter((category) => category.status === isActive);
+      filtered = filtered.filter((category) => category.isActive === isActive);
     }
 
     setFilteredCategories(filtered);
@@ -102,7 +103,7 @@ function Category() {
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setCategoryTypeFilter("All");
+    setCategoryFilter("All");
     setFilteredCategories(categories);
   };
 
@@ -117,7 +118,7 @@ function Category() {
         <Typography variant="h4"><b>Category Management</b></Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
-          <IconButton color="primary">
+          <IconButton color="primary" onClick={fetchCategories}>
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -129,7 +130,7 @@ function Category() {
       {/* Search Bar and Filters */}
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         <TextField
-          placeholder=" Categories"
+          placeholder="Search Categories"
           size="small"
           value={searchTerm}
           onChange={handleSearch}
@@ -140,7 +141,7 @@ function Category() {
               </InputAdornment>
             ),
           }}
-          sx={{ width: "200px" }} // Reduced width
+          sx={{ width: "200px" }} // Adjusted width
         />
         <FormControl fullWidth variant="outlined" sx={{ width: 150 }}>
           <InputLabel>Status</InputLabel>
@@ -158,15 +159,15 @@ function Category() {
         <FormControl fullWidth variant="outlined" sx={{ width: 150 }}>
           <InputLabel>Category Type</InputLabel>
           <Select
-            value={categoryTypeFilter}
-            onChange={handleCategoryTypeFilterChange}
+            value={categoryFilter}
+            onChange={handleCategoryFilterChange}
             label="Category Type"
             size="small"
           >
             <MenuItem value="All">All</MenuItem>
             {categories
-              .map((category) => category.name)
-              .filter((value, index, self) => self.indexOf(value) === index) // Unique category types
+              .map((category) => category.categoryType.name)
+              .filter((value, index, self) => self.indexOf(value) === index) // Ensure unique types
               .map((name) => (
                 <MenuItem key={name} value={name}>
                   {name}
@@ -174,7 +175,7 @@ function Category() {
               ))}
           </Select>
         </FormControl>
-        <Button variant="outlined" onClick={() => filterCategories(searchTerm, statusFilter, categoryTypeFilter)}>Apply</Button>
+        <Button variant="outlined" onClick={() => filterCategories(searchTerm, statusFilter, categoryFilter)}>Apply</Button>
         <Button variant="outlined" onClick={clearFilters}>Clear</Button>
         <Button
           variant="contained"
@@ -187,70 +188,54 @@ function Category() {
       </Box>
 
       {/* Category Table */}
-      <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 3, boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
+      <TableContainer component={Paper} elevation={3}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "primary.main" }}>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}></TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>CATEGORY-TYPE</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>CATEGORY</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>DESCRIPTION</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ICON</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
+            <TableRow
+             sx={{
+              backgroundColor: "primary.main",
+            }}
+            >
+              <TableCell>#</TableCell>
+              <TableCell>Category Type</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Icon</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredCategories.map((category, index) => (
-              <TableRow key={category.id} sx={{
-                "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
-                "&:hover": { backgroundColor: "#f1f1f1", transition: "background-color 0.3s" },
-              }}>
-                <TableCell sx={{ color: "text.secondary", fontWeight: "bold" }}>
-                  {index + 1}
-                </TableCell>
-                <TableCell sx={{ color: "text.primary", fontWeight: "medium" }}>
-                  {category.name}
-                </TableCell>
-                <TableCell sx={{ color: "text.secondary", fontSize: "0.9rem" }}>
-                  {category.category}
-                </TableCell>
-                <TableCell sx={{ color: "text.secondary", fontSize: "0.9rem" }}>
-                  {category.description}
-                </TableCell>
-                <TableCell>
-                  <Avatar
+            {filteredCategories
+              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+              .map((category, index) => (
+                <TableRow key={category._id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{category.categoryType.name}</TableCell>
+                  <TableCell>{category.name}</TableCell>
+                  <TableCell>{category.description}</TableCell>
+                  <TableCell>
+                    <Avatar src={category.icon}
                     variant="rounded"
-                    src={category.iconUrl}
-                    sx={{ width: 80, height: 80, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)" }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={category.status ? "Active" : "Inactive"}
-                    color={category.status ? "success" : "error"}
-                    variant="outlined"
-                    sx={{
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                      borderWidth: 1.5,
-                      fontSize: "0.85rem",
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => navigate("/view-category", { state: category })}
-                    sx={{ textTransform: "none", fontWeight: "medium" }}
-                  >
-                    View
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+                    sx={{height:'100px', width:'100px'}} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={category.isActive ? "Active" : "Inactive"}
+                      color={category.isActive ? "success" : "error"}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => navigate(`/view-category/${category._id}`)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

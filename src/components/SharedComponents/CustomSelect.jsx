@@ -1,10 +1,10 @@
-import React from 'react';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import React from "react";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 function CustomSelect({ id, name, value, onChange, label, MenuItems = [] }) {
   const handleChange = (e) => {
     const { value } = e.target;
-    onChange({ target: { name, value } }); // Pass name and value
+    onChange({ target: { name, value } });  // Pass the updated value correctly
   };
 
   return (
@@ -34,14 +34,14 @@ function CustomSelect({ id, name, value, onChange, label, MenuItems = [] }) {
       <InputLabel>{label}</InputLabel>
       <Select
         id={id}
-        value={value}
+        value={value || ""}  // Ensure that the value is either the selected one or empty string
         onChange={handleChange}
         label={label}
         fullWidth
       >
         {MenuItems.map((item, index) => (
-          <MenuItem key={index} value={item}>
-            {item}
+          <MenuItem key={index} value={item.value}>
+            {item.label}
           </MenuItem>
         ))}
       </Select>

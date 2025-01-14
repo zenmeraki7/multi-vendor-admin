@@ -30,8 +30,8 @@ function SubCategories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
-  const [categoryTypeFilter, setCategoryTypeFilter] = useState("All");
-  const [categoryType] = useState([
+  const [subCategoryTypeFilter, setSubCategoryTypeFilter] = useState("All");
+  const [subCategoryType] = useState([
     { name: "Electronics", id: 1 },
     { name: "Fashion", id: 2 },
     { name: "Beauty", id: 3 },
@@ -83,7 +83,7 @@ function SubCategories() {
     filterSubCategories(
       e.target.value,
       statusFilter,
-      categoryTypeFilter,
+      subCategoryTypeFilter,
       categoryFilter
     );
   };
@@ -93,7 +93,7 @@ function SubCategories() {
     filterSubCategories(
       searchTerm,
       e.target.value,
-      categoryTypeFilter,
+      subCategoryTypeFilter,
       categoryFilter
     );
   };
@@ -103,13 +103,13 @@ function SubCategories() {
     filterSubCategories(
       searchTerm,
       statusFilter,
-      categoryTypeFilter,
+      subCategoryTypeFilter,
       e.target.value
     );
   };
 
-  const handleCategoryTypeFilterChange = (e) => {
-    setCategoryTypeFilter(e.target.value);
+  const handleSubCategoryTypeFilterChange = (e) => {
+    setSubCategoryTypeFilter(e.target.value);
     filterSubCategories(
       searchTerm,
       statusFilter,
@@ -121,14 +121,14 @@ function SubCategories() {
   const filterSubCategories = (
     searchTerm,
     statusFilter,
-    categoryTypeFilter,
+    subCategoryTypeFilter,
     categoryFilter
   ) => {
     let filtered = subCategories;
 
-    if (categoryTypeFilter !== "All") {
+    if (subCategoryTypeFilter !== "All") {
       filtered = filtered.filter(
-        (subcategory) => subcategory.name === categoryTypeFilter
+        (subcategory) => subcategory.name === subCategoryTypeFilter
       );
     }
 
@@ -157,7 +157,7 @@ function SubCategories() {
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setCategoryTypeFilter("All");
+    setSubCategoryTypeFilter("All");
     setCategoryFilter("All");
     setFilteredSubCategories(subCategories);
   };
@@ -218,14 +218,14 @@ function SubCategories() {
           </Select>
         </FormControl>
         <FormControl fullWidth>
-          <InputLabel>Category Type</InputLabel>
+          <InputLabel>SubCategory Type</InputLabel>
           <Select
-            value={categoryTypeFilter}
-            onChange={handleCategoryTypeFilterChange}
-            label="Category Type"
+            value={subCategoryTypeFilter}
+            onChange={handleSubCategoryTypeFilterChange}
+            label="SubCategory Type"
           >
             <MenuItem value="All">All</MenuItem>
-            {categoryType.map((type) => (
+            {subCategoryType.map((type) => (
               <MenuItem key={type.id} value={type.name}>
                 {type.name}
               </MenuItem>
@@ -277,7 +277,7 @@ function SubCategories() {
                 #
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                CATEGORY-TYPE
+                SUBCATEGORY TYPE
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 CATEGORY
@@ -304,42 +304,36 @@ function SubCategories() {
               <TableRow
                 key={subcategory.id}
                 sx={{
-                  "&:nth-of-type(odd)": { backgroundColor: "#f9f9f9" },
-                  "&:hover": {
-                    backgroundColor: "#f1f1f1",
-                    transition: "background-color 0.3s",
-                  },
+                  backgroundColor:
+                    index % 2 === 0 ? "white" : "background.default",
                 }}
               >
-                <TableCell sx={{ color: "text.primary" }}>
-                  {index + 1}
-                </TableCell>
+                <TableCell>{subcategory.id}</TableCell>
                 <TableCell>{subcategory.name}</TableCell>
                 <TableCell>{subcategory.category}</TableCell>
                 <TableCell>{subcategory.subcategory}</TableCell>
                 <TableCell>{subcategory.description}</TableCell>
                 <TableCell>
                   <Avatar
-                    alt={subcategory.subcategory}
                     src={subcategory.iconUrl}
+                    alt={subcategory.subcategory}
                   />
                 </TableCell>
                 <TableCell>
-                  <Chip
-                    label={subcategory.status ? "Active" : "Inactive"}
-                    color={subcategory.status ? "success" : "error"}
-                  />
+                  {subcategory.status ? (
+                    <Chip label="Active" color="success" />
+                  ) : (
+                    <Chip label="Inactive" color="error" />
+                  )}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() =>
-                      navigate("/view-subcategory", { state: subcategory })
-                    }
+                  <Button variant="contained" size="small" color="primary"
+               onClick={() => navigate(`/view-category`)}
+
                   >
                     View
                   </Button>
+                 
                 </TableCell>
               </TableRow>
             ))}
@@ -348,11 +342,12 @@ function SubCategories() {
       </TableContainer>
 
       {/* Pagination */}
-      <Box display="flex" justifyContent="center" my={2}>
+      <Box display="flex" justifyContent="center" marginTop={3}>
         <Pagination
           count={Math.ceil(filteredSubCategories.length / itemsPerPage)}
           page={currentPage}
           onChange={handlePageChange}
+          color="primary"
         />
       </Box>
     </Box>
