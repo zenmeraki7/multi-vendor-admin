@@ -18,7 +18,7 @@ import {
   Box,
   Pagination,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom"; 
 import { BASE_URL } from "../utils/baseUrl";
 
 function VendorDetails() {
@@ -55,7 +55,7 @@ function VendorDetails() {
         );
         console.log(response.data.data);
 
-        setVendors(response.data.data || []); // Adjust according to API response
+        setVendors(response.data.data || []); 
       } catch (err) {
         if (err.response) {
           // Handle specific error responses

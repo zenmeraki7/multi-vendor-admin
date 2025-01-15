@@ -264,6 +264,9 @@ function AddCategoryType() {
           color="primary"
           onClick={handleSave}
           startIcon={<Save />}
+          style={{                
+            background: "linear-gradient(45deg, #556cd6, #19857b)",
+            color: "#fff",}}
         >
           Save
         </Button>

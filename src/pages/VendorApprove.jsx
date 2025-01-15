@@ -104,7 +104,7 @@ const VendorApprove = () => {
           }
         );
 
-        setVendorDetails(response.data.data); // Update vendorDetails with API response
+        setVendorDetails(response.data.data);  
       } catch (error) {
         console.error("Error fetching vendor data:", error);
         setSnackbar({

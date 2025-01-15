@@ -140,7 +140,7 @@ function App() {
           <Route path="/vendor-view/:vendorId" element={<VendorView />} />
           <Route path="/category-Type"  element={<CategoryType/>} />
           <Route path='/category' element={<Category/>}/>
-          <Route path="/view-category" element={<ViewCategories/>} />
+          <Route path="/view-category/:id" element={<ViewCategories/>} />
           <Route path="/viewcategorytype/:id" element={<ViewCategoryType />} />
           <Route path="/add-Categorytype" element={<AddCategoryType/>}/>
           <Route path="/add-category" element={<AddCategory/>} />
