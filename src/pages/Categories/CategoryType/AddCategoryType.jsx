@@ -21,7 +21,9 @@ import * as yup from "yup";
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
   description: yup.string().required("Description is required"),
-  isActive: yup.boolean().nullable().required("Status is required"),
+  isActive: yup
+  .string()
+  .required("Status is required"),
   image: yup.mixed().required("Icon is required"),
 });
 
@@ -42,7 +44,7 @@ function AddCategoryType() {
     console.log("Change detected", name, value);
 
     if (name === "isActive") {
-      const newIsActive = value === "Active"; // Convert "Active" to true, "Inactive" to false
+      const newIsActive = value === "Active"; // Correctly set boolean value
       console.log("New isActive value:", newIsActive); // This should log `true` or `false`
       setCategoryType((prev) => ({
         ...prev,
@@ -245,10 +247,13 @@ function AddCategoryType() {
             <CustomSelect
               id="status"
               name="isActive"
-              value={categoryType.isActive ? "Active" : "Inactive"}
+              value={categoryType.isActive ? "Active" : "Inactive"} // Convert boolean to string
               onChange={handleInputChange}
               label="Status"
-              MenuItems={["Active", "Inactive"]}
+              MenuItems={[
+                { value: "Active", label: "Active" },
+                { value: "Inactive", label: "Inactive" },
+              ]}
             />
 
             {errors.isActive && (
@@ -264,9 +269,10 @@ function AddCategoryType() {
           color="primary"
           onClick={handleSave}
           startIcon={<Save />}
-          style={{                
+          style={{
             background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",}}
+            color: "#fff",
+          }}
         >
           Save
         </Button>

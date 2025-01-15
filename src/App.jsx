@@ -23,14 +23,13 @@ import ViewProduct from "./pages/ViewProduct/ViewProduct";
 import "bootstrap/dist/css/bootstrap.min.css";
 import CategoryType from './pages/Categories/CategoryType/CategoryType'
 import ViewCategories from './pages/Categories/category/ViewCategories'
-
 import AddCategoryType from "./pages/Categories/CategoryType/AddCategoryType";
 import ViewCategoryType from "./pages/Categories/CategoryType/ViewCategoryType";
 import SubCategories from "./pages/Categories/SubCategories/SubCategories";
 import AddCategory from "./pages/Categories/category/AddCategory";
 import Category from './pages/Categories/category/Category'
-import ViewSubcategories from "./pages/Categories/SubCategories/ViewSubcategories";
 import AddSubCategories from "./pages/Categories/SubCategories/AddSubCategories";
+import ViewSubCategories from "./pages/Categories/SubCategories/ViewSubcategories";
 
 function App() {
   const dummyProduct = {
@@ -145,8 +144,8 @@ function App() {
           <Route path="/add-Categorytype" element={<AddCategoryType/>}/>
           <Route path="/add-category" element={<AddCategory/>} />
           <Route path='/sub-category' element={<SubCategories/>}/>
-          <Route path="/view-subcategory" element={<ViewSubcategories/>}/>
           <Route path='/add-subcategory' element={<AddSubCategories/>}/>
+          <Route path="view-subcategory/:id" element={<ViewSubCategories/>}/>
           <Route
             path="view-product/:id"
             element={<PrivateRoute component={<ViewProduct />} />}

@@ -81,7 +81,9 @@ function Category() {
 
     // Filter by category type
     if (categoryFilter !== "All") {
-      filtered = filtered.filter((category) => category.categoryType.name === categoryFilter);
+      filtered = filtered.filter(
+        (category) => category.categoryType.name === categoryFilter
+      );
     }
 
     // Filter by search term
@@ -114,8 +116,15 @@ function Category() {
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4"><b>Category Management</b></Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h4">
+          <b>Category Management</b>
+        </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
           <IconButton color="primary" onClick={fetchCategories}>
@@ -166,8 +175,12 @@ function Category() {
           >
             <MenuItem value="All">All</MenuItem>
             {categories
-              .map((category) => category.categoryType.name)
-              .filter((value, index, self) => self.indexOf(value) === index) // Ensure unique types
+              .map((category) =>
+                category.categoryType ? category.categoryType.name : null
+              )
+              .filter(
+                (value, index, self) => value && self.indexOf(value) === index
+              ) // Ensure unique types and skip null values
               .map((name) => (
                 <MenuItem key={name} value={name}>
                   {name}
@@ -175,12 +188,21 @@ function Category() {
               ))}
           </Select>
         </FormControl>
-        <Button variant="outlined" onClick={() => filterCategories(searchTerm, statusFilter, categoryFilter)}>Apply</Button>
-        <Button variant="outlined" onClick={clearFilters}>Clear</Button>
+        <Button
+          variant="outlined"
+          onClick={() =>
+            filterCategories(searchTerm, statusFilter, categoryFilter)
+          }
+        >
+          Apply
+        </Button>
+        <Button variant="outlined" onClick={clearFilters}>
+          Clear
+        </Button>
         <Button
           variant="contained"
           color="primary"
-          style={{ marginLeft: '400px' }}
+          style={{ marginLeft: "400px" }}
           onClick={() => navigate("/add-category")}
         >
           <AddIcon /> Add
@@ -192,9 +214,9 @@ function Category() {
         <Table>
           <TableHead>
             <TableRow
-             sx={{
-              backgroundColor: "primary.main",
-            }}
+              sx={{
+                backgroundColor: "primary.main",
+              }}
             >
               <TableCell>#</TableCell>
               <TableCell>Category Type</TableCell>
@@ -207,17 +229,22 @@ function Category() {
           </TableHead>
           <TableBody>
             {filteredCategories
-              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+              .slice(
+                (currentPage - 1) * itemsPerPage,
+                currentPage * itemsPerPage
+              )
               .map((category, index) => (
                 <TableRow key={category._id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{category.categoryType.name}</TableCell>
+                  <TableCell>{category?.categoryType?.name}</TableCell>
                   <TableCell>{category.name}</TableCell>
                   <TableCell>{category.description}</TableCell>
                   <TableCell>
-                    <Avatar src={category.icon}
-                    variant="rounded"
-                    sx={{height:'100px', width:'100px'}} />
+                    <Avatar
+                      src={category.icon}
+                      variant="rounded"
+                      sx={{ height: "100px", width: "100px" }}
+                    />
                   </TableCell>
                   <TableCell>
                     <Chip

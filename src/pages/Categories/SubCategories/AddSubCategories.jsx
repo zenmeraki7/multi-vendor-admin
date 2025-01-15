@@ -1,21 +1,54 @@
-import React, { useState } from "react";
-import { Box, Button, Typography, Avatar, IconButton, Grid, Alert, TextField, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  Avatar,
+  IconButton,
+  Grid,
+  Alert,
+  FormControl,
+} from "@mui/material";
 import { Save } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../../../components/SharedComponents/CustomInput"; // Import CustomInput
+import CustomSelect from "../../../components/SharedComponents/CustomSelect";
+import { BASE_URL } from "../../../utils/baseUrl";
+import axios from "axios";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 function AddSubCategory() {
   const navigate = useNavigate();
   const [subcategory, setSubcategory] = useState({
-    name: "",
-    category: "",  // Added category field
+    category: "", // Added category field
     subcategory: "",
     description: "",
-    iconUrl: "",
-    status: true, 
+    image: "",
+    status: true,
   });
+  const [categoryOptions, setCategoryOptions] = useState([]); // Declare categoryOptions state
   const [alertVisible, setAlertVisible] = useState(false);
+
+  const fetchCategories = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${BASE_URL}/api/category/admin-all`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+      const categories = response.data.data || [];
+      setCategoryOptions(categories); // Set the categories in state
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,122 +61,302 @@ function AddSubCategory() {
   const handleIconUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSubcategory((prev) => ({
-          ...prev,
-          iconUrl: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
+      // Check file size and type here if needed (e.g., max 5MB)
+      setSubcategory((prev) => ({
+        ...prev,
+        image: file, // Set the file itself to the state
+      }));
     }
   };
 
-  const handleSave = () => {
-    // Save the subcategory (connect to API or manage state here)
-    console.log("Saved Subcategory:", subcategory);
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
 
-    // Show success alert after saving
-    setAlertVisible(true);
+    // Append the subcategory data
+    formData.append("name", subcategory.subcategory);
+    formData.append("description", subcategory.description);
+    formData.append("category", subcategory.category);
 
-    setTimeout(() => {
-      setAlertVisible(false);
-    }, 3000); 
+    if (subcategory.image) {
+      formData.append("image", subcategory.image); // Append the file itself
+    } else {
+      alert("Please upload an image.");
+      return;
+    }
+
+    formData.append("isActive", subcategory.status === true ? "true" : "false");
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/subcategory/create`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data;
+      if (response.status === 200) {
+        // Successfully created subcategory
+        console.log("Subcategory Created Successfully:", data);
+        {
+          alertVisible && (
+            <Alert variant="filled" severity="success">
+              Subcategory successfully added!
+            </Alert>
+          );
+        }
+        setTimeout(() => {
+          setAlertVisible(false);
+        }, 3000);
+      } else {
+        alert(data.message || "Error creating subcategory");
+        console.error("Validation error details:", data.details);
+      }
+    } catch (error) {
+      console.error("Error during category creation:", error);
+      alert("An error occurred while creating the category.");
+    }
   };
+
+  const validationSchema = Yup.object({
+    category: Yup.string().required("Category is required"), // Ensure category is selected
+    subcategory: Yup.string()
+      .required("Subcategory name is required")
+      .min(3, "Subcategory name must be at least 3 characters"),
+    description: Yup.string()
+      .required("Description is required")
+      .min(10, "Description must be at least 10 characters"),
+    status: Yup.boolean().required("Status is required"),
+    image: Yup.mixed()
+      .required("Category icon is required")
+     
+  });
 
   return (
     <Box padding={2}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" fontWeight="bold">Add New Subcategory</Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h4" fontWeight="bold">
+          Add New Subcategory
+        </Typography>
         <Button
           variant="outlined"
           color="primary"
           onClick={() => navigate(-1)}
-          style={{ marginRight: "80px", background: "linear-gradient(45deg, #556cd6, #19857b)", color: "#fff" }}
+          style={{
+            marginRight: "80px",
+            background: "linear-gradient(45deg, #556cd6, #19857b)",
+            color: "#fff",
+          }}
         >
           Back
         </Button>
       </Box>
 
       {alertVisible && (
-        <Alert variant="filled" severity="success" mb={3} sx={{ width: "350px" }}>
+        <Alert
+          variant="filled"
+          severity="success"
+          mb={3}
+          sx={{ width: "350px" }}
+        >
           Subcategory successfully added!
         </Alert>
       )}
+      <Formik
+        initialValues={{
+          category: "",
+          subcategory: "",
+          description: "",
+          status: true,
+          image: null,
+        }}
+        validationSchema={validationSchema}
+        onSubmit={async (values, { setSubmitting }) => {
+          setSubmitting(true);
+          const token = localStorage.getItem("token");
+          const formData = new FormData();
 
-      <Grid container spacing={2} mb={3} mt={8} p={7}>
-        <Grid item xs={12} sm={6} display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="body1" mb={1}><b>Upload Icon</b></Typography>
-          <Avatar
-            variant="rounded"
-            src={subcategory.iconUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR0ydDiYMYriRcJDdqE8NZxnRisT4XZmc7AQ&s"}
-            sx={{ width: 100, height: 150, borderRadius: "8px" }}
-          />
-          <IconButton color="primary" component="label">
-            <input type="file" accept="image/*" hidden onChange={handleIconUpload} />
-            <UploadIcon style={{ fontSize: "40px" }} />
-          </IconButton>
-        </Grid>
+          formData.append("name", values.subcategory);
+          formData.append("description", values.description);
+          formData.append("category", values.category);
 
-        <Grid item xs={12} sm={6}>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <CustomInput
-              id="category-name"
-              name="name"
-              label="Category Type"
-              placeholder="Enter category type"
-              value={subcategory.name}
-              onChange={handleInputChange}
-              sx={{ width: "100%" }}
-            />
-            <CustomInput
-              id="category"
-              name="category"
-              label="Category" 
-              placeholder="Enter category"
-              value={subcategory.category}  
-              onChange={handleInputChange} 
-              sx={{ width: "100%" }}
-            />
-            <CustomInput
-              id="subcategory"
-              name="subcategory"
-              label="Subcategory Name"
-              placeholder="Enter subcategory name"
-              value={subcategory.subcategory}
-              onChange={handleInputChange}
-              sx={{ width: "100%" }}
-            />
-            <CustomInput
-              id="subcategory-description"
-              name="description"
-              label="Subcategory Description"
-              placeholder="Enter subcategory description"
-              value={subcategory.description}
-              onChange={handleInputChange}
-              sx={{ width: "100%" }}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={subcategory.status}
-                onChange={handleInputChange}
-                label="Status"
-                name="status"
+          if (values.image) {
+            formData.append("image", values.image); // Append the file itself
+          } else {
+            alert("Please upload an image.");
+            setSubmitting(false);
+            return;
+          }
+
+          formData.append(
+            "isActive",
+            values.status === true ? "true" : "false"
+          );
+
+          try {
+            const response = await axios.post(
+              `${BASE_URL}/api/subcategory/create`,
+              formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const data = response.data;
+            if (response.status === 200) {
+              console.log("Subcategory Created Successfully:", data);
+              setAlertVisible(true);
+              setTimeout(() => {
+                setAlertVisible(false);
+              }, 3000);
+            } else {
+              alert(data.message || "Error creating subcategory");
+              console.error("Validation error details:", data.details);
+            }
+          } catch (error) {
+            console.error("Error during category creation:", error);
+            alert("An error occurred while creating the category.");
+          }
+          setSubmitting(false);
+        }}
+      >
+        {({ setFieldValue, values, touched, errors, isSubmitting }) => (
+          <Form>
+            <Grid container spacing={2} mb={3} mt={8} p={7}>
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
               >
-                <MenuItem value={true}>Active</MenuItem>
-                <MenuItem value={false}>Inactive</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Grid>
-      </Grid>
+                <Typography variant="body1" mb={1}>
+                  <b>Upload Icon</b>
+                </Typography>
+                <Avatar
+                  variant="rounded"
+                  src={
+                    values.image
+                      ? URL.createObjectURL(values.image)
+                      : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR0ydDiYMYriRcJDdqE8NZxnRisT4XZmc7AQ&s"
+                  }
+                  sx={{ width: 100, height: 150, borderRadius: "8px" }}
+                />
+                <IconButton color="primary" component="label">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => setFieldValue("image", e.target.files[0])}
+                  />
+                  <UploadIcon style={{ fontSize: "40px" }} />
+                </IconButton>
+                {touched.image && errors.image && (
+                  <div style={{ color: "red", fontSize: "12px" }}>
+                    {errors.image}
+                  </div>
+                )}
+              </Grid>
 
-      <Box display="flex" justifyContent="center" mt={3}>
-        <Button variant="contained" color="primary" onClick={handleSave} startIcon={<Save />}>
-          Save
-        </Button>
-      </Box>
+              <Grid item xs={12} sm={6}>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomSelect
+                    id="category"
+                    name="category"
+                    label="Category"
+                    value={values.category}
+                    onChange={(e) => setFieldValue("category", e.target.value)}
+                    MenuItems={categoryOptions.map((category) => ({
+                      label: category.name,
+                      value: category._id,
+                    }))}
+                    sx={{ width: "100%" }}
+                  />
+                  <ErrorMessage
+                    name="category"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+
+                  <Field
+                    as={CustomInput}
+                    id="subcategory"
+                    name="subcategory"
+                    label="Subcategory Name"
+                    placeholder="Enter subcategory name"
+                    sx={{ width: "100%" }}
+                  />
+                  <ErrorMessage
+                    name="subcategory"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+
+                  <Field
+                    as={CustomInput}
+                    id="subcategory-description"
+                    name="description"
+                    label="Subcategory Description"
+                    placeholder="Enter subcategory description"
+                    sx={{ width: "100%" }}
+                  />
+                  <ErrorMessage
+                    name="description"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+
+                  <CustomSelect
+                    id="status"
+                    name="status"
+                    label="Status"
+                    value={values.status.toString()} // Convert boolean to string
+                    onChange={(e) =>
+                      setFieldValue("status", e.target.value === "true")
+                    } // Convert string back to boolean
+                    MenuItems={[
+                      { label: "Active", value: "true" }, // Use strings as values
+                      { label: "Inactive", value: "false" },
+                    ]}
+                    sx={{ width: "100%" }}
+                  />
+                  <ErrorMessage
+                    name="status"
+                    component="div"
+                    style={{ color: "red", fontSize: "12px" }}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Box display="flex" justifyContent="center" mt={3}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                startIcon={<Save />}
+                disabled={isSubmitting}
+              >
+                Save
+              </Button>
+            </Box>
+          </Form>
+        )}
+      </Formik>
     </Box>
   );
 }

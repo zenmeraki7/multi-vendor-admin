@@ -39,6 +39,7 @@ function ViewCategoryType() {
     name: "",
     description: "",
     status: "",
+    icon:""
   });
 
   useEffect(() => {
@@ -79,6 +80,7 @@ function ViewCategoryType() {
         console.error("Error fetching category:", error);
       });
   }, [id, navigate]);
+console.log(data);
 
   const handleEditClick = () => {
     setIsEditing(true);

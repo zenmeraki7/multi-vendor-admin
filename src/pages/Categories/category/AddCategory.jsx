@@ -8,15 +8,14 @@ import {
   Grid,
   Alert,
   FormControl,
-  InputLabel,
-  Select,
+ 
   MenuItem,
   FormHelperText,
 } from "@mui/material";
 import { Save } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../../../components/SharedComponents/CustomInput"; // Import CustomInput
+import CustomInput from "../../../components/SharedComponents/CustomInput";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { BASE_URL } from "../../../utils/baseUrl";
 import axios from "axios";
@@ -31,11 +30,13 @@ function AddCategory() {
     type: "",
     description: "",
     image: "",
-    status: true, // Ensure this is set to a valid value
+    status: "Active",
   });
 
-  const [alertVisible, setAlertVisible] = useState(false); // State to manage alert visibility
-  const [categoryTypes, setCategoryTypes] = useState([]); // State to store category types
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [errorAlertVisible, setErrorAlertVisible] = useState(false); // New state for error alert
+  const [categoryTypes, setCategoryTypes] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // Fetch category types from API
   const fetchCategoryTypes = async () => {
@@ -50,10 +51,10 @@ function AddCategory() {
         }
       );
       const data = response.data.data || [];
-      setCategoryTypes(data); // Set the fetched categories
+      setCategoryTypes(data);
     } catch (error) {
       console.error("Error fetching category types:", error);
-      setCategoryTypes([]); // Handle error scenario
+      setCategoryTypes([]);
     }
   };
 
@@ -65,33 +66,34 @@ function AddCategory() {
     const { name, value } = e.target;
     setCategory((prev) => ({
       ...prev,
-      [name]: value,  // Ensure the category.type is being updated correctly
+      [name]: value,
     }));
   };
 
   const handleIconUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      console.log(file);
       setCategory((prev) => ({
         ...prev,
-        image: file, // Store file instead of base64 string
+        image: file,
       }));
     }
   };
 
-  const handleSave = async () => {
-    const token = localStorage.getItem("token"); // Get token from local storage
+  const handleSave = async (values) => {
+    const token = localStorage.getItem("token");
     const formData = new FormData();
-  
-    // Append category data to formData
-    formData.append("name", category.name);
-    formData.append("description", category.description);
-    formData.append("categoryType", category.type); // Pass selected category type
-    if (category.image) {  // Ensure image is not empty
-      formData.append("image", category.image); // Append the file itself
+
+    // Use values from Formik instead of category state
+    formData.append("name", values.name);
+    formData.append("description", values.description);
+    formData.append("categoryType", values.type);
+    if (values.image) {
+      formData.append("image", values.image);
     }
-    formData.append("isActive", category.status === "Active" ? "true" : "false");
-  
+    formData.append("isActive", values.status === "Active");
+
     try {
       const response = await axios.post(
         `${BASE_URL}/api/category/create`,
@@ -103,23 +105,26 @@ function AddCategory() {
           },
         }
       );
-  
+
       const data = response.data;
       console.log("Response Data:", data);
-  
+
       if (response.status === 200) {
-        // Successfully created category
         setAlertVisible(true);
         setTimeout(() => {
           setAlertVisible(false);
+          navigate(-1); // Navigate back after successful creation
         }, 3000);
       } else {
-        // Handle error and display validation details
-        alert(data.message || "Error creating category");
+        setErrorAlertVisible(true); // Display error alert if something goes wrong
+        setTimeout(() => {
+          setErrorAlertVisible(false);
+        }, 3000);
         console.error("Validation error details:", data.details);
       }
     } catch (error) {
       console.error("Error during category creation:", error);
+      setErrorAlertVisible(true); // Display error alert if request fails
       alert("An error occurred while creating the category.");
     }
   };
@@ -129,16 +134,17 @@ function AddCategory() {
     type: Yup.string().required("Category type is required"),
     description: Yup.string().required("Category description is required"),
     status: Yup.string().required("Status is required"),
-    image: Yup.mixed().required("Category icon is required").test(
-      "fileSize",
-      "File too large",
-      (value) => !value || (value && value.size <= 5000000) // Example: File size limit to 5MB
-    ),
+    image: Yup.mixed()
+      .required("Category icon is required")
+      .test(
+        "fileSize",
+        "File too large",
+        (value) => !value || (value && value.size <= 5000000)
+      ),
   });
 
   return (
     <Box padding={2}>
-      {/* Header Section */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -162,7 +168,6 @@ function AddCategory() {
         </Button>
       </Box>
 
-      {/* Show Success Alert if Category is Saved */}
       {alertVisible && (
         <Alert
           variant="filled"
@@ -174,7 +179,17 @@ function AddCategory() {
         </Alert>
       )}
 
-      {/* Form Section */}
+      {errorAlertVisible && (
+        <Alert
+          variant="filled"
+          severity="error"
+          mb={3}
+          sx={{ width: "350px" }}
+        >
+          There was an error adding the category.
+        </Alert>
+      )}
+
       <Formik
         initialValues={{
           name: "",
@@ -184,12 +199,11 @@ function AddCategory() {
           image: "",
         }}
         validationSchema={validationSchema}
-        onSubmit={handleSave}
+        onSubmit={handleSave} // This will now receive the form values
       >
-        {({ setFieldValue, touched, errors }) => (
+        {({ setFieldValue, touched, errors, values }) => (
           <Form>
             <Grid container spacing={2} mb={3} mt={8} p={7}>
-              {/* Image Column */}
               <Grid
                 item
                 xs={12}
@@ -203,9 +217,18 @@ function AddCategory() {
                 </Typography>
                 <Avatar
                   variant="rounded"
-                  src={category.image ? URL.createObjectURL(category.image) : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR0ydDiYMYriRcJDdqE8NZxnRisT4XZmc7AQ&s"}
-                  sx={{ width: 100, height: 150, borderRadius: "8px" }}
+                  src={
+                    previewImage
+                      ? previewImage
+                      : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR0ydDiYMYriRcJDdqE8NZxnRisT4XZmc7AQ&s"
+                  }
+                  sx={{
+                    width: "150px",
+                    height: "150px",
+                    borderRadius: "8px",
+                  }}
                 />
+
                 <IconButton color="primary" component="label">
                   <input
                     type="file"
@@ -213,104 +236,123 @@ function AddCategory() {
                     hidden
                     onChange={(e) => {
                       const file = e.target.files[0];
-                      setFieldValue("image", file);
+                      if (file) {
+                        setFieldValue("image", file);
+                        setCategory(prev => ({ ...prev, image: file }));
+                        setPreviewImage(URL.createObjectURL(file));
+                      }
                     }}
                   />
                   <UploadIcon style={{ fontSize: "40px" }} />
                 </IconButton>
                 {touched.image && errors.image && (
-                  <div style={{ color: "red", fontSize: "12px" }}>{errors.image}</div>
+                  <div style={{ color: "red", fontSize: "12px" }}>
+                    {errors.image}
+                  </div>
                 )}
               </Grid>
 
-              {/* Category Name, Type, Description, and Status Columns */}
               <Grid item xs={12} sm={6}>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  {/* Category Type Dropdown */}
-                  <FormControl fullWidth variant="outlined" size="small" error={touched.type && errors.type}>
-                    <CustomSelect
-                      id="type"
-                      name="type"
-                      value={category.type}
-                      onChange={handleInputChange}
-                      label="Category Type"
-                      MenuItems={categoryTypes.map((type) => ({
-                        value: type._id, // Use categoryType ID as the value
-                        label: type.name, // Use categoryType name as the label
-                      }))}
-                      sx={{ width: "100%" }}
-                    />
-                    {touched.type && errors.type && (
-                      <FormHelperText>{errors.type}</FormHelperText>
-                    )}
-                  </FormControl>
-
-                  <CustomInput
-                    id="category-name"
-                    name="name"
-                    label="Category Name"
-                    placeholder="Enter category name"
-                    value={category.name}
-                    onChange={handleInputChange}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.name && errors.name && (
-                    <div style={{ color: "red", fontSize: "12px" }}>{errors.name}</div>
-                  )}
-
-                  <CustomInput
-                    id="category-description"
-                    name="description"
-                    label="Category Description"
-                    placeholder="Enter category description"
-                    value={category.description}
-                    onChange={handleInputChange}
-                    type="text"
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.description && errors.description && (
-                    <div style={{ color: "red", fontSize: "12px" }}>{errors.description}</div>
-                  )}
-
+              <Box display="flex" flexDirection="column" gap={2}>
+                <FormControl
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  error={touched.type && errors.type}
+                >
                   <CustomSelect
-                    id="status"
-                    name="status"
-                    value={category.status}
-                    onChange={handleInputChange}
-                    label="Status"
-                    MenuItems={[
-                      { value: "Active", label: "Active" },
-                      { value: "Inactive", label: "Inactive" },
-                    ]}
+                    id="type"
+                    name="type"
+                    value={values.type} // Use Formik values
+                    onChange={(e) => {
+                      setFieldValue("type", e.target.value);
+                      handleInputChange(e); // Keep local state in sync
+                    }}
+                    label="Category Type"
+                    MenuItems={categoryTypes.map((type) => ({
+                      value: type._id,
+                      label: type.name,
+                    }))}
                     sx={{ width: "100%" }}
                   />
-                  {touched.status && errors.status && (
-                    <div style={{ color: "red", fontSize: "12px" }}>{errors.status}</div>
+                  {touched.type && errors.type && (
+                    <FormHelperText>{errors.type}</FormHelperText>
                   )}
+                </FormControl>
+
+                <CustomInput
+                  id="category-name"
+                  name="name"
+                  label="Category Name"
+                  placeholder="Enter category name"
+                  value={values.name} // Use Formik values
+                  onChange={(e) => {
+                    setFieldValue("name", e.target.value);
+                    handleInputChange(e); // Keep local state in sync
+                  }}
+                  sx={{ width: "100%" }}
+                />
+                {touched.name && errors.name && (
+                  <div style={{ color: "red", fontSize: "12px" }}>
+                    {errors.name}
+                  </div>
+                )}
+
+                <CustomInput
+                  id="category-description"
+                  name="description"
+                  label="Category Description"
+                  placeholder="Enter category description"
+                  value={values.description} // Use Formik values
+                  onChange={(e) => {
+                    setFieldValue("description", e.target.value);
+                    handleInputChange(e); // Keep local state in sync
+                  }}
+                  type="text"
+                  sx={{ width: "100%" }}
+                />
+                {touched.description && errors.description && (
+                  <div style={{ color: "red", fontSize: "12px" }}>
+                    {errors.description}
+                  </div>
+                )}
+
+                <CustomSelect
+                  id="status"
+                  name="status"
+                  value={values.status} // Use Formik values
+                  onChange={(e) => {
+                    setFieldValue("status", e.target.value);
+                    handleInputChange(e); // Keep local state in sync
+                  }}
+                  label="Status"
+                  MenuItems={[
+                    { value: "Active", label: "Active" },
+                    { value: "Inactive", label: "Inactive" },
+                  ]}
+                  sx={{ width: "100%" }}
+                />
+                {touched.status && errors.status && (
+                  <div style={{ color: "red", fontSize: "12px" }}>
+                    {errors.status}
+                  </div>
+                )}
                 </Box>
               </Grid>
             </Grid>
-
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              gap={2}
-              mt={2}
-            >
+            <Box display="flex" justifyContent="center" mb={3}>
               <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                sx={{ padding: "10px 20px" }}
-                disabled={Object.keys(errors).length > 0}
-                style={{                
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",}}
-              >
-                <Save  />
-                Save 
-              </Button>
+                       variant="contained"
+                       color="primary"
+                       onClick={handleSave}
+                       startIcon={<Save />}
+                       style={{
+                         background: "linear-gradient(45deg, #556cd6, #19857b)",
+                         color: "#fff",
+                       }}
+                     >
+                       Save
+                        </Button>
             </Box>
           </Form>
         )}
@@ -318,5 +360,6 @@ function AddCategory() {
     </Box>
   );
 }
+
 
 export default AddCategory;
