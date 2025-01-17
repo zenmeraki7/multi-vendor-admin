@@ -6,6 +6,7 @@ import {
   Avatar,
   IconButton,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import * as yup from "yup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -29,6 +30,31 @@ const validationSchema = yup.object().shape({
     .required("Status is required"),
 });
 
+const LoadingSpinner = () => (
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    height="100vh"
+  >
+    <CircularProgress
+      size={60}
+      thickness={4}
+      sx={{
+        color: "#1976d2", // Material UI's primary blue
+        animation: "spin 1s linear infinite",
+        "@keyframes spin": {
+          "0%": {
+            transform: "rotate(0deg)",
+          },
+          "100%": {
+            transform: "rotate(360deg)",
+          },
+        },
+      }}
+    />
+  </Box>
+);
 
 function ViewSubCategories() {
   const { id } = useParams();
@@ -37,6 +63,8 @@ function ViewSubCategories() {
   const [imageUrl, setImageUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [editedSubCategory, setEditedSubCategory] = useState({
     name: "",
     description: "",
@@ -56,6 +84,7 @@ function ViewSubCategories() {
       navigate("/login");
       return;
     }
+    setLoading(true);
 
     axios
       .get(`${BASE_URL}/api/subcategory/all-admin?id=${id}`, {
@@ -80,12 +109,16 @@ function ViewSubCategories() {
         } else {
           console.error("No subcategory found with the provided ID.");
         }
+        setLoading(false);
+
       })
       .catch((error) => {
         console.error(
           "Error fetching subcategory:",
           error.response ? error.response.data : error.message
         );
+        toast.error("Failed to fetch category types. Please try again later.");
+        setLoading(false); 
       });
   }, [id, navigate]);
 
@@ -134,7 +167,6 @@ function ViewSubCategories() {
       }));
     }
   };
-  
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -148,7 +180,6 @@ function ViewSubCategories() {
       console.log("Uploaded file:", file); // Debug the file upload
     }
   };
-  
 
   const handleStatusChange = (event) => {
     const { value } = event.target;
@@ -167,27 +198,31 @@ function ViewSubCategories() {
   const handleSaveClick = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
+    setIsSaving(true);
 
     console.log("Edited Subcategory Data:", editedSubCategory);
-  
+
     const isActive = editedSubCategory.status === "Active";
     const updatedData = new FormData();
     updatedData.append("name", editedSubCategory.name);
     updatedData.append("description", editedSubCategory.description);
     updatedData.append("isActive", isActive);
-  
+
     // Append icon (File)
     if (editedSubCategory.icon instanceof File) {
       updatedData.append("image", editedSubCategory.icon);
-    } else if (editedSubCategory.icon && typeof editedSubCategory.icon === "string") {
+    } else if (
+      editedSubCategory.icon &&
+      typeof editedSubCategory.icon === "string"
+    ) {
       updatedData.append("iconUrl", editedSubCategory.icon);
     }
-  
+
     // Log FormData entries to debug
     for (let [key, value] of updatedData.entries()) {
       console.log(key, value);
     }
-  
+
     const token = localStorage.getItem("token");
     try {
       const response = await axios.put(
@@ -208,23 +243,9 @@ function ViewSubCategories() {
       console.error("Error updating subcategory", error);
     }
   };
-  
-  
-  
 
-  if (!subcategory) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <Typography variant="h6" color="error">
-          Loading category data...
-        </Typography>
-      </Box>
-    );
+  if (loading || !subcategory) {
+    return <LoadingSpinner />;
   }
   return (
     <Box padding={4} maxWidth={800} margin="auto">
@@ -300,17 +321,17 @@ function ViewSubCategories() {
           </Typography>
           {isEditing ? (
             <>
-            <CustomInput
-              value={editedSubCategory.name}
-              name="name"
-              onChange={handleInputChange}
-            />
+              <CustomInput
+                value={editedSubCategory.name}
+                name="name"
+                onChange={handleInputChange}
+              />
               {errors.name && (
-                            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                              {errors.name}
-                            </Typography>
-                          )}
-              </>
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  {errors.name}
+                </Typography>
+              )}
+            </>
           ) : (
             <Typography>{subcategory.name}</Typography>
           )}
@@ -327,16 +348,16 @@ function ViewSubCategories() {
           </Typography>
           {isEditing ? (
             <>
-            <CustomInput
-              value={editedSubCategory.description}
-              name="description"
-              onChange={handleInputChange}
-            />
-            {errors.description && (
-                            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                              {errors.description}
-                            </Typography>
-                          )}
+              <CustomInput
+                value={editedSubCategory.description}
+                name="description"
+                onChange={handleInputChange}
+              />
+              {errors.description && (
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  {errors.description}
+                </Typography>
+              )}
             </>
           ) : (
             <Typography>{subcategory.description}</Typography>
@@ -354,23 +375,23 @@ function ViewSubCategories() {
           </Typography>
           {isEditing ? (
             <>
-            <CustomSelect
-              id="status"
-              name="status"
-              value={editedSubCategory.status}
-              onChange={handleStatusChange}
-              label="Status"
-              MenuItems={[
-                { value: "Active", label: "Active" },
-                { value: "Inactive", label: "Inactive" },
-              ]}
-              sx={{ width: "100%" }}
-            />
+              <CustomSelect
+                id="status"
+                name="status"
+                value={editedSubCategory.status}
+                onChange={handleStatusChange}
+                label="Status"
+                MenuItems={[
+                  { value: "Active", label: "Active" },
+                  { value: "Inactive", label: "Inactive" },
+                ]}
+                sx={{ width: "100%" }}
+              />
               {errors.status && (
-                    <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                      {errors.status}
-                    </Typography>
-                  )}
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  {errors.status}
+                </Typography>
+              )}
             </>
           ) : (
             <Typography>

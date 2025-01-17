@@ -7,6 +7,7 @@ import {
   Chip,
   Button,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
@@ -19,6 +20,7 @@ import * as yup from "yup";
 import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { BASE_URL } from "../../../utils/baseUrl";
+import { toast } from 'react-toastify';
 
 // Validation schema
 const validationSchema = yup.object().shape({
@@ -30,6 +32,32 @@ const validationSchema = yup.object().shape({
     .required("Status is required"),
 });
 
+const LoadingSpinner = () => (
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    height="100vh"
+  >
+    <CircularProgress
+      size={60}
+      thickness={4}
+      sx={{
+        color: "#1976d2",
+        animation: "spin 1s linear infinite",
+        "@keyframes spin": {
+          "0%": {
+            transform: "rotate(0deg)",
+          },
+          "100%": {
+            transform: "rotate(360deg)",
+          },
+        },
+      }}
+    />
+  </Box>
+);
+
 function ViewCategories() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,13 +65,17 @@ function ViewCategories() {
   const [imageUrl, setImageUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [editedCategory, setEditedCategory] = useState({
     id: "",
     name: "",
     description: "",
     status: "",
   });
+
   console.log("Category ID:", id);
+
   useEffect(() => {
     if (!id) {
       console.error("Invalid category ID.");
@@ -56,6 +88,7 @@ function ViewCategories() {
       navigate("/login");
       return;
     }
+    setLoading(true);
 
     axios
       .get(`${BASE_URL}/api/category/admin-all?id=${id}`, {
@@ -71,21 +104,24 @@ function ViewCategories() {
             id: data._id,
             name: data.name,
             description: data.description,
-            status: data.isActive ? "Active" : "Inactive", 
+            status: data.isActive ? "Active" : "Inactive",
           });
           setImageUrl(data.icon || "default_image_url");
         } else {
           console.error("No category found with the provided ID.");
         }
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching category:", error);
+        toast.error("Failed to fetch category types. Please try again later.");
+        setLoading(false);
       });
   }, [id, navigate]);
 
   const handleEditClick = () => {
     setIsEditing(true);
-    setErrors({}); // Clear any existing errors
+    setErrors({});
   };
 
   const validateForm = async () => {
@@ -106,24 +142,26 @@ function ViewCategories() {
   const handleSaveClick = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
-  
-    console.log("Saving category with status:", editedCategory.status); // Debugging
-    
+    setIsSaving(true);
+
+    console.log("Saving category with status:", editedCategory.status);
+
     const updatedData = new FormData();
     updatedData.append("name", editedCategory.name);
     updatedData.append("description", editedCategory.description);
-  
-    // Ensure status is correctly converted to boolean
-    updatedData.append("isActive", editedCategory.status === "Active" ? true : false); 
-  
+    updatedData.append(
+      "isActive",
+      editedCategory.status === "Active" ? true : false
+    );
+
     if (imageUrl && imageUrl instanceof File) {
       updatedData.append("image", imageUrl);
     }
-  
-    console.log(updatedData); // Log FormData to check its contents
-    
+
+    console.log(updatedData);
+
     const token = localStorage.getItem("token");
-    
+
     try {
       const response = await axios.put(
         `${BASE_URL}/api/category/update/${id}`,
@@ -139,19 +177,19 @@ function ViewCategories() {
       setCategory(response.data.data);
       setIsEditing(false);
       setErrors({});
+      setIsSaving(false);
     } catch (error) {
       console.error("Error updating category:", error);
+      setIsSaving(false);
     }
   };
-  
-  
 
   const handleCancelClick = () => {
     setEditedCategory({
       id: category._id,
       name: category.name,
       description: category.description,
-      status: data.isActive ? "Active" : "Inactive",
+      status: category.isActive ? "Active" : "Inactive",
     });
     setImageUrl(category.icon || "default_image_url");
     setIsEditing(false);
@@ -188,25 +226,13 @@ function ViewCategories() {
     if (errors.status) {
       setErrors((prev) => ({
         ...prev,
-        status: undefined, 
+        status: undefined,
       }));
     }
   };
-  
 
-  if (!category) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <Typography variant="h6" color="error">
-          Loading category data...
-        </Typography>
-      </Box>
-    );
+  if (loading || !category) {
+    return <LoadingSpinner />;
   }
 
   return (
@@ -325,42 +351,40 @@ function ViewCategories() {
           )}
         </Box>
 
-<Box sx={{ padding: 2 }}>
-  <Typography
-    variant="subtitle1"
-    color="textSecondary"
-    sx={{ fontWeight: "bold", mb: 1 }}
-  >
-    Status:
-  </Typography>
-  {isEditing ? (
-    <>
-      <CustomSelect
-        id="status"
-        name="status"
-        value={editedCategory.status}
-        onChange={handleStatusChange}
-        label="Status"
-        MenuItems={[
-          { value: "Active", label: "Active" },
-          { value: "Inactive", label: "Inactive" },
-        ]}
-        sx={{ width: "100%" }}
-      />
-      {errors.status && (
-        <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-          {errors.status}
-        </Typography>
-      )}
-    </>
-  ) : (
-    // Fix: Ensure status is checked properly when not in editing mode
-    <Typography variant="body1">
-      {category.isActive ? "Active" : "Inactive"}
-    </Typography>
-  )}
-</Box>
-
+        <Box sx={{ padding: 2 }}>
+          <Typography
+            variant="subtitle1"
+            color="textSecondary"
+            sx={{ fontWeight: "bold", mb: 1 }}
+          >
+            Status:
+          </Typography>
+          {isEditing ? (
+            <>
+              <CustomSelect
+                id="status"
+                name="status"
+                value={editedCategory.status}
+                onChange={handleStatusChange}
+                label="Status"
+                MenuItems={[
+                  { value: "Active", label: "Active" },
+                  { value: "Inactive", label: "Inactive" },
+                ]}
+                sx={{ width: "100%" }}
+              />
+              {errors.status && (
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  {errors.status}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Typography variant="body1">
+              {category.isActive ? "Active" : "Inactive"}
+            </Typography>
+          )}
+        </Box>
 
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           {isEditing ? (
@@ -369,18 +393,21 @@ function ViewCategories() {
                 variant="contained"
                 color="success"
                 onClick={handleSaveClick}
-                endIcon={<SaveIcon />}
+                disabled={isSaving}
+                endIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
                 sx={{
                   background: "linear-gradient(45deg, #556cd6, #19857b)",
                   color: "#fff",
+                  minWidth: "100px",
                 }}
               >
-                Save
+                {isSaving ? 'Saving...' : 'Save'}
               </Button>
               <Button
                 variant="outlined"
                 color="error"
                 onClick={handleCancelClick}
+                disabled={isSaving}
                 endIcon={<CancelIcon />}
                 sx={{
                   background: "linear-gradient(45deg, #FF0000, #FF7878)",

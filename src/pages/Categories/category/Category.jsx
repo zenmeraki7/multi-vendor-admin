@@ -20,6 +20,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -35,24 +36,37 @@ function Category() {
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState(categories);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
   const itemsPerPage = 10;
 
   // Fetch Categories
   const fetchCategories = async () => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found. Please log in.");
+      navigate("/login");
+      return;
+    }
+    setLoading(true); 
+
     try {
       const response = await axios.get(`${BASE_URL}/api/category/admin-all`, {
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
-      const data = response.data.data || []; // Adjust based on API structure
+      const data = response.data.data || []; 
       setCategories(data);
       setFilteredCategories(data);
+      setLoading(false); 
+
     } catch (error) {
       console.error("Error fetching categories:", error);
       setCategories([]);
       setFilteredCategories([]);
+      setLoading(false); 
+
     }
   };
 
@@ -135,9 +149,14 @@ function Category() {
           </Typography>
         </Box>
       </Box>
-
-      {/* Search Bar and Filters */}
-      <Box display="flex" alignItems="center" gap={2} mb={2}>
+ {loading?(
+<Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+          <CircularProgress color="primary" />
+        </Box>
+ ):(
+  <>
+  {/* Search Bar and Filters */}
+  <Box display="flex" alignItems="center" gap={2} mb={2}>
         <TextField
           placeholder="Search Categories"
           size="small"
@@ -276,6 +295,10 @@ function Category() {
           color="primary"
         />
       </Box>
+  </>
+ )}
+
+      
     </Box>
   );
 }

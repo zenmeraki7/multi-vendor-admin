@@ -4,8 +4,6 @@ import Layout from "./layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./routes/PrivateRoute";
 import Register from "./pages/Register";
-import Login from "./pages/Login";
-import AddProduct from "./pages/AddProduct";
 import AddVariant from "./components/AddVariant";
 import "bootstrap/dist/css/bootstrap.min.css";
 import SellerPro from "./pages/SellerPro";
@@ -30,6 +28,9 @@ import AddCategory from "./pages/Categories/category/AddCategory";
 import Category from './pages/Categories/category/Category'
 import AddSubCategories from "./pages/Categories/SubCategories/AddSubCategories";
 import ViewSubCategories from "./pages/Categories/SubCategories/ViewSubcategories";
+import BankManagement from "./pages/Others/BankManagement";
+import CountryManagement from "./pages/Others/CountryManagement";
+import StateManagement from "./pages/Others/StateManagement";
 
 function App() {
   const dummyProduct = {
@@ -146,6 +147,9 @@ function App() {
           <Route path='/sub-category' element={<SubCategories/>}/>
           <Route path='/add-subcategory' element={<AddSubCategories/>}/>
           <Route path="view-subcategory/:id" element={<ViewSubCategories/>}/>
+          <Route path="/bank-management" element={<BankManagement/>}/>
+          <Route path="/country-management" element={<CountryManagement/>} />
+          <Route path="/state-management" element={<StateManagement/>}/>
           <Route
             path="view-product/:id"
             element={<PrivateRoute component={<ViewProduct />} />}

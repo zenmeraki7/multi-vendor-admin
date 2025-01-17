@@ -8,11 +8,12 @@ import {
   Grid,
   Alert,
   FormControl,
+  CircularProgress,
 } from "@mui/material";
 import { Save } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../../../components/SharedComponents/CustomInput"; // Import CustomInput
+import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { BASE_URL } from "../../../utils/baseUrl";
 import axios from "axios";
@@ -21,14 +22,15 @@ import * as Yup from "yup";
 
 function AddSubCategory() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [subcategory, setSubcategory] = useState({
-    category: "", // Added category field
+    category: "",
     subcategory: "",
     description: "",
     image: "",
     status: true,
   });
-  const [categoryOptions, setCategoryOptions] = useState([]); // Declare categoryOptions state
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [alertVisible, setAlertVisible] = useState(false);
 
   const fetchCategories = async () => {
@@ -40,9 +42,11 @@ function AddSubCategory() {
         },
       });
       const categories = response.data.data || [];
-      setCategoryOptions(categories); // Set the categories in state
+      setCategoryOptions(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,10 +65,9 @@ function AddSubCategory() {
   const handleIconUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Check file size and type here if needed (e.g., max 5MB)
       setSubcategory((prev) => ({
         ...prev,
-        image: file, // Set the file itself to the state
+        image: file,
       }));
     }
   };
@@ -73,13 +76,12 @@ function AddSubCategory() {
     const token = localStorage.getItem("token");
     const formData = new FormData();
 
-    // Append the subcategory data
     formData.append("name", subcategory.subcategory);
     formData.append("description", subcategory.description);
     formData.append("category", subcategory.category);
 
     if (subcategory.image) {
-      formData.append("image", subcategory.image); // Append the file itself
+      formData.append("image", subcategory.image);
     } else {
       alert("Please upload an image.");
       return;
@@ -101,15 +103,8 @@ function AddSubCategory() {
 
       const data = response.data;
       if (response.status === 200) {
-        // Successfully created subcategory
         console.log("Subcategory Created Successfully:", data);
-        {
-          alertVisible && (
-            <Alert variant="filled" severity="success">
-              Subcategory successfully added!
-            </Alert>
-          );
-        }
+        setAlertVisible(true);
         setTimeout(() => {
           setAlertVisible(false);
         }, 3000);
@@ -124,7 +119,7 @@ function AddSubCategory() {
   };
 
   const validationSchema = Yup.object({
-    category: Yup.string().required("Category is required"), // Ensure category is selected
+    category: Yup.string().required("Category is required"),
     subcategory: Yup.string()
       .required("Subcategory name is required")
       .min(3, "Subcategory name must be at least 3 characters"),
@@ -134,8 +129,20 @@ function AddSubCategory() {
     status: Yup.boolean().required("Status is required"),
     image: Yup.mixed()
       .required("Category icon is required")
-     
   });
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box padding={2}>
@@ -166,8 +173,13 @@ function AddSubCategory() {
         <Alert
           variant="filled"
           severity="success"
-          mb={3}
-          sx={{ width: "350px" }}
+          sx={{ 
+            width: "350px",
+            position: "fixed",
+            top: 16,
+            right: 16,
+            zIndex: 9999
+          }}
         >
           Subcategory successfully added!
         </Alert>
@@ -183,6 +195,7 @@ function AddSubCategory() {
         validationSchema={validationSchema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
+          setLoading(true);
           const token = localStorage.getItem("token");
           const formData = new FormData();
 
@@ -191,10 +204,11 @@ function AddSubCategory() {
           formData.append("category", values.category);
 
           if (values.image) {
-            formData.append("image", values.image); // Append the file itself
+            formData.append("image", values.image);
           } else {
             alert("Please upload an image.");
             setSubmitting(false);
+            setLoading(false);
             return;
           }
 
@@ -221,6 +235,7 @@ function AddSubCategory() {
               setAlertVisible(true);
               setTimeout(() => {
                 setAlertVisible(false);
+                navigate(-1);
               }, 3000);
             } else {
               alert(data.message || "Error creating subcategory");
@@ -231,6 +246,7 @@ function AddSubCategory() {
             alert("An error occurred while creating the category.");
           }
           setSubmitting(false);
+          setLoading(false);
         }}
       >
         {({ setFieldValue, values, touched, errors, isSubmitting }) => (
@@ -324,12 +340,12 @@ function AddSubCategory() {
                     id="status"
                     name="status"
                     label="Status"
-                    value={values.status.toString()} // Convert boolean to string
+                    value={values.status.toString()}
                     onChange={(e) =>
                       setFieldValue("status", e.target.value === "true")
-                    } // Convert string back to boolean
+                    }
                     MenuItems={[
-                      { label: "Active", value: "true" }, // Use strings as values
+                      { label: "Active", value: "true" },
                       { label: "Inactive", value: "false" },
                     ]}
                     sx={{ width: "100%" }}
@@ -348,10 +364,14 @@ function AddSubCategory() {
                 type="submit"
                 variant="contained"
                 color="primary"
-                startIcon={<Save />}
-                disabled={isSubmitting}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                disabled={isSubmitting || loading}
+                style={{
+                  background: "linear-gradient(45deg, #556cd6, #19857b)",
+                  color: "#fff",
+                }}
               >
-                Save
+                {loading ? 'Saving...' : 'Save'}
               </Button>
             </Box>
           </Form>
