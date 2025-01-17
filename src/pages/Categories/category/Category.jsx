@@ -20,6 +20,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -35,24 +36,37 @@ function Category() {
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState(categories);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
   const itemsPerPage = 10;
 
   // Fetch Categories
   const fetchCategories = async () => {
     const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found. Please log in.");
+      navigate("/login");
+      return;
+    }
+    setLoading(true); 
+
     try {
       const response = await axios.get(`${BASE_URL}/api/category/admin-all`, {
         headers: {
           authorization: `Bearer ${token}`,
         },
       });
-      const data = response.data.data || []; // Adjust based on API structure
+      const data = response.data.data || []; 
       setCategories(data);
       setFilteredCategories(data);
+      setLoading(false); 
+
     } catch (error) {
       console.error("Error fetching categories:", error);
       setCategories([]);
       setFilteredCategories([]);
+      setLoading(false); 
+
     }
   };
 
@@ -81,7 +95,9 @@ function Category() {
 
     // Filter by category type
     if (categoryFilter !== "All") {
-      filtered = filtered.filter((category) => category.categoryType.name === categoryFilter);
+      filtered = filtered.filter(
+        (category) => category.categoryType.name === categoryFilter
+      );
     }
 
     // Filter by search term
@@ -114,8 +130,15 @@ function Category() {
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4"><b>Category Management</b></Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h4">
+          <b>Category Management</b>
+        </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
           <IconButton color="primary" onClick={fetchCategories}>
@@ -126,9 +149,14 @@ function Category() {
           </Typography>
         </Box>
       </Box>
-
-      {/* Search Bar and Filters */}
-      <Box display="flex" alignItems="center" gap={2} mb={2}>
+ {loading?(
+<Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+          <CircularProgress color="primary" />
+        </Box>
+ ):(
+  <>
+  {/* Search Bar and Filters */}
+  <Box display="flex" alignItems="center" gap={2} mb={2}>
         <TextField
           placeholder="Search Categories"
           size="small"
@@ -166,8 +194,12 @@ function Category() {
           >
             <MenuItem value="All">All</MenuItem>
             {categories
-              .map((category) => category.categoryType.name)
-              .filter((value, index, self) => self.indexOf(value) === index) // Ensure unique types
+              .map((category) =>
+                category.categoryType ? category.categoryType.name : null
+              )
+              .filter(
+                (value, index, self) => value && self.indexOf(value) === index
+              ) // Ensure unique types and skip null values
               .map((name) => (
                 <MenuItem key={name} value={name}>
                   {name}
@@ -175,12 +207,21 @@ function Category() {
               ))}
           </Select>
         </FormControl>
-        <Button variant="outlined" onClick={() => filterCategories(searchTerm, statusFilter, categoryFilter)}>Apply</Button>
-        <Button variant="outlined" onClick={clearFilters}>Clear</Button>
+        <Button
+          variant="outlined"
+          onClick={() =>
+            filterCategories(searchTerm, statusFilter, categoryFilter)
+          }
+        >
+          Apply
+        </Button>
+        <Button variant="outlined" onClick={clearFilters}>
+          Clear
+        </Button>
         <Button
           variant="contained"
           color="primary"
-          style={{ marginLeft: '400px' }}
+          style={{ marginLeft: "400px" }}
           onClick={() => navigate("/add-category")}
         >
           <AddIcon /> Add
@@ -192,9 +233,9 @@ function Category() {
         <Table>
           <TableHead>
             <TableRow
-             sx={{
-              backgroundColor: "primary.main",
-            }}
+              sx={{
+                backgroundColor: "primary.main",
+              }}
             >
               <TableCell>#</TableCell>
               <TableCell>Category Type</TableCell>
@@ -207,17 +248,22 @@ function Category() {
           </TableHead>
           <TableBody>
             {filteredCategories
-              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+              .slice(
+                (currentPage - 1) * itemsPerPage,
+                currentPage * itemsPerPage
+              )
               .map((category, index) => (
                 <TableRow key={category._id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{category.categoryType.name}</TableCell>
+                  <TableCell>{category?.categoryType?.name}</TableCell>
                   <TableCell>{category.name}</TableCell>
                   <TableCell>{category.description}</TableCell>
                   <TableCell>
-                    <Avatar src={category.icon}
-                    variant="rounded"
-                    sx={{height:'100px', width:'100px'}} />
+                    <Avatar
+                      src={category.icon}
+                      variant="rounded"
+                      sx={{ height: "100px", width: "100px" }}
+                    />
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -249,6 +295,10 @@ function Category() {
           color="primary"
         />
       </Box>
+  </>
+ )}
+
+      
     </Box>
   );
 }

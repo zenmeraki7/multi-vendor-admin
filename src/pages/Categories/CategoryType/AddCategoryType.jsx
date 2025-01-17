@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -7,6 +7,7 @@ import {
   IconButton,
   Grid,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { Save } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
@@ -21,32 +22,40 @@ import * as yup from "yup";
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
   description: yup.string().required("Description is required"),
-  isActive: yup.boolean().nullable().required("Status is required"),
+  isActive: yup.string().required("Status is required"),
   image: yup.mixed().required("Icon is required"),
 });
 
 function AddCategoryType() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [categoryType, setCategoryType] = useState({
     name: "",
     description: "",
     image: null,
-    isActive: true, // Or `null` or `false`, depending on your needs
+    isActive: true,
   });
 
   const [errors, setErrors] = useState({});
   const [alertVisible, setAlertVisible] = useState(false);
+
+  useEffect(() => {
+    // Simulate initial loading
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     console.log("Change detected", name, value);
 
     if (name === "isActive") {
-      const newIsActive = value === "Active"; // Convert "Active" to true, "Inactive" to false
-      console.log("New isActive value:", newIsActive); // This should log `true` or `false`
+      const newIsActive = value === "Active";
+      console.log("New isActive value:", newIsActive);
       setCategoryType((prev) => ({
         ...prev,
-        isActive: newIsActive, // Update state with the correct boolean value
+        isActive: newIsActive,
       }));
     } else {
       setCategoryType((prev) => ({
@@ -56,7 +65,6 @@ function AddCategoryType() {
     }
   };
 
-  // Rest of your component code remains the same...
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -144,6 +152,25 @@ function AddCategoryType() {
     }
   };
 
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress
+          size={60}
+          thickness={4}
+          sx={{
+            color: '#1976d2',
+          }}
+        />
+      </Box>
+    );
+  }
+
   return (
     <Box padding={2}>
       <Box
@@ -173,8 +200,13 @@ function AddCategoryType() {
         <Alert
           variant="filled"
           severity="success"
-          mb={3}
-          sx={{ width: "350px" }}
+          sx={{ 
+            width: "350px",
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: 1000
+          }}
         >
           Category Type successfully added!
         </Alert>
@@ -248,9 +280,11 @@ function AddCategoryType() {
               value={categoryType.isActive ? "Active" : "Inactive"}
               onChange={handleInputChange}
               label="Status"
-              MenuItems={["Active", "Inactive"]}
+              MenuItems={[
+                { value: "Active", label: "Active" },
+                { value: "Inactive", label: "Inactive" },
+              ]}
             />
-
             {errors.isActive && (
               <Typography color="error">{errors.isActive}</Typography>
             )}
@@ -264,9 +298,10 @@ function AddCategoryType() {
           color="primary"
           onClick={handleSave}
           startIcon={<Save />}
-          style={{                
+          style={{
             background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",}}
+            color: "#fff",
+          }}
         >
           Save
         </Button>

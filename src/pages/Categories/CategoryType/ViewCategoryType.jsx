@@ -7,6 +7,7 @@ import {
   Chip,
   Button,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,9 +25,36 @@ import { BASE_URL } from "../../../utils/baseUrl";
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
   description: yup.string().required("Description is required"),
-  status: yup.string().oneOf(['Active', 'Inactive']).required("Status is required"),
+  status: yup
+    .string()
+    .oneOf(["Active", "Inactive"])
+    .required("Status is required"),
 });
-
+const LoadingSpinner = () => (
+  <Box
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    height="100vh"
+  >
+    <CircularProgress 
+      size={60}
+      thickness={4}
+      sx={{
+        color: '#1976d2', // Material UI's primary blue
+        animation: 'spin 1s linear infinite',
+        '@keyframes spin': {
+          '0%': {
+            transform: 'rotate(0deg)',
+          },
+          '100%': {
+            transform: 'rotate(360deg)',
+          },
+        },
+      }}
+    />
+  </Box>
+);
 function ViewCategoryType() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,11 +62,14 @@ function ViewCategoryType() {
   const [imageUrl, setImageUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [editedCategory, setEditedCategory] = useState({
     id: "",
     name: "",
     description: "",
     status: "",
+    icon: "",
   });
 
   useEffect(() => {
@@ -53,7 +84,7 @@ function ViewCategoryType() {
       navigate("/login");
       return;
     }
-
+    setLoading(true);
     axios
       .get(`${BASE_URL}/api/category-type/all-admin?id=${id}`, {
         headers: {
@@ -74,9 +105,12 @@ function ViewCategoryType() {
         } else {
           console.error("No category found with the provided ID.");
         }
+        setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching category:", error);
+        console.error("Error fetching categoryType:", error);
+        toast.error("Failed to fetch category types. Please try again later.");
+        setLoading(false); 
       });
   }, [id, navigate]);
 
@@ -103,7 +137,7 @@ function ViewCategoryType() {
   const handleSaveClick = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
-
+    setIsSaving(true);
     const isActive = editedCategory.status === "Active";
     const updatedData = new FormData();
     updatedData.append("name", editedCategory.name);
@@ -134,6 +168,7 @@ function ViewCategoryType() {
     } catch (error) {
       console.error("Error updating category:", error);
     }
+    
   };
 
   const handleCancelClick = () => {
@@ -183,21 +218,12 @@ function ViewCategoryType() {
       }));
     }
   };
-
-  if (!category) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
-        <Typography variant="h6" color="error">
-          Loading category data...
-        </Typography>
-      </Box>
-    );
+  
+  if (loading || !category) {
+    return <LoadingSpinner />;
   }
+
+ 
 
   return (
     <Box padding={4} maxWidth={800} margin="auto">
@@ -327,10 +353,13 @@ function ViewCategoryType() {
             <>
               <CustomSelect
                 id="status"
-                value={editedCategory.status}
+                value={editedCategory.status || ""}
                 onChange={handleStatusChange}
                 label="Status"
-                MenuItems={["Active", "Inactive"]}
+                MenuItems={[
+                  { value: "Active", label: "Active" },
+                  { value: "Inactive", label: "Inactive" },
+                ]}
               />
               {errors.status && (
                 <Typography color="error" variant="caption" sx={{ mt: 1 }}>

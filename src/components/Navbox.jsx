@@ -14,11 +14,13 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import SettingsIcon from "@mui/icons-material/Settings";
+import AssuredWorkloadIcon from "@mui/icons-material/AssuredWorkload";
 import PeopleIcon from "@mui/icons-material/People";
 import WidgetsIcon from "@mui/icons-material/Widgets";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import PublicIcon from '@mui/icons-material/Public';
+import ApartmentIcon from '@mui/icons-material/Apartment';
 import { useNavigate } from "react-router-dom";
 
 function Navbox() {
@@ -36,9 +38,17 @@ function Navbox() {
     { text: "Sellers", icon: <PeopleIcon />, path: "/sellers" },
     { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
-    { text: "Transactions", icon: <MonetizationOnIcon />, path: "/transactions" },
+    {
+      text: "Transactions",
+      icon: <MonetizationOnIcon />,
+      path: "/transactions",
+    },
     { text: "Reviews", icon: <AssignmentIcon />, path: "/reviews" },
-    { text: "Product Management", icon: <WidgetsIcon />, path: "/product-list" },
+    {
+      text: "Product Management",
+      icon: <WidgetsIcon />,
+      path: "/product-list",
+    },
     {
       text: "Manage Categories",
       icon: <WidgetsIcon />,
@@ -106,7 +116,8 @@ function Navbox() {
                     if (item.path) navigate(item.path);
                   }}
                   sx={{
-                    backgroundColor: activeItem === item.text ? "#c8d8e4" : "inherit",
+                    backgroundColor:
+                      activeItem === item.text ? "#c8d8e4" : "inherit",
                     "&:hover": {
                       backgroundColor: "#c8d8e4",
                     },
@@ -130,11 +141,114 @@ function Navbox() {
                 </ListItemButton>
               </ListItem>
             )}
-            {item.text === "Configuration" || item.text === "Sellers" ? (
-              <Divider sx={{ marginY: 1 }} />
-            ) : null}
           </React.Fragment>
         ))}
+        {/* "Manage Categories" extra menu items like Bank, Country, State Management */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+            mt: 1,
+          }}
+        >
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => navigate("/bank-management")}
+              sx={{
+                backgroundColor:
+                  activeItem === "Bank Management" ? "#c8d8e4" : "inherit",
+                "&:hover": {
+                  backgroundColor: "#c8d8e4",
+                },
+                transition: "background-color 0.3s",
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color:
+                    activeItem === "Bank Management" ? "#3a4b58" : "#556b78",
+                }}
+              >
+                <AssuredWorkloadIcon />{" "}
+              </ListItemIcon>
+              <ListItemText
+                primary="Bank Management"
+                primaryTypographyProps={{
+                  fontWeight:
+                    activeItem === "Bank Management" ? "bold" : "normal",
+                  color:
+                    activeItem === "Bank Management" ? "#3a4b58" : "#556b78",
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => navigate("/country-management")}
+              sx={{
+                backgroundColor:
+                  activeItem === "Country Management" ? "#c8d8e4" : "inherit",
+                "&:hover": {
+                  backgroundColor: "#c8d8e4",
+                },
+                transition: "background-color 0.3s",
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color:
+                    activeItem === "Country Management" ? "#3a4b58" : "#556b78",
+                }}
+              >
+                <PublicIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary="Country Management"
+                primaryTypographyProps={{
+                  fontWeight:
+                    activeItem === "Country Management" ? "bold" : "normal",
+                  color:
+                    activeItem === "Country Management" ? "#3a4b58" : "#556b78",
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => navigate("/state-management")}
+              sx={{
+                backgroundColor:
+                  activeItem === "State Management" ? "#c8d8e4" : "inherit",
+                "&:hover": {
+                  backgroundColor: "#c8d8e4",
+                },
+                transition: "background-color 0.3s",
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color:
+                    activeItem === "State Management" ? "#3a4b58" : "#556b78",
+                }}
+              >
+                <ApartmentIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary="State Management"
+                primaryTypographyProps={{
+                  fontWeight:
+                    activeItem === "State Management" ? "bold" : "normal",
+                  color:
+                    activeItem === "State Management" ? "#3a4b58" : "#556b78",
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </Box>
       </List>
     </Box>
   );
