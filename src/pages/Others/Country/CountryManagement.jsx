@@ -13,32 +13,60 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Avatar,
   Pagination,
   Chip,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import AddIcon from "@mui/icons-material/Add";
+import axios from "axios";
+import { BASE_URL } from "../../../utils/baseUrl";
 
-const BankManagement = () => {
+const CountryManagement = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  
-  const banks = [
-    { name: "State bank of India", country: "India", isActive: true, icon: "https://img.etimg.com/thumb/msid-101177850,width-1200,height-900,resizemode-4,imgsize-8302/state-bank-of-india-share-price-live-22-jun-2023.jpg" },
-    { name: "Federal Bank", country: "India", isActive: false, icon: "https://etimg.etb2bimg.com/photo/114746925.cms" },
-    
-  ];
-
-  const [filteredBanks, setFilteredBanks] = useState(banks);
+  const [countries, setCountries] = useState([]);
+  const [filteredCountries, setFilteredCountries] = useState(countries);
 
   useEffect(() => {
-    filterBanks(searchTerm, statusFilter);
+    fetchCountries();
+  }, []);
+
+  useEffect(() => {
+    filterCountries(searchTerm, statusFilter);
   }, [searchTerm, statusFilter]);
 
-  // Search and Filter Logic
+  
+  const fetchCountries = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${BASE_URL}/api/countries/admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      
+      if (Array.isArray(response.data.data)) {
+        setCountries(response.data.data);  
+        setFilteredCountries(response.data.data);  
+        console.log(response.data.data);
+        
+      } else {
+        console.error("API response is not an array", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+  };
+  
+
+
+  
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -47,37 +75,40 @@ const BankManagement = () => {
     setStatusFilter(e.target.value);
   };
 
-  const filterBanks = (searchTerm, statusFilter) => {
-    let filtered = banks;
+  const filterCountries = (searchTerm, statusFilter) => {
+    let filtered = countries;
 
     if (searchTerm) {
-      filtered = filtered.filter((bank) =>
-        bank.name.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter((country) =>
+        country.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (statusFilter !== "All") {
       const isActive = statusFilter === "Active";
-      filtered = filtered.filter((bank) => bank.isActive === isActive);
+      filtered = filtered.filter((country) => country.isActive === isActive);
     }
 
-    setFilteredBanks(filtered);
+    setFilteredCountries(filtered);
   };
 
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setFilteredBanks(banks);
+    setFilteredCountries(countries);
   };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
-  const currentData = filteredBanks.slice(
+  
+const currentData = Array.isArray(filteredCountries)
+? filteredCountries.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
+  )
+: [];
 
   return (
     <Box padding={2}>
@@ -89,11 +120,11 @@ const BankManagement = () => {
         mb={2}
       >
         <Typography variant="h4">
-          <b>Bank Management</b>
+          <b>Country Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
-          <IconButton color="primary">
+          <IconButton color="primary" onClick={fetchCountries}>
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -104,9 +135,9 @@ const BankManagement = () => {
 
       {/* Search Bar and Filters */}
       <Box display="flex" alignItems="center" gap={2} mb={2}>
-        {/* Search by Bank Name */}
+        {/* Search by Country Name */}
         <TextField
-          placeholder="Search Banks by Name"
+          placeholder="Search Countries by Name"
           size="small"
           value={searchTerm}
           onChange={handleSearch}
@@ -139,59 +170,63 @@ const BankManagement = () => {
 
         {/* Clear Filters Button */}
         <Button variant="outlined" onClick={clearFilters}>
-          Clear 
+          Clear
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ marginLeft: "400px" }}
+          onClick={() => navigate("/add-country")}
+        >
+          <AddIcon /> Add
         </Button>
       </Box>
 
-      {/* Bank Table */}
+      {/* Country Table */}
       <TableContainer component={Paper} elevation={3}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "primary.main" }}>
               <TableCell>#</TableCell>
-              <TableCell>Bank Name</TableCell>
-              <TableCell>Country</TableCell>
-              <TableCell>Icon</TableCell>
+              <TableCell>Country Name</TableCell>
+              <TableCell>Country Code</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentData.map((bank, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  {(currentPage - 1) * itemsPerPage + index + 1}
-                </TableCell>
-                <TableCell>{bank.name}</TableCell>
-                <TableCell>{bank.country}</TableCell>
-                <TableCell>
-                  <Avatar
-                    src={bank.icon}
-                    variant="rounded"
-                    sx={{ height: "100px", width: "150px" }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={bank.isActive ? "Active" : "Inactive"}
-                    color={bank.isActive ? "success" : "error"}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button variant="contained" size="small">
-                    View
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+    {currentData.map((country, index) => (
+      <TableRow key={index}>
+        <TableCell>
+          {(currentPage - 1) * itemsPerPage + index + 1}
+        </TableCell>
+        <TableCell>{country.name}</TableCell>
+        <TableCell>{country.code}</TableCell>
+        <TableCell>
+          <Chip
+            label={country.isActive ? "Active" : "Inactive"}
+            color={country.isActive ? "success" : "error"}
+          />
+        </TableCell>
+        <TableCell>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => navigate("/view-country")}
+          >
+            View
+          </Button>
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
         </Table>
       </TableContainer>
 
       {/* Pagination */}
       <Box mt={2} display="flex" justifyContent="center">
         <Pagination
-          count={Math.ceil(filteredBanks.length / itemsPerPage)}
+          count={Math.ceil(filteredCountries.length / itemsPerPage)}
           page={currentPage}
           onChange={handlePageChange}
           color="primary"
@@ -201,4 +236,4 @@ const BankManagement = () => {
   );
 };
 
-export default BankManagement;
+export default CountryManagement;
