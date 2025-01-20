@@ -212,7 +212,7 @@ const currentData = Array.isArray(filteredCountries)
           <Button
             variant="contained"
             size="small"
-            onClick={() => navigate("/view-country")}
+            onClick={() => navigate(`/view-country/${country._id}`)}
           >
             View
           </Button>

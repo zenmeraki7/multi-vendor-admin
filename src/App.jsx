@@ -156,11 +156,11 @@ function App() {
           <Route path="/bank-management" element={<BankManagement/>}/>
           <Route path="/country-management" element={<CountryManagement/>} />
           <Route path="/state-management" element={<StateManagement/>}/>
-          <Route path="/view-bank" element ={<ViewBank/>}/>
+          <Route path="/view-bank/:id" element ={<ViewBank/>}/>
           <Route path="/add-bank" element={<AddBank/>} />
-          <Route path="/view-country" element={<ViewCountry/>}/>
+          <Route path="/view-country/:id" element={<ViewCountry/>}/>
           <Route path="/add-country" element={<AddCountry/>} />
-          <Route path="/view-state" element={<ViewState/>} />
+          <Route path="/view-state/:id" element={<ViewState/>} />
           <Route path="/add-state" element={<AddState/>} />
           <Route
             path="view-product/:id"
