@@ -28,9 +28,15 @@ import AddCategory from "./pages/Categories/category/AddCategory";
 import Category from './pages/Categories/category/Category'
 import AddSubCategories from "./pages/Categories/SubCategories/AddSubCategories";
 import ViewSubCategories from "./pages/Categories/SubCategories/ViewSubcategories";
-import BankManagement from "./pages/Others/BankManagement";
-import CountryManagement from "./pages/Others/CountryManagement";
-import StateManagement from "./pages/Others/StateManagement";
+import BankManagement from "./pages/Others/Bank/BankManagement";
+import CountryManagement from "./pages/Others/Country/CountryManagement";
+import StateManagement from "./pages/Others/State/StateManagement";
+import ViewBank from "./pages/Others/Bank/ViewBank";
+import AddBank from "./pages/Others/Bank/AddBank";
+import ViewCountry from "./pages/Others/Country/ViewCountry";
+import AddCountry from "./pages/Others/Country/AddCountry";
+import ViewState from "./pages/Others/State/ViewState";
+import AddState from "./pages/Others/State/AddState";
 
 function App() {
   const dummyProduct = {
@@ -150,6 +156,12 @@ function App() {
           <Route path="/bank-management" element={<BankManagement/>}/>
           <Route path="/country-management" element={<CountryManagement/>} />
           <Route path="/state-management" element={<StateManagement/>}/>
+          <Route path="/view-bank" element ={<ViewBank/>}/>
+          <Route path="/add-bank" element={<AddBank/>} />
+          <Route path="/view-country" element={<ViewCountry/>}/>
+          <Route path="/add-country" element={<AddCountry/>} />
+          <Route path="/view-state" element={<ViewState/>} />
+          <Route path="/add-state" element={<AddState/>} />
           <Route
             path="view-product/:id"
             element={<PrivateRoute component={<ViewProduct />} />}

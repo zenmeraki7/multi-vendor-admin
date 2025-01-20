@@ -17,25 +17,54 @@ import {
   Chip,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { BASE_URL } from "../../../utils/baseUrl"; // Import base URL
 
 const StateManagement = () => {
+  const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Hardcoded data for demonstration
-  const states = [
-    { name: "Kerala", country: "India", code: "IN", isActive: true },
-    { name: "Tamil Nadu", country: "India", code: "IN", isActive: false },
- 
-  ];
+  const [states, setStates] = useState([]); // State to store fetched states
+  const [filteredStates, setFilteredStates] = useState([]); // State to store filtered states
 
-  const [filteredStates, setFilteredStates] = useState(states);
+  // Fetch States from API
+  useEffect(() => {
+    fetchStates();
+  }, []);
 
   useEffect(() => {
     filterStates(searchTerm, statusFilter);
   }, [searchTerm, statusFilter]);
+
+  // API Fetching Logic
+  const fetchStates = async () => {
+    try {
+      const token = localStorage.getItem("token"); // Get token from local storage
+      const response = await axios.get(`${BASE_URL}/api/states/admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Ensure the response contains the expected data
+      if (response.data && Array.isArray(response.data.data)) {
+        setStates(response.data.data); // Set fetched states
+        setFilteredStates(response.data.data); // Set filtered states
+      } else {
+        console.error(
+          "Error: API response data is not in the expected format."
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching states:", error);
+    }
+  };
 
   // Search and Filter Logic
   const handleSearch = (e) => {
@@ -92,7 +121,7 @@ const StateManagement = () => {
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
-          <IconButton color="primary">
+          <IconButton color="primary" onClick={fetchStates}>
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -140,6 +169,14 @@ const StateManagement = () => {
         <Button variant="outlined" onClick={clearFilters}>
           Clear Filters
         </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ marginLeft: "400px" }}
+          onClick={() => navigate("/add-state")}
+        >
+          <AddIcon /> Add
+        </Button>
       </Box>
 
       {/* State Table */}
@@ -162,7 +199,10 @@ const StateManagement = () => {
                   {(currentPage - 1) * itemsPerPage + index + 1}
                 </TableCell>
                 <TableCell>{state.name}</TableCell>
-                <TableCell>{state.country}</TableCell>
+                <TableCell>
+                  {state.country ? state.country.name : "N/A"}
+                </TableCell>{" "}
+                {/* Access country name correctly */}
                 <TableCell>{state.code}</TableCell>
                 <TableCell>
                   <Chip
@@ -171,7 +211,11 @@ const StateManagement = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  <Button variant="contained" size="small">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => navigate("/view-state")}
+                  >
                     View
                   </Button>
                 </TableCell>
