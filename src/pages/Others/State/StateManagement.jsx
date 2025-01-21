@@ -214,7 +214,7 @@ const StateManagement = () => {
                   <Button
                     variant="contained"
                     size="small"
-                    onClick={() => navigate("/view-state")}
+                    onClick={() => navigate(`/view-state/${state._id}`)}
                   >
                     View
                   </Button>

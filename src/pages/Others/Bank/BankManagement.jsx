@@ -35,45 +35,40 @@ const BankManagement = () => {
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const token = localStorage.getItem("token"); 
+        const token = localStorage.getItem("token");
         const response = await axios.get(`${BASE_URL}/api/banks/admin`, {
           headers: {
-            authorization: `Bearer ${token}`, 
+            authorization: `Bearer ${token}`,
           },
         });
 
-        
         if (response.data && response.data.data) {
-          console.log("Fetched Banks:", response.data.data); 
-          setBanks(response.data.data); 
-          setFilteredBanks(response.data.data); 
+          console.log("Fetched Banks:", response.data.data);
+          setBanks(response.data.data);
+          setFilteredBanks(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching banks:", error.response || error.message);
       }
     };
 
-    fetchBanks(); 
+    fetchBanks();
   }, []);
 
-  
   useEffect(() => {
     filterBanks(searchTerm, statusFilter);
   }, [searchTerm, statusFilter, banks]);
 
-  
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
   };
 
-  
   const filterBanks = (searchTerm, statusFilter) => {
-    let filtered = banks || []; 
+    let filtered = banks || [];
 
     if (searchTerm) {
       filtered = filtered.filter((bank) =>
@@ -203,7 +198,7 @@ const BankManagement = () => {
                   <Button
                     variant="contained"
                     size="small"
-                    onClick={() => navigate(`/view-bank`)}
+                    onClick={() => navigate(`/view-bank/${bank._id}`)}
                   >
                     View
                   </Button>
