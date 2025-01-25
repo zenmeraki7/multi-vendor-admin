@@ -37,6 +37,7 @@ import ViewCountry from "./pages/Others/Country/ViewCountry";
 import AddCountry from "./pages/Others/Country/AddCountry";
 import ViewState from "./pages/Others/State/ViewState";
 import AddState from "./pages/Others/State/AddState";
+import Commision from "./pages/Commision/Commision";
 
 function App() {
   const dummyProduct = {
@@ -174,6 +175,7 @@ function App() {
         </Route>
 
         <Route path="add-variant" element={<AddVariant />} />
+        <Route path="/Commision" element={<Commision />} />
       </Routes>
     </>
   );
