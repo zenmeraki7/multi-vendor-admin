@@ -1,20 +1,13 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Grid,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
-import { Save } from "@mui/icons-material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useNavigate } from "react-router-dom";
-import CustomInput from "../../../components/SharedComponents/CustomInput";
-import CustomSelect from "../../../components/SharedComponents/CustomSelect";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
-import axios from "axios";
+import React, { useState, useEffect } from "react"; 
+import { Box, Button, Typography, Grid, Alert, CircularProgress } from "@mui/material"; 
+import { Save } from "@mui/icons-material"; 
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"; 
+import { useNavigate } from "react-router-dom"; 
+import CustomInput from "../../../components/SharedComponents/CustomInput"; 
+import CustomSelect from "../../../components/SharedComponents/CustomSelect"; 
+import { Formik, Form } from "formik"; 
+import * as Yup from "yup"; 
+import axios from "axios"; 
 import { BASE_URL } from "../../../utils/baseUrl";
 
 function AddCountry() {
@@ -22,54 +15,67 @@ function AddCountry() {
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorAlertVisible, setErrorAlertVisible] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);  // New state to control page load
+
+  // Simulate fetching or page loading tasks
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Simulate async operation (e.g., fetching data)
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Add a delay for demonstration
+        setIsPageLoading(false); // Page loaded
+      } catch (error) {
+        console.error("Error during page load:", error);
+        setIsPageLoading(false); // Ensure loader is removed even if there's an error
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSave = async (values) => {
     setLoading(true);
     const token = localStorage.getItem("token"); // Get token from localStorage
   
     try {
-      // Log the payload to check values being sent
       console.log("Payload:", {
         name: values.countryName,
         code: values.countryCode,
-        isActive: values.status === "Active", // Convert status to boolean
+        isActive: values.status === "Active", 
       });
   
-      // Sending a POST request to create a new country
       const response = await axios.post(
-        `${BASE_URL}/api/countries/create`, // The API endpoint
+        `${BASE_URL}/api/countries/create`,
         {
-          name: values.countryName, // Align with 'name' from backend schema
-          code: values.countryCode, // Align with 'code' from backend schema
-          isActive: values.status === "Active", // Convert status to boolean
+          name: values.countryName,
+          code: values.countryCode,
+          isActive: values.status === "Active",
         },
         {
           headers: {
-            "Content-Type": "application/json", // Content type for JSON data
-            Authorization: `Bearer ${token}`, // Authorization header with token
+            "Content-Type": "application/json", 
+            Authorization: `Bearer ${token}`,
           },
         }
       );
   
-      // Check for success status (200 or 201)
       if (response.status === 200 || response.status === 201) {
-        setAlertVisible(true); // Display success alert
+        setAlertVisible(true);
         setTimeout(() => {
           setAlertVisible(false);
-          navigate(-1); // Navigate back after success
+          navigate(-1);
         }, 3000);
       } else {
         console.error("Unexpected Response:", response.data);
-        setErrorAlertVisible(true); // Display error alert
+        setErrorAlertVisible(true);
       }
     } catch (error) {
       console.error("Error during country creation:", error);
-      setErrorAlertVisible(true); // Display error alert if API call fails
+      setErrorAlertVisible(true);
     } finally {
-      setLoading(false); // Stop the loading spinner after API call completes
+      setLoading(false);
     }
   };
-  
 
   const validationSchema = Yup.object({
     countryName: Yup.string().required("Country name is required"),
@@ -77,17 +83,19 @@ function AddCountry() {
     status: Yup.string().required("Status is required"),
   });
 
+  if (isPageLoading) {
+    // Display loading spinner while the page is being loaded
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box padding={2}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h4" fontWeight="bold">
-          Add New Country
-        </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" fontWeight="bold">Add New Country</Typography>
         <Button
           variant="outlined"
           color="primary"
@@ -138,7 +146,7 @@ function AddCountry() {
         initialValues={{
           countryName: "",
           countryCode: "",
-          status: "Active", // Default to Active
+          status: "Active",
         }}
         validationSchema={validationSchema}
         onSubmit={handleSave}

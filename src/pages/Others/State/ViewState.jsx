@@ -39,6 +39,7 @@ const ViewState = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editedState, setEditedState] = useState({ ...state });
   const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   // Fetch countries
   useEffect(() => {
@@ -71,10 +72,13 @@ const ViewState = () => {
             stateName: response.data.data.name,
             countryName: response.data.data.country._id,
             stateCode: response.data.data.code,
-            status: response.data.data.isActive ? "Active" : "Inactive",});
+            status: response.data.data.isActive ? "Active" : "Inactive",
+          });
         }
       } catch (error) {
         console.error("Error fetching state details:", error.response ? error.response.data : error.message);
+      } finally {
+        setLoading(false); // Set loading to false once the data is fetched
       }
     };
     fetchStateDetails();
@@ -106,30 +110,30 @@ const ViewState = () => {
     if (!isValid) return;
 
     setIsSaving(true);
-   try {
-    const updatedStateData={
-      name: editedState.stateName,
-      country: editedState.countryName,
-      code: editedState.stateCode,
-      isActive: editedState.status === "Active",
-    }
-   const token = localStorage.getItem("token");
-   const response = await axios.put(`${BASE_URL}/api/states/update/${id}`,updatedStateData,{
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-   });
-console.log('Response: ' + response);
+    try {
+      const updatedStateData = {
+        name: editedState.stateName,
+        country: editedState.countryName,
+        code: editedState.stateCode,
+        isActive: editedState.status === "Active",
+      };
+      const token = localStorage.getItem("token");
+      const response = await axios.put(`${BASE_URL}/api/states/update/${id}`, updatedStateData, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+      console.log('Response: ' + response);
 
-if (response.data?.success|| response.status===200) {
-  setState({...editedState})
-  setIsEditing(false);
-  setIsSaving(false);
-}
-   } catch (error) {
-    console.error("Error updating bank details:", error.response ? error.response.data : error.message);
-    setIsSaving(false);    
-   }
+      if (response.data?.success || response.status === 200) {
+        setState({ ...editedState });
+        setIsEditing(false);
+        setIsSaving(false);
+      }
+    } catch (error) {
+      console.error("Error updating state details:", error.response ? error.response.data : error.message);
+      setIsSaving(false);
+    }
   };
 
   const handleCancelClick = () => {
@@ -151,6 +155,20 @@ if (response.data?.success|| response.status===200) {
       }));
     }
   };
+
+  if (loading) {
+    return (
+      <Box
+        padding={4}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box padding={4} maxWidth={800} margin="auto">
@@ -201,43 +219,42 @@ if (response.data?.success|| response.status===200) {
         </Box>
 
         <Box sx={{ padding: 2 }}>
-  <Typography
-    variant="subtitle1"
-    color="textSecondary"
-    sx={{ fontWeight: "bold", mb: 1 }}
-  >
-    Country Name:
-  </Typography>
-  {isEditing ? (
-    <>
-      {countries.length > 0 ? (
-        <CustomSelect
-          id="country"
-          name="countryName"
-          value={editedState.countryName}
-          onChange={handleInputChange}
-          label="Country"
-          MenuItems={countries.map((country) => ({
-            value: country._id,
-            label: country.name,
-          }))}
-        />
-      ) : (
-        <CircularProgress size={20} />
-      )}
-      {errors.countryName && (
-        <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-          {errors.countryName}
-        </Typography>
-      )}
-    </>
-  ) : (
-    <Typography variant="body1">
-      {countries.find((country) => country._id === state.countryName)?.name || state.countryName || "Not available"}
-    </Typography>
-  )}
-</Box>
-
+          <Typography
+            variant="subtitle1"
+            color="textSecondary"
+            sx={{ fontWeight: "bold", mb: 1 }}
+          >
+            Country Name:
+          </Typography>
+          {isEditing ? (
+            <>
+              {countries.length > 0 ? (
+                <CustomSelect
+                  id="country"
+                  name="countryName"
+                  value={editedState.countryName}
+                  onChange={handleInputChange}
+                  label="Country"
+                  MenuItems={countries.map((country) => ({
+                    value: country._id,
+                    label: country.name,
+                  }))}
+                />
+              ) : (
+                <CircularProgress size={20} />
+              )}
+              {errors.countryName && (
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  {errors.countryName}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Typography variant="body1">
+              {countries.find((country) => country._id === state.countryName)?.name || state.countryName || "Not available"}
+            </Typography>
+          )}
+        </Box>
 
         <Box sx={{ padding: 2 }}>
           <Typography
