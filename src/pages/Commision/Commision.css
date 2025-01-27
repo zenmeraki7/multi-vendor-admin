@@ -1,0 +1,4 @@
+.no-hover:hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
