@@ -37,6 +37,7 @@ const ViewBank = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editedBank, setEditedBank] = useState({ ...bank });
   const [countries, setCountries] = useState([]); // State to store fetched countries
+  const [isLoading, setIsLoading] = useState(true); // Loading state for bank details
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -74,20 +75,19 @@ const ViewBank = () => {
           status: response.data.data.isActive ? "Active" : "Inactive",
         });
         setEditedBank(response.data);
+        setIsLoading(false); // Set loading to false once data is fetched
       } catch (error) {
         console.error("Error fetching bank details", error);
       }
     };
     fetchBankDetails();
   }, [id]);
-  
 
-const handleEditClick = () => {
-  setIsEditing(true);
-  setEditedBank({ ...bank });  
-  setErrors({});
-};
-
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setEditedBank({ ...bank });
+    setErrors({});
+  };
 
   const validateForm = async () => {
     try {
@@ -107,16 +107,16 @@ const handleEditClick = () => {
   const handleSaveClick = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
-  
+
     setIsSaving(true);
-  
+
     try {
       const updatedBankData = {
         name: editedBank.bankName,  // Map bankName to name
         country: editedBank.country,  // Ensure this is the Country ObjectId (not name)
         isActive: editedBank.status === 'Active',  // Convert status to boolean isActive
       };
-  
+
       const token = localStorage.getItem("token");
       const response = await axios.put(
         `${BASE_URL}/api/banks/update/${id}`,
@@ -127,9 +127,9 @@ const handleEditClick = () => {
           },
         }
       );
-  
+
       console.log('Response:', response);  // Log the full response to inspect it
-  
+
       // Ensure the correct condition is used to check success
       if (response.data?.success || response.status === 200) {
         setBank({ ...editedBank }); // Update state with the new bank details
@@ -143,10 +143,6 @@ const handleEditClick = () => {
       setIsSaving(false); // Stop saving state if error occurs
     }
   };
-  
-  
-  
-  
 
   const handleCancelClick = () => {
     setEditedBank({ ...bank });
@@ -229,35 +225,36 @@ const handleEditClick = () => {
           >
             Country:
           </Typography>
-          {isEditing ? (
-    <>
-      {countries.length > 0 ? (
-        <CustomSelect
-          id="country"
-          name="country"
-          value={editedBank.country} // This will be the country ID
-          onChange={handleInputChange}
-          label="Country"
-          MenuItems={countries.map((country) => ({
-            value: country._id, // The unique identifier for the country
-            label: country.name, // The country name to display in the dropdown
-          }))}
-        />
-      ) : (
-        <CircularProgress size={20} />
-      )}
-      {errors.country && (
-        <div style={{ color: "red", fontSize: "12px" }}>
-          {errors.country}
-        </div>
-      )}
-    </>
-  ) : (
-    // When not editing, display the country name by matching the ID
-    <Typography variant="body1">
-      {countries.find((country) => country._id === bank.country)?.name || bank.country}
-    </Typography>
-  )}
+          {isLoading ? (
+            <CircularProgress size={20} />
+          ) : isEditing ? (
+            <>
+              {countries.length > 0 ? (
+                <CustomSelect
+                  id="country"
+                  name="country"
+                  value={editedBank.country} // This will be the country ID
+                  onChange={handleInputChange}
+                  label="Country"
+                  MenuItems={countries.map((country) => ({
+                    value: country._id, // The unique identifier for the country
+                    label: country.name, // The country name to display in the dropdown
+                  }))}
+                />
+              ) : (
+                <CircularProgress size={20} />
+              )}
+              {errors.country && (
+                <div style={{ color: "red", fontSize: "12px" }}>
+                  {errors.country}
+                </div>
+              )}
+            </>
+          ) : (
+            <Typography variant="body1">
+              {countries.find((country) => country._id === bank.country)?.name || bank.country}
+            </Typography>
+          )}
         </Box>
 
         <Box sx={{ padding: 2 }}>

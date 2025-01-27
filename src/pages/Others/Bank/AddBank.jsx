@@ -23,6 +23,7 @@ function AddBank() {
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorAlertVisible, setErrorAlertVisible] = useState(false);
   const [countries, setCountries] = useState([]); // State to store fetched countries
+  const [countriesLoading, setCountriesLoading] = useState(true); // New loading state for countries
 
   // Fetch countries from API
   useEffect(() => {
@@ -47,6 +48,8 @@ function AddBank() {
         }
       } catch (error) {
         console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+      } finally {
+        setCountriesLoading(false); // Stop loading spinner after countries are fetched
       }
     };
 
@@ -69,7 +72,7 @@ function AddBank() {
       country: country, // Country ID
       isActive: status === "Active" ? true : false, // Ensure status maps to isActive
     };
-  
+
     console.log("Payload:", payload);
 
     try {
@@ -102,8 +105,7 @@ function AddBank() {
     } finally {
       setLoading(false); // Stop the loading spinner
     }
-};
-
+  };
 
   const validationSchema = Yup.object({
     bankName: Yup.string().required("Bank name is required"),
@@ -168,91 +170,97 @@ function AddBank() {
         </Alert>
       )}
 
-      <Formik
-        initialValues={{
-          bankName: "",
-          country: "",
-          status: "Active",
-        }}
-        validationSchema={validationSchema}
-        onSubmit={handleSave}
-      >
-        {({ setFieldValue, touched, errors, values }) => (
-          <Form>
-            <Grid container spacing={2} justifyContent="center" alignItems="center" mb={3} mt={8} p={7}>
-              <Grid item xs={12} sm={8} md={6}>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <CustomInput
-                    id="bank-name"
-                    name="bankName"
-                    label="Bank Name"
-                    placeholder="Enter bank name"
-                    value={values.bankName}
-                    onChange={(e) => setFieldValue("bankName", e.target.value)}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.bankName && errors.bankName && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.bankName}
-                    </div>
-                  )}
+      {countriesLoading ? ( // Show CircularProgress while countries are loading
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Formik
+          initialValues={{
+            bankName: "",
+            country: "",
+            status: "Active",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSave}
+        >
+          {({ setFieldValue, touched, errors, values }) => (
+            <Form>
+              <Grid container spacing={2} justifyContent="center" alignItems="center" mb={3} mt={8} p={7}>
+                <Grid item xs={12} sm={8} md={6}>
+                  <Box display="flex" flexDirection="column" gap={2}>
+                    <CustomInput
+                      id="bank-name"
+                      name="bankName"
+                      label="Bank Name"
+                      placeholder="Enter bank name"
+                      value={values.bankName}
+                      onChange={(e) => setFieldValue("bankName", e.target.value)}
+                      sx={{ width: "100%" }}
+                    />
+                    {touched.bankName && errors.bankName && (
+                      <div style={{ color: "red", fontSize: "12px" }}>
+                        {errors.bankName}
+                      </div>
+                    )}
 
-                  <CustomSelect
-                    id="country"
-                    name="country"
-                    value={values.country}
-                    onChange={(e) => setFieldValue("country", e.target.value)}
-                    label="Country"
-                    MenuItems={countries.map((country) => ({
-                      value: country._id,
-                      label: country.name,
-                    }))}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.country && errors.country && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.country}
-                    </div>
-                  )}
+                    <CustomSelect
+                      id="country"
+                      name="country"
+                      value={values.country}
+                      onChange={(e) => setFieldValue("country", e.target.value)}
+                      label="Country"
+                      MenuItems={countries.map((country) => ({
+                        value: country._id,
+                        label: country.name,
+                      }))}
+                      sx={{ width: "100%" }}
+                    />
+                    {touched.country && errors.country && (
+                      <div style={{ color: "red", fontSize: "12px" }}>
+                        {errors.country}
+                      </div>
+                    )}
 
-                  <CustomSelect
-                    id="status"
-                    name="status"
-                    value={values.status}
-                    onChange={(e) => setFieldValue("status", e.target.value)}
-                    label="Status"
-                    MenuItems={[
-                      { value: "Active", label: "Active" },
-                      { value: "Inactive", label: "Inactive" },
-                    ]}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.status && errors.status && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.status}
-                    </div>
-                  )}
-                </Box>
+                    <CustomSelect
+                      id="status"
+                      name="status"
+                      value={values.status}
+                      onChange={(e) => setFieldValue("status", e.target.value)}
+                      label="Status"
+                      MenuItems={[
+                        { value: "Active", label: "Active" },
+                        { value: "Inactive", label: "Inactive" },
+                      ]}
+                      sx={{ width: "100%" }}
+                    />
+                    {touched.status && errors.status && (
+                      <div style={{ color: "red", fontSize: "12px" }}>
+                        {errors.status}
+                      </div>
+                    )}
+                  </Box>
+                </Grid>
               </Grid>
-            </Grid>
-            <Box display="flex" justifyContent="center" mb={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                style={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save"}
-              </Button>
-            </Box>
-          </Form>
-        )}
-      </Formik>
+              <Box display="flex" justifyContent="center" mb={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                  style={{
+                    background: "linear-gradient(45deg, #556cd6, #19857b)",
+                    color: "#fff",
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </Button>
+              </Box>
+            </Form>
+          )}
+        </Formik>
+      )}
     </Box>
   );
 }
