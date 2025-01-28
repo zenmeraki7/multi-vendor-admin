@@ -43,6 +43,22 @@ function Navbox() {
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
     { text: "Transactions", icon: <MonetizationOnIcon />, path: "/transactions" },
     { text: "Reviews", icon: <AssignmentIcon />, path: "/reviews" },
+    {
+      text: "Product Management",
+      icon: <WidgetsIcon />,
+      subItems: [
+        { text: "Product Option", path: "" },
+        { text: "Product Tags", path: "" },
+        { text: "Product Types", path: "" },
+        { text: "Collections", path: "" },
+        { text: "Import Products", path: "" },
+        { text: "Product Form Customization", path: "" },
+        { text: "Dual Sync Products", path: "" },
+        { text: "Batch CVs", path: "" },
+
+
+      ],
+    },
     { text: "Product Management", icon: <WidgetsIcon />, path: "/product-list" },
     {
       text: "Manage Categories",
