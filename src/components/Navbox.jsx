@@ -38,7 +38,22 @@ function Navbox() {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
-    { text: "Sellers", icon: <PeopleIcon />, path: "/sellers" },
+    {
+      text: "Sellers",
+      icon: <PeopleIcon />,
+      subItems: [
+        { text: "Sellers Listing", path: "" },
+        { text: "Seller form Settings", path: "" },
+        { text: "Shop Page Settings", path: "" },
+        { text: "Seller Profile Page Settings", path: "" },
+        { text: "Customize Seller Page", path: "" },
+        { text: "Seller Feedback", path: "" },
+        { text: "Seller Feedback Option", path: "" },
+        { text: "Seller Policy", path: "" },
+
+
+      ],
+    },
     { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
     { text: "Transactions", icon: <MonetizationOnIcon />, path: "/transactions" },
@@ -59,7 +74,6 @@ function Navbox() {
 
       ],
     },
-    { text: "Product Management", icon: <WidgetsIcon />, path: "/product-list" },
     {
       text: "Manage Categories",
       icon: <WidgetsIcon />,
@@ -128,7 +142,7 @@ function Navbox() {
             </AccordionDetails>
           </Accordion>
         ) : (
-          <ListItem disablePadding sx={{ pl: depth * 2 }}>
+          <ListItem disablePadding sx={{pl : depth * 2  }}>
             <ListItemButton
               onClick={() => item.path && navigate(item.path)}
               sx={{
@@ -136,7 +150,7 @@ function Navbox() {
                 transition: "background-color 0.3s",
               }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
+              {item.icon &&<ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
