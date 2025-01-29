@@ -1,0 +1,230 @@
+/* General container styles */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(-45deg, #f3e5f5, #fff3e0, #f3e5f5, #fff3e0);
+  background-size: 400% 400%;
+  animation: gradientAnimation 10s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Card styles */
+.auth-card {
+  background: #ffffff; /* White background */
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  height: 600px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left section for image */
+.auth-left {
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px 0 0 20px; /* Curved corners only on the left side */
+}
+
+.auth-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 0.8s ease-in-out;
+  border-radius: 20px 0 0 20px; /* Match the border-radius of the parent container */
+}
+
+.auth-left:hover img {
+  transform: scale(1.05);
+}
+
+/* Right section for the form */
+.auth-right {
+  width: 50%;
+  padding: 3.5rem 4rem;
+  background: #ffffff; /* White background */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.auth-right h2 {
+  font-family: "Poppins", sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333; /* Dark text color */
+  letter-spacing: -0.5px;
+  position: relative;
+}
+
+.auth-right .subtitle {
+  font-size: 1rem;
+  color: #666; /* Gray text color */
+  margin-bottom: 2rem;
+}
+
+/* Form group styling */
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-control {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 1px solid #ddd; /* Light gray border */
+  border-radius: 8px;
+  background: #f9f9f9; /* Light gray background */
+  outline: none;
+  transition: all 0.3s ease;
+  color: #333; /* Dark text color */
+}
+
+.form-control::placeholder {
+  color: #999; /* Light gray placeholder */
+}
+
+.auth-right .form-control:focus {
+  border-color: #6a11cb !important; /* Force the border color */
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px; /* Updated padding */
+  background: linear-gradient(45deg, #6a11cb, #2575fc); /* Gradient background */
+  color: #fff; /* White text */
+  border: none;
+  border-radius: 8px;
+  font-weight: bold; /* Updated font weight */
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease; /* Combined transitions */
+  margin-top: 1.5rem;
+  margin-bottom: 50px; /* Added margin-bottom */
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added box shadow */
+}
+
+.submit-btn:hover {
+  background: linear-gradient(45deg, #2575fc, #6a11cb); /* Reverse gradient on hover */
+  transform: translateY(-2px); /* Lift effect on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Social login buttons */
+.social-login {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.social-btn {
+  flex: 1;
+  padding: 1rem;
+  background: #ffffff; /* White background */
+  border: 1px solid #ddd; /* Light gray border */
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333; /* Dark text color */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.social-btn:hover {
+  background: #f9f9f9; /* Light gray background on hover */
+}
+
+/* Authentication link */
+.auth-link {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #666; /* Gray text color */
+  font-size: 0.95rem;
+}
+
+.auth-link a {
+  color: #8d3de1; /* Purple text color */
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.auth-link a:hover {
+  color: #7c4dff; /* Lighter purple on hover */
+}
+
+/* Forgot password link */
+.forgot-password {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color:#D31B0D; /* Gray text color */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #6a11cb; /* Purple text color on hover */
+}
+
+
+/* Error message styling */
+.error-text {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .auth-card {
+    flex-direction: column;
+    height: auto;
+    margin: 1rem;
+  }
+
+  .auth-left,
+  .auth-right {
+    width: 100%;
+  }
+
+  .auth-left img {
+    height: 250px;
+  }
+
+  .auth-right {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-right h2 {
+    font-size: 1.75rem;
+  }
+
+  .form-control {
+    padding: 0.75rem;
+  }
+}

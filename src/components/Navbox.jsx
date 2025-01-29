@@ -26,17 +26,19 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import EmailIcon from "@mui/icons-material/Email";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import CardTravelIcon from "@mui/icons-material/CardTravel";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Navbox() {
   const [expanded, setExpanded] = useState("");
   const navigate = useNavigate();
+  const location = useLocation(); // Get the current route location
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : "");
   };
 
   const menuItems = [
+
     { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
     {
       text: "Sellers",
@@ -54,6 +56,8 @@ function Navbox() {
 
       ],
     },
+
+    { text: "Overview", icon: <DashboardIcon />, path: "/" },
     { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
     { text: "Transactions", icon: <MonetizationOnIcon />, path: "/transactions" },
@@ -62,16 +66,13 @@ function Navbox() {
       text: "Product Management",
       icon: <WidgetsIcon />,
       subItems: [
+        { text: "Product List", path: "/product-list" },
         { text: "Product Option", path: "" },
         { text: "Product Tags", path: "" },
         { text: "Product Types", path: "" },
         { text: "Collections", path: "" },
         { text: "Import Products", path: "" },
         { text: "Product Form Customization", path: "" },
-        { text: "Dual Sync Products", path: "" },
-        { text: "Batch CVs", path: "" },
-
-
       ],
     },
     {
@@ -146,7 +147,8 @@ function Navbox() {
             <ListItemButton
               onClick={() => item.path && navigate(item.path)}
               sx={{
-                "&:hover": { backgroundColor: "#e0e7eb" },
+                backgroundColor: location.pathname === item.path ? "#ffffff" : "inherit", // White background for the active item
+                "&:hover": { backgroundColor: "#ffffff" }, // White background on hover
                 transition: "background-color 0.3s",
               }}
             >
@@ -154,8 +156,8 @@ function Navbox() {
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
-                  fontWeight: "normal",
-                  color: "#556b78",
+                  fontWeight: location.pathname === item.path ? "bold" : "normal", // Bold text for the active item
+                  color: location.pathname === item.path ? "#3a4b58" : "#556b78", // Darker text for the active item
                 }}
               />
             </ListItemButton>
@@ -168,13 +170,13 @@ function Navbox() {
     <Box
       sx={{
         width: 300,
-        backgroundColor: "#f0f4f8",
+        backgroundColor: "#f0f4f8", // Grey background for the entire Navbox
         height: "100vh",
         boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
         display: "flex",
         flexDirection: "column",
         pt: 2,
-        overflow:"scroll"
+        overflow: "scroll",
       }}
     >
       <List>{renderMenuItems(menuItems)}</List>

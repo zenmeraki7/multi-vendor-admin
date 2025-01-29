@@ -35,17 +35,17 @@ function Header() {
           Admin-Zen-Meraki
         </Typography>
 
-        <Button color="inherit" sx={{ mr: 4, textTransform: "none" }}>
+        {/* <Button color="inherit" sx={{ mr: 4, textTransform: "none" }}>
           Admin Dashboard
-        </Button>
+        </Button> */}
 
-        <IconButton
+        {/* <IconButton
           color="inherit"
           sx={{ mr: 3 }}
           onClick={() => navigate("/")}
         >
           <HomeIcon />
-        </IconButton>
+        </IconButton> */}
 
         <IconButton color="inherit" sx={{ mr: 3 }}>
           <NotificationsIcon />
@@ -53,14 +53,14 @@ function Header() {
 
        
         
-          {/* Login Button */}
+          {/* Login Button
           <Button
           color="inherit"
           sx={{ mr: 3, textTransform: "none" }}
           onClick={handleLogin}
         >
           <LoginIcon /> SignIn
-        </Button>
+        </Button> */}
 
         {/* Logout Button */}
         <Button
