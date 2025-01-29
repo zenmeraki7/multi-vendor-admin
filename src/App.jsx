@@ -9,7 +9,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import SellerPro from "./pages/SellerPro";
 import ProductList from "./pages/ProductList";
 import { Toaster } from "react-hot-toast";
-import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 import VendorDetails from "./pages/VendorDetails";
 import OrderDetails from "./pages/OrderDetails";
@@ -19,13 +18,13 @@ import VendorApprove from "./pages/VendorApprove";
 import VendorView from "./pages/VendorView";
 import ViewProduct from "./pages/ViewProduct/ViewProduct";
 import "bootstrap/dist/css/bootstrap.min.css";
-import CategoryType from './pages/Categories/CategoryType/CategoryType'
-import ViewCategories from './pages/Categories/category/ViewCategories'
+import CategoryType from "./pages/Categories/CategoryType/CategoryType";
+import ViewCategories from "./pages/Categories/category/ViewCategories";
 import AddCategoryType from "./pages/Categories/CategoryType/AddCategoryType";
 import ViewCategoryType from "./pages/Categories/CategoryType/ViewCategoryType";
 import SubCategories from "./pages/Categories/SubCategories/SubCategories";
 import AddCategory from "./pages/Categories/category/AddCategory";
-import Category from './pages/Categories/category/Category'
+import Category from "./pages/Categories/category/Category";
 import AddSubCategories from "./pages/Categories/SubCategories/AddSubCategories";
 import ViewSubCategories from "./pages/Categories/SubCategories/ViewSubcategories";
 import BankManagement from "./pages/Others/Bank/BankManagement";
@@ -38,6 +37,9 @@ import AddCountry from "./pages/Others/Country/AddCountry";
 import ViewState from "./pages/Others/State/ViewState";
 import AddState from "./pages/Others/State/AddState";
 import Commision from "./pages/Commision/Commision";
+import AdminLogin from "./pages/Auth/AdminLogin";
+import ForgetPassword from "./pages/Auth/ForgetPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 function App() {
   const dummyProduct = {
@@ -135,34 +137,36 @@ function App() {
       <Routes>
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forget-password" element={<ForgetPassword/>} />
+        <Route path="/reset-password" element={<ResetPassword/>} />
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path='/admin' element={<Admin/>}/>
-          <Route path="/sellers" element={<VendorDetails/>} />
-          <Route path="/orders" element={<OrderDetails/>}/>
-          <Route path="/user" element={<UserManagement/>} />
-          <Route path="/reviews" element={<Review/>} />
-          <Route path="/vendor-approve/:vendorId" element={<VendorApprove/>} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/sellers" element={<VendorDetails />} />
+          <Route path="/orders" element={<OrderDetails />} />
+          <Route path="/user" element={<UserManagement />} />
+          <Route path="/reviews" element={<Review />} />
+          <Route path="/vendor-approve/:vendorId" element={<VendorApprove />} />
           <Route path="/vendor-view/:vendorId" element={<VendorView />} />
-          <Route path="/category-Type"  element={<CategoryType/>} />
-          <Route path='/category' element={<Category/>}/>
-          <Route path="/view-category/:id" element={<ViewCategories/>} />
+          <Route path="/category-Type" element={<CategoryType />} />
+          <Route path="/category" element={<Category />} />
+          <Route path="/view-category/:id" element={<ViewCategories />} />
           <Route path="/viewcategorytype/:id" element={<ViewCategoryType />} />
-          <Route path="/add-Categorytype" element={<AddCategoryType/>}/>
-          <Route path="/add-category" element={<AddCategory/>} />
-          <Route path='/sub-category' element={<SubCategories/>}/>
-          <Route path='/add-subcategory' element={<AddSubCategories/>}/>
-          <Route path="view-subcategory/:id" element={<ViewSubCategories/>}/>
-          <Route path="/bank-management" element={<BankManagement/>}/>
-          <Route path="/country-management" element={<CountryManagement/>} />
-          <Route path="/state-management" element={<StateManagement/>}/>
-          <Route path="/view-bank/:id" element ={<ViewBank/>}/>
-          <Route path="/add-bank" element={<AddBank/>} />
-          <Route path="/view-country/:id" element={<ViewCountry/>}/>
-          <Route path="/add-country" element={<AddCountry/>} />
-          <Route path="/view-state/:id" element={<ViewState/>} />
-          <Route path="/add-state" element={<AddState/>} />
+          <Route path="/add-Categorytype" element={<AddCategoryType />} />
+          <Route path="/add-category" element={<AddCategory />} />
+          <Route path="/sub-category" element={<SubCategories />} />
+          <Route path="/add-subcategory" element={<AddSubCategories />} />
+          <Route path="view-subcategory/:id" element={<ViewSubCategories />} />
+          <Route path="/bank-management" element={<BankManagement />} />
+          <Route path="/country-management" element={<CountryManagement />} />
+          <Route path="/state-management" element={<StateManagement />} />
+          <Route path="/view-bank/:id" element={<ViewBank />} />
+          <Route path="/add-bank" element={<AddBank />} />
+          <Route path="/view-country/:id" element={<ViewCountry />} />
+          <Route path="/add-country" element={<AddCountry />} />
+          <Route path="/view-state/:id" element={<ViewState />} />
+          <Route path="/add-state" element={<AddState />} />
           <Route
             path="view-product/:id"
             element={<PrivateRoute component={<ViewProduct />} />}
@@ -172,10 +176,10 @@ function App() {
             path="/seller-profile"
             element={<PrivateRoute component={<SellerPro />} />}
           />
+          <Route path="/Commision" element={< PrivateRoute component={<Commision/>} /> } />
         </Route>
 
         <Route path="add-variant" element={<AddVariant />} />
-        <Route path="/Commision" element={<Commision />} />
       </Routes>
     </>
   );

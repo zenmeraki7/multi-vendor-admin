@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import * as yup from "yup";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { keyframes } from "@emotion/react"; // Import keyframes from Emotion
 import "./AdminLogin.css";
-import signinImage from "../assets/adminlogin.avif";
-import { BASE_URL } from "../utils/baseUrl";
+import { BASE_URL } from "../../utils/baseUrl";
 
 // Yup validation schema
 const loginSchema = yup.object({
@@ -16,6 +16,13 @@ const loginSchema = yup.object({
     .required("Email is required."),
   password: yup.string().required("Password is required."),
 });
+
+// Define the gradient animation
+const gradientAnimation = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -37,25 +44,28 @@ function AdminLogin() {
   const handleSignIn = async (e) => {
     e.preventDefault();
     setValidationErrors({}); // Reset validation errors
-  
+
     try {
       // Validate the form data
       await loginSchema.validate(formData, { abortEarly: false });
-  
+
       setLoading(true);
-  
+
       // Make the API call
-      const { data } = await axios.post(`${BASE_URL}/api/admin/login`, formData);
-  
+      const { data } = await axios.post(
+        `${BASE_URL}/api/admin/login`,
+        formData
+      );
+
       // Save token in localStorage
       localStorage.setItem("token", data.token);
-  
+
       // Show success toast and navigate
       toast.success("Login successful!");
       navigate("/admin");
     } catch (error) {
       setLoading(false);
-  
+
       if (error.name === "ValidationError") {
         // Handle Yup validation errors
         const errors = error.inner.reduce(
@@ -66,7 +76,8 @@ function AdminLogin() {
       } else if (error.response) {
         // Handle API errors
         const errorMessage =
-          error.response.data?.message || "Something went wrong. Please try again.";
+          error.response.data?.message ||
+          "Something went wrong. Please try again.";
         toast.error(errorMessage);
       } else {
         // Handle unexpected errors
@@ -79,16 +90,22 @@ function AdminLogin() {
 
   const handleForgotPassword = (e) => {
     e.preventDefault();
-    navigate("/forget-pwd");
+    navigate("/forget-password");
   };
 
   return (
     <motion.div
       className="auth-container"
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
+      style={{
+        background:
+          "linear-gradient(-45deg, #e0eafc, #cfdef3, #e0eafc, #cfdef3)",
+        backgroundSize: "400% 400%",
+        animation: `${gradientAnimation} 10s ease infinite`,
+      }}
     >
       <motion.div
         className="auth-card"
@@ -98,7 +115,7 @@ function AdminLogin() {
       >
         <div className="auth-left">
           <motion.img
-            src={signinImage}
+            src="https://img.freepik.com/free-vector/user-verification-unauthorized-access-prevention-private-account-authentication-cyber-security-people-entering-login-password-safety-measures_335657-1592.jpg?uid=R156367193&ga=GA1.1.1718526043.1722838254&semt=ais_hybrid"
             alt="Sign In"
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
@@ -114,6 +131,14 @@ function AdminLogin() {
           >
             Admin Sign In
           </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="subtitle"
+          >
+            Welcome back!
+          </motion.p>
 
           <motion.form
             initial={{ opacity: 0, y: 20 }}
@@ -162,7 +187,7 @@ function AdminLogin() {
             <div
               className="forgot-password"
               onClick={handleForgotPassword}
-              style={{ cursor: "pointer", color: "#0072ff", marginTop: "10px" }}
+              style={{ cursor: "pointer", marginTop: "10px" }}
             >
               Forget Password?
             </div>
