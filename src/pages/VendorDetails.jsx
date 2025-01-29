@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, Download, Refresh } from "@mui/icons-material";
 import axios from "axios";
+
 import {
   Card,
   CardContent,
@@ -18,7 +19,7 @@ import {
   Box,
   Pagination,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import { BASE_URL } from "../utils/baseUrl";
 
 function VendorDetails() {
@@ -149,13 +150,8 @@ function VendorDetails() {
         <CardHeader
           action={
             <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                variant="outlined"
-                startIcon={<Download />}
-                onClick={handleExport}
-                sx={{ width: 150 }}
-              >
-                Export
+              <Button variant="contained">
+                <Link style={{textDecoration:"none",color:"white"}} to={"/add-seller"}>ADD SELLER </Link> 
               </Button>
             </Box>
           }
