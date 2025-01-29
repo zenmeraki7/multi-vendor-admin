@@ -17,7 +17,6 @@ import Review from "./pages/Review";
 import VendorApprove from "./pages/VendorApprove";
 import VendorView from "./pages/VendorView";
 import ViewProduct from "./pages/ViewProduct/ViewProduct";
-import "bootstrap/dist/css/bootstrap.min.css";
 import CategoryType from "./pages/Categories/CategoryType/CategoryType";
 import ViewCategories from "./pages/Categories/category/ViewCategories";
 import AddCategoryType from "./pages/Categories/CategoryType/AddCategoryType";
@@ -40,6 +39,8 @@ import Commision from "./pages/Commision/Commision";
 import AdminLogin from "./pages/Auth/AdminLogin";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import SellerFormSettings from "./pages/SellerFormSettings";
+import ShopPageSettings from "./pages/ShopPageSettings";
 
 function App() {
   const dummyProduct = {
@@ -131,52 +132,50 @@ function App() {
       location: "123 Electronics Ave, Silicon Valley, CA",
     },
   };
+
   return (
     <>
       <Toaster />
       <Routes>
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/forget-password" element={<ForgetPassword/>} />
-        <Route path="/reset-password" element={<ResetPassword/>} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/sellers" element={<VendorDetails />} />
-          <Route path="/orders" element={<OrderDetails />} />
-          <Route path="/user" element={<UserManagement />} />
-          <Route path="/reviews" element={<Review />} />
-          <Route path="/vendor-approve/:vendorId" element={<VendorApprove />} />
-          <Route path="/vendor-view/:vendorId" element={<VendorView />} />
-          <Route path="/category-Type" element={<CategoryType />} />
-          <Route path="/category" element={<Category />} />
-          <Route path="/view-category/:id" element={<ViewCategories />} />
-          <Route path="/viewcategorytype/:id" element={<ViewCategoryType />} />
-          <Route path="/add-Categorytype" element={<AddCategoryType />} />
-          <Route path="/add-category" element={<AddCategory />} />
-          <Route path="/sub-category" element={<SubCategories />} />
-          <Route path="/add-subcategory" element={<AddSubCategories />} />
-          <Route path="view-subcategory/:id" element={<ViewSubCategories />} />
-          <Route path="/bank-management" element={<BankManagement />} />
-          <Route path="/country-management" element={<CountryManagement />} />
-          <Route path="/state-management" element={<StateManagement />} />
-          <Route path="/view-bank/:id" element={<ViewBank />} />
-          <Route path="/add-bank" element={<AddBank />} />
-          <Route path="/view-country/:id" element={<ViewCountry />} />
-          <Route path="/add-country" element={<AddCountry />} />
-          <Route path="/view-state/:id" element={<ViewState />} />
-          <Route path="/add-state" element={<AddState />} />
-          <Route
-            path="view-product/:id"
-            element={<PrivateRoute component={<ViewProduct />} />}
-          />
-          <Route path="/product-list" element={<ProductList />} />
-          <Route
-            path="/seller-profile"
-            element={<PrivateRoute component={<SellerPro />} />}
-          />
-          <Route path="/Commision" element={< PrivateRoute component={<Commision/>} /> } />
+        <Route path="/" element={<PrivateRoute component={<Layout />} />}>
+          <Route index element={<PrivateRoute component={<Dashboard />} />} />
+          <Route path="/admin" element={<PrivateRoute component={<Admin />} />} />
+          <Route path="/sellers" element={<PrivateRoute component={<VendorDetails />} />} />
+          <Route path="/orders" element={<PrivateRoute component={<OrderDetails />} />} />
+          <Route path="/user" element={<PrivateRoute component={<UserManagement />} />} />
+          <Route path="/reviews" element={<PrivateRoute component={<Review />} />} />
+          <Route path="/vendor-approve/:vendorId" element={<PrivateRoute component={<VendorApprove />} />} />
+          <Route path="/vendor-view/:vendorId" element={<PrivateRoute component={<VendorView />} />} />
+          <Route path="/category-Type" element={<PrivateRoute component={<CategoryType />} />} />
+          <Route path="/category" element={<PrivateRoute component={<Category />} />} />
+          <Route path="/view-category/:id" element={<PrivateRoute component={<ViewCategories />} />} />
+          <Route path="/viewcategorytype/:id" element={<PrivateRoute component={<ViewCategoryType />} />} />
+          <Route path="/add-Categorytype" element={<PrivateRoute component={<AddCategoryType />} />} />
+          <Route path="/add-category" element={<PrivateRoute component={<AddCategory />} />} />
+          <Route path="/sub-category" element={<PrivateRoute component={<SubCategories />} />} />
+          <Route path="/add-subcategory" element={<PrivateRoute component={<AddSubCategories />} />} />
+          <Route path="view-subcategory/:id" element={<PrivateRoute component={<ViewSubCategories />} />} />
+          <Route path="/bank-management" element={<PrivateRoute component={<BankManagement />} />} />
+          <Route path="/country-management" element={<PrivateRoute component={<CountryManagement />} />} />
+          <Route path="/state-management" element={<PrivateRoute component={<StateManagement />} />} />
+          <Route path="/view-bank/:id" element={<PrivateRoute component={<ViewBank />} />} />
+          <Route path="/add-bank" element={<PrivateRoute component={<AddBank />} />} />
+          <Route path="/view-country/:id" element={<PrivateRoute component={<ViewCountry />} />} />
+          <Route path="/add-country" element={<PrivateRoute component={<AddCountry />} />} />
+          <Route path="/view-state/:id" element={<PrivateRoute component={<ViewState />} />} />
+          <Route path="/add-state" element={<PrivateRoute component={<AddState />} />} />
+          <Route path="/seller-form-settings" element={<PrivateRoute component={<SellerFormSettings />} />} />
+          <Route path="/shop-page-settings" element={<PrivateRoute component={<ShopPageSettings />} />} />
+          <Route path="view-product/:id" element={<PrivateRoute component={<ViewProduct />} />} />
+          <Route path="/product-list" element={<PrivateRoute component={<ProductList />} />} />
+          <Route path="/seller-profile" element={<PrivateRoute component={<SellerPro />} />} />
+          <Route path="/Commision" element={<PrivateRoute component={<Commision />} />} />
         </Route>
 
         <Route path="add-variant" element={<AddVariant />} />

@@ -16,6 +16,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
+import { logoutUser } from "../../../utils/authUtils";
 
 function AddState() {
   const navigate = useNavigate();
@@ -48,6 +49,9 @@ function AddState() {
         }
       } catch (error) {
         console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       } finally {
         setLoading(false); // Set loading to false once the data has been fetched
       }
@@ -97,6 +101,9 @@ function AddState() {
       }
     } catch (error) {
       console.error("Error during state creation:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setErrorAlertVisible(true);
     } finally {
       setLoading(false); // Stop loading spinner

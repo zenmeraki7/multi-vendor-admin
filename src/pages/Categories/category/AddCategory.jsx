@@ -21,6 +21,7 @@ import axios from "axios";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { logoutUser } from "../../../utils/authUtils";
 
 function AddCategory() {
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ function AddCategory() {
       setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error("Error fetching category types:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setCategoryTypes([]);
       setLoading(false); // Set loading to false even if there's an error
     }
@@ -122,6 +126,9 @@ function AddCategory() {
       }
     } catch (error) {
       console.error("Error during category creation:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setErrorAlertVisible(true);
     } finally {
       setLoading(false); // Hide loading spinner after save attempt

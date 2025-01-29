@@ -19,6 +19,7 @@ import { BASE_URL } from "../../../utils/baseUrl";
 import axios from "axios";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { logoutUser } from "../../../utils/authUtils";
 
 function AddSubCategory() {
   const navigate = useNavigate();
@@ -45,6 +46,12 @@ function AddSubCategory() {
       setCategoryOptions(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
     } finally {
       setLoading(false);
     }
@@ -115,6 +122,12 @@ function AddSubCategory() {
     } catch (error) {
       console.error("Error during category creation:", error);
       alert("An error occurred while creating the category.");
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
     }
   };
 
@@ -127,8 +140,7 @@ function AddSubCategory() {
       .required("Description is required")
       .min(10, "Description must be at least 10 characters"),
     status: Yup.boolean().required("Status is required"),
-    image: Yup.mixed()
-      .required("Category icon is required")
+    image: Yup.mixed().required("Category icon is required"),
   });
 
   if (loading) {
@@ -173,12 +185,12 @@ function AddSubCategory() {
         <Alert
           variant="filled"
           severity="success"
-          sx={{ 
+          sx={{
             width: "350px",
             position: "fixed",
             top: 16,
             right: 16,
-            zIndex: 9999
+            zIndex: 9999,
           }}
         >
           Subcategory successfully added!
@@ -243,6 +255,12 @@ function AddSubCategory() {
             }
           } catch (error) {
             console.error("Error during category creation:", error);
+            if (
+              error.response &&
+              (error.response.status === 404 || error.response.status === 401)
+            ) {
+              logoutUser(); // Call logoutUser if 404 or 401 status code
+            }
             alert("An error occurred while creating the category.");
           }
           setSubmitting(false);
@@ -364,14 +382,20 @@ function AddSubCategory() {
                 type="submit"
                 variant="contained"
                 color="primary"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <Save />
+                  )
+                }
                 disabled={isSubmitting || loading}
                 style={{
                   background: "linear-gradient(45deg, #556cd6, #19857b)",
                   color: "#fff",
                 }}
               >
-                {loading ? 'Saving...' : 'Save'}
+                {loading ? "Saving..." : "Save"}
               </Button>
             </Box>
           </Form>

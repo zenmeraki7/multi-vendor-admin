@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+import { logoutUser } from "../../../utils/authUtils";
 const CountryManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +60,9 @@ const CountryManagement = () => {
       }
     } catch (error) {
       console.error("Error fetching countries:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setLoading(false); // Set loading to false even if there's an error
     }
   };
