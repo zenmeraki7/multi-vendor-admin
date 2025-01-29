@@ -9,7 +9,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import SellerPro from "./pages/SellerPro";
 import ProductList from "./pages/ProductList";
 import { Toaster } from "react-hot-toast";
-import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 import VendorDetails from "./pages/VendorDetails";
 import OrderDetails from "./pages/OrderDetails";
@@ -38,6 +37,9 @@ import AddCountry from "./pages/Others/Country/AddCountry";
 import ViewState from "./pages/Others/State/ViewState";
 import AddState from "./pages/Others/State/AddState";
 import Commision from "./pages/Commision/Commision";
+import AdminLogin from "./pages/Auth/AdminLogin";
+import ForgetPassword from "./pages/Auth/ForgetPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 function App() {
   const dummyProduct = {
@@ -135,6 +137,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forget-password" element={<ForgetPassword/>} />
+        <Route path="/reset-password" element={<ResetPassword/>} />
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
