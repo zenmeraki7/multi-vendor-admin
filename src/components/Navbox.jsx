@@ -46,7 +46,7 @@ function Navbox() {
       subItems: [
         { text: "Sellers Listing", path: "" },
         { text: "Seller form Settings", path: "/seller-form-settings" },
-        { text: "Shop Page Settings", path: "" },
+        { text: "Shop Page Settings", path: "/shop-page-settings" },
         { text: "Seller Profile Page Settings", path: "" },
         { text: "Customize Seller Page", path: "" },
         { text: "Seller Feedback", path: "" },
