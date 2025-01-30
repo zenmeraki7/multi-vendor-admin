@@ -44,7 +44,7 @@ function Navbox() {
       text: "Sellers",
       icon: <PeopleIcon />,
       subItems: [
-        { text: "Sellers Listing", path: "" },
+        { text: "Sellers Listing", path: "/sellers" },
         { text: "Seller form Settings", path: "/seller-form-settings" },
         { text: "Shop Page Settings", path: "" },
         { text: "Seller Profile Page Settings", path: "" },

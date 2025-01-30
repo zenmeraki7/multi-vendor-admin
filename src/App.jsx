@@ -41,6 +41,7 @@ import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import SellerFormSettings from "./pages/SellerFormSettings";
 import ShopPageSettings from "./pages/ShopPageSettings";
+import AddSeller from "./pages/AddSeller/AddSeller";
 
 function App() {
   const dummyProduct = {
@@ -179,6 +180,8 @@ function App() {
         </Route>
 
         <Route path="add-variant" element={<AddVariant />} />
+        
+        <Route path="/add-seller" element={<AddSeller />} />
       </Routes>
     </>
   );
