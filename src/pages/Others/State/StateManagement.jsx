@@ -15,13 +15,14 @@ import {
   Paper,
   Pagination,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl"; // Import base URL
-
+import { logoutUser } from "../../../utils/authUtils";
 const StateManagement = () => {
   const navigate = useNavigate();
 
@@ -32,6 +33,7 @@ const StateManagement = () => {
 
   const [states, setStates] = useState([]); // State to store fetched states
   const [filteredStates, setFilteredStates] = useState([]); // State to store filtered states
+  const [loading, setLoading] = useState(false); // Loading state for spinner
 
   // Fetch States from API
   useEffect(() => {
@@ -44,6 +46,7 @@ const StateManagement = () => {
 
   // API Fetching Logic
   const fetchStates = async () => {
+    setLoading(true); // Set loading to true while fetching data
     try {
       const token = localStorage.getItem("token"); // Get token from local storage
       const response = await axios.get(`${BASE_URL}/api/states/admin`, {
@@ -63,6 +66,11 @@ const StateManagement = () => {
       }
     } catch (error) {
       console.error("Error fetching states:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
+    } finally {
+      setLoading(false); // Set loading to false after fetching data
     }
   };
 
@@ -179,61 +187,70 @@ const StateManagement = () => {
         </Button>
       </Box>
 
-      {/* State Table */}
-      <TableContainer component={Paper} elevation={3}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "primary.main" }}>
-              <TableCell>#</TableCell>
-              <TableCell>State Name</TableCell>
-              <TableCell>Country</TableCell>
-              <TableCell>State Code</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {currentData.map((state, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  {(currentPage - 1) * itemsPerPage + index + 1}
-                </TableCell>
-                <TableCell>{state.name}</TableCell>
-                <TableCell>
-                  {state.country ? state.country.name : "N/A"}
-                </TableCell>{" "}
-                {/* Access country name correctly */}
-                <TableCell>{state.code}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={state.isActive ? "Active" : "Inactive"}
-                    color={state.isActive ? "success" : "error"}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => navigate("/view-state")}
-                  >
-                    View
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* Loading Spinner */}
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          {/* State Table */}
+          <TableContainer component={Paper} elevation={3}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "primary.main" }}>
+                  <TableCell>#</TableCell>
+                  <TableCell>State Name</TableCell>
+                  <TableCell>Country</TableCell>
+                  <TableCell>State Code</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {currentData.map((state, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </TableCell>
+                    <TableCell>{state.name}</TableCell>
+                    <TableCell>
+                      {state.country ? state.country.name : "N/A"}
+                    </TableCell>{" "}
+                    {/* Access country name correctly */}
+                    <TableCell>{state.code}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={state.isActive ? "Active" : "Inactive"}
+                        color={state.isActive ? "success" : "error"}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => navigate(`/view-state/${state._id}`)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-      {/* Pagination */}
-      <Box mt={2} display="flex" justifyContent="center">
-        <Pagination
-          count={Math.ceil(filteredStates.length / itemsPerPage)}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
+          {/* Pagination */}
+          <Box mt={2} display="flex" justifyContent="center">
+            <Pagination
+              count={Math.ceil(filteredStates.length / itemsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </Box>
+        </>
+      )}
     </Box>
   );
 };

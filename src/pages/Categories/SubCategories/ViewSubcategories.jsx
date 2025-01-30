@@ -19,7 +19,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import UploadIcon from "@mui/icons-material/Upload";
 import EditIcon from "@mui/icons-material/Edit";
-
+import { logoutUser } from "../../../utils/authUtils";
 // Validation schema
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
@@ -110,15 +110,19 @@ function ViewSubCategories() {
           console.error("No subcategory found with the provided ID.");
         }
         setLoading(false);
-
       })
       .catch((error) => {
         console.error(
           "Error fetching subcategory:",
           error.response ? error.response.data : error.message
         );
-        toast.error("Failed to fetch category types. Please try again later.");
-        setLoading(false); 
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
+        setLoading(false);
       });
   }, [id, navigate]);
 
@@ -241,6 +245,12 @@ function ViewSubCategories() {
       setErrors({});
     } catch (error) {
       console.error("Error updating subcategory", error);
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
     }
   };
 

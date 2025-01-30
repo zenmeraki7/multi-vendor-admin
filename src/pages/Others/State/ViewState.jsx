@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,7 +13,10 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import * as yup from "yup";
 import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { BASE_URL } from "../../../utils/baseUrl";
+import { logoutUser } from "../../../utils/authUtils";
 
 // Validation schema
 const validationSchema = yup.object().shape({
@@ -24,21 +27,73 @@ const validationSchema = yup.object().shape({
 });
 
 const ViewState = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [state, setState] = useState({
-    id: "1",
-    stateName: "Kerala",
-    countryName: "India",
-    stateCode: "KL",
+    stateName: "",
+    countryName: "",
+    stateCode: "",
     status: "Active",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [editedState, setEditedState] = useState({ ...state });
+  const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  // Fetch countries
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${BASE_URL}/api/countries/admin`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data?.data && Array.isArray(response.data.data)) {
+          setCountries(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Fetch state details
+  useEffect(() => {
+    const fetchStateDetails = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${BASE_URL}/api/states/admin?id=${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data?.data) {
+          setState({
+            stateName: response.data.data.name,
+            countryName: response.data.data.country._id,
+            stateCode: response.data.data.code,
+            status: response.data.data.isActive ? "Active" : "Inactive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching state details:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
+      } finally {
+        setLoading(false); // Set loading to false once the data is fetched
+      }
+    };
+    fetchStateDetails();
+  }, [id]);
 
   const handleEditClick = () => {
     setIsEditing(true);
+    setEditedState({ ...state });
     setErrors({});
   };
 
@@ -62,11 +117,33 @@ const ViewState = () => {
     if (!isValid) return;
 
     setIsSaving(true);
-    setTimeout(() => {
-      setState({ ...editedState });
-      setIsEditing(false);
+    try {
+      const updatedStateData = {
+        name: editedState.stateName,
+        country: editedState.countryName,
+        code: editedState.stateCode,
+        isActive: editedState.status === "Active",
+      };
+      const token = localStorage.getItem("token");
+      const response = await axios.put(`${BASE_URL}/api/states/update/${id}`, updatedStateData, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
+      console.log('Response: ' + response);
+
+      if (response.data?.success || response.status === 200) {
+        setState({ ...editedState });
+        setIsEditing(false);
+        setIsSaving(false);
+      }
+    } catch (error) {
+      console.error("Error updating state details:", error.response ? error.response.data : error.message);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setIsSaving(false);
-    }, 1000);
+    }
   };
 
   const handleCancelClick = () => {
@@ -89,14 +166,23 @@ const ViewState = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <Box
+        padding={4}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box padding={4} maxWidth={800} margin="auto">
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" fontWeight="bold">
           View State Details
         </Typography>
@@ -152,18 +238,21 @@ const ViewState = () => {
           </Typography>
           {isEditing ? (
             <>
-              <CustomSelect
-                id="countryName"
-                name="countryName"
-                value={editedState.countryName}
-                onChange={handleInputChange}
-                label="Country Name"
-                MenuItems={[
-                  { value: "India", label: "India" },
-                  { value: "United States", label: "United States" },
-                ]}
-                sx={{ width: "100%" }}
-              />
+              {countries.length > 0 ? (
+                <CustomSelect
+                  id="country"
+                  name="countryName"
+                  value={editedState.countryName}
+                  onChange={handleInputChange}
+                  label="Country"
+                  MenuItems={countries.map((country) => ({
+                    value: country._id,
+                    label: country.name,
+                  }))}
+                />
+              ) : (
+                <CircularProgress size={20} />
+              )}
               {errors.countryName && (
                 <Typography color="error" variant="caption" sx={{ mt: 1 }}>
                   {errors.countryName}
@@ -171,7 +260,9 @@ const ViewState = () => {
               )}
             </>
           ) : (
-            <Typography variant="body1">{state.countryName}</Typography>
+            <Typography variant="body1">
+              {countries.find((country) => country._id === state.countryName)?.name || state.countryName || "Not available"}
+            </Typography>
           )}
         </Box>
 
@@ -242,7 +333,13 @@ const ViewState = () => {
                 color="success"
                 onClick={handleSaveClick}
                 disabled={isSaving}
-                endIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                endIcon={
+                  isSaving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <SaveIcon />
+                  )
+                }
                 sx={{
                   background: "linear-gradient(45deg, #556cd6, #19857b)",
                   color: "#fff",
@@ -267,10 +364,10 @@ const ViewState = () => {
             </>
           ) : (
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={handleEditClick}
-              endIcon={<EditIcon />}
+              startIcon={<EditIcon />}
               sx={{
                 background: "linear-gradient(45deg, #556cd6, #19857b)",
                 color: "#fff",

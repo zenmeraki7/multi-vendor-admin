@@ -16,6 +16,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
+import { logoutUser } from "../../../utils/authUtils";
 
 function AddState() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ function AddState() {
   // Fetch countries from API
   useEffect(() => {
     const fetchCountries = async () => {
+      setLoading(true);  // Set loading to true when the page starts loading
       const token = localStorage.getItem("token"); // Get token from local storage
       if (!token) {
         console.error("No token found. Please log in.");
@@ -47,6 +49,11 @@ function AddState() {
         }
       } catch (error) {
         console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
+      } finally {
+        setLoading(false); // Set loading to false once the data has been fetched
       }
     };
 
@@ -94,6 +101,9 @@ function AddState() {
       }
     } catch (error) {
       console.error("Error during state creation:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setErrorAlertVisible(true);
     } finally {
       setLoading(false); // Stop loading spinner
@@ -109,162 +119,178 @@ function AddState() {
 
   return (
     <Box padding={2}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography variant="h4" fontWeight="bold">
-          Add New State
-        </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          style={{
-            marginRight: "80px",
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
+      {/* Loading indicator during page load */}
+      {loading && (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
         >
-          <ArrowBackIcon />
-        </Button>
-      </Box>
-
-      {alertVisible && (
-        <Alert
-          variant="filled"
-          severity="success"
-          sx={{
-            width: "350px",
-            position: "fixed",
-            top: 16,
-            right: 16,
-            zIndex: 9999,
-          }}
-        >
-          State successfully added!
-        </Alert>
+          <CircularProgress size={60} color="primary" />
+        </Box>
       )}
 
-      {errorAlertVisible && (
-        <Alert
-          variant="filled"
-          severity="error"
-          sx={{
-            width: "350px",
-            position: "fixed",
-            top: 16,
-            right: 16,
-            zIndex: 9999,
-          }}
-        >
-          There was an error adding the state.
-        </Alert>
-      )}
+      {!loading && (
+        <>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={3}
+          >
+            <Typography variant="h4" fontWeight="bold">
+              Add New State
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => navigate(-1)}
+              style={{
+                marginRight: "80px",
+                background: "linear-gradient(45deg, #556cd6, #19857b)",
+                color: "#fff",
+              }}
+            >
+              <ArrowBackIcon />
+            </Button>
+          </Box>
 
-      <Formik
-        initialValues={{
-          stateName: "",
-          stateCode: "",
-          countryName: "",
-          status: "Active",
-        }}
-        validationSchema={validationSchema}
-        onSubmit={handleSave}
-      >
-        {({ setFieldValue, touched, errors, values }) => (
-          <Form>
-            <Grid container spacing={2} justifyContent="center" alignItems="center" mb={3} mt={8} p={7}>
-              <Grid item xs={12} sm={8} md={6}>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <CustomInput
-                    id="state-name"
-                    name="stateName"
-                    label="State Name"
-                    placeholder="Enter state name"
-                    value={values.stateName}
-                    onChange={(e) => setFieldValue("stateName", e.target.value)}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.stateName && errors.stateName && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.stateName}
-                    </div>
-                  )}
+          {alertVisible && (
+            <Alert
+              variant="filled"
+              severity="success"
+              sx={{
+                width: "350px",
+                position: "fixed",
+                top: 16,
+                right: 16,
+                zIndex: 9999,
+              }}
+            >
+              State successfully added!
+            </Alert>
+          )}
 
-                  <CustomInput
-                    id="state-code"
-                    name="stateCode"
-                    label="State Code"
-                    placeholder="Enter state code"
-                    value={values.stateCode}
-                    onChange={(e) => setFieldValue("stateCode", e.target.value)}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.stateCode && errors.stateCode && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.stateCode}
-                    </div>
-                  )}
+          {errorAlertVisible && (
+            <Alert
+              variant="filled"
+              severity="error"
+              sx={{
+                width: "350px",
+                position: "fixed",
+                top: 16,
+                right: 16,
+                zIndex: 9999,
+              }}
+            >
+              There was an error adding the state.
+            </Alert>
+          )}
 
-                  <CustomSelect
-                    id="country-name"
-                    name="countryName"
-                    value={values.countryName}
-                    onChange={(e) => setFieldValue("countryName", e.target.value)}
-                    label="Country"
-                    MenuItems={countries.map((country) => ({
-                      value: country._id,  // Assuming '_id' is the country identifier
-                      label: country.name, // Assuming 'name' is the country name
-                    }))}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.countryName && errors.countryName && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.countryName}
-                    </div>
-                  )}
+          <Formik
+            initialValues={{
+              stateName: "",
+              stateCode: "",
+              countryName: "",
+              status: "Active",
+            }}
+            validationSchema={validationSchema}
+            onSubmit={handleSave}
+          >
+            {({ setFieldValue, touched, errors, values }) => (
+              <Form>
+                <Grid container spacing={2} justifyContent="center" alignItems="center" mb={3} mt={8} p={7}>
+                  <Grid item xs={12} sm={8} md={6}>
+                    <Box display="flex" flexDirection="column" gap={2}>
+                      <CustomInput
+                        id="state-name"
+                        name="stateName"
+                        label="State Name"
+                        placeholder="Enter state name"
+                        value={values.stateName}
+                        onChange={(e) => setFieldValue("stateName", e.target.value)}
+                        sx={{ width: "100%" }}
+                      />
+                      {touched.stateName && errors.stateName && (
+                        <div style={{ color: "red", fontSize: "12px" }}>
+                          {errors.stateName}
+                        </div>
+                      )}
 
-                  <CustomSelect
-                    id="status"
-                    name="status"
-                    value={values.status}
-                    onChange={(e) => setFieldValue("status", e.target.value)}
-                    label="Status"
-                    MenuItems={[
-                      { value: "Active", label: "Active" },
-                      { value: "Inactive", label: "Inactive" },
-                    ]}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.status && errors.status && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.status}
-                    </div>
-                  )}
+                      <CustomInput
+                        id="state-code"
+                        name="stateCode"
+                        label="State Code"
+                        placeholder="Enter state code"
+                        value={values.stateCode}
+                        onChange={(e) => setFieldValue("stateCode", e.target.value)}
+                        sx={{ width: "100%" }}
+                      />
+                      {touched.stateCode && errors.stateCode && (
+                        <div style={{ color: "red", fontSize: "12px" }}>
+                          {errors.stateCode}
+                        </div>
+                      )}
+
+                      <CustomSelect
+                        id="country-name"
+                        name="countryName"
+                        value={values.countryName}
+                        onChange={(e) => setFieldValue("countryName", e.target.value)}
+                        label="Country"
+                        MenuItems={countries.map((country) => ({
+                          value: country._id,  // Assuming '_id' is the country identifier
+                          label: country.name, // Assuming 'name' is the country name
+                        }))}
+                        sx={{ width: "100%" }}
+                      />
+                      {touched.countryName && errors.countryName && (
+                        <div style={{ color: "red", fontSize: "12px" }}>
+                          {errors.countryName}
+                        </div>
+                      )}
+
+                      <CustomSelect
+                        id="status"
+                        name="status"
+                        value={values.status}
+                        onChange={(e) => setFieldValue("status", e.target.value)}
+                        label="Status"
+                        MenuItems={[
+                          { value: "Active", label: "Active" },
+                          { value: "Inactive", label: "Inactive" },
+                        ]}
+                        sx={{ width: "100%" }}
+                      />
+                      {touched.status && errors.status && (
+                        <div style={{ color: "red", fontSize: "12px" }}>
+                          {errors.status}
+                        </div>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
+                <Box display="flex" justifyContent="center" mb={3}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                    style={{
+                      background: "linear-gradient(45deg, #556cd6, #19857b)",
+                      color: "#fff",
+                    }}
+                    disabled={loading}
+                  >
+                    {loading ? "Saving..." : "Save"}
+                  </Button>
                 </Box>
-              </Grid>
-            </Grid>
-            <Box display="flex" justifyContent="center" mb={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                style={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save"}
-              </Button>
-            </Box>
-          </Form>
-        )}
-      </Formik>
+              </Form>
+            )}
+          </Formik>
+        </>
+      )}
     </Box>
   );
 }

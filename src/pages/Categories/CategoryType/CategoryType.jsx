@@ -27,6 +27,7 @@ import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { BASE_URL } from "../../../utils/baseUrl"; 
+import { logoutUser } from "../../../utils/authUtils";
 
 function CategoryType() {
   const navigate = useNavigate();
@@ -68,7 +69,9 @@ function CategoryType() {
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        toast.error("Failed to fetch category types. Please try again later.");
+          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+                logoutUser(); // Call logoutUser if 404 or 401 status code
+              }
         setLoading(false); 
       });
   }, []);

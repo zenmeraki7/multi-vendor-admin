@@ -20,8 +20,7 @@ import * as yup from "yup";
 import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { BASE_URL } from "../../../utils/baseUrl";
-import { toast } from 'react-toastify';
-
+import { logoutUser } from "../../../utils/authUtils";
 // Validation schema
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
@@ -114,7 +113,9 @@ function ViewCategories() {
       })
       .catch((error) => {
         console.error("Error fetching category:", error);
-        toast.error("Failed to fetch category types. Please try again later.");
+          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+                logoutUser(); // Call logoutUser if 404 or 401 status code
+              }
         setLoading(false);
       });
   }, [id, navigate]);
@@ -180,6 +181,9 @@ function ViewCategories() {
       setIsSaving(false);
     } catch (error) {
       console.error("Error updating category:", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+              logoutUser(); // Call logoutUser if 404 or 401 status code
+            }
       setIsSaving(false);
     }
   };

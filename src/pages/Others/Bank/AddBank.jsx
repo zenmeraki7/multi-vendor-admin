@@ -16,13 +16,14 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+import { logoutUser } from "../../../utils/authUtils";
 function AddBank() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorAlertVisible, setErrorAlertVisible] = useState(false);
   const [countries, setCountries] = useState([]); // State to store fetched countries
+  const [countriesLoading, setCountriesLoading] = useState(true); // New loading state for countries
 
   // Fetch countries from API
   useEffect(() => {
@@ -43,10 +44,23 @@ function AddBank() {
         if (response.data && Array.isArray(response.data.data)) {
           setCountries(response.data.data);
         } else {
-          console.error("Error: API response data is not in the expected format.");
+          console.error(
+            "Error: API response data is not in the expected format."
+          );
         }
       } catch (error) {
-        console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        console.error(
+          "Error fetching countries:",
+          error.response ? error.response.data : error.message
+        );
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
+      } finally {
+        setCountriesLoading(false); // Stop loading spinner after countries are fetched
       }
     };
 
@@ -69,7 +83,7 @@ function AddBank() {
       country: country, // Country ID
       isActive: status === "Active" ? true : false, // Ensure status maps to isActive
     };
-  
+
     console.log("Payload:", payload);
 
     try {
@@ -84,9 +98,10 @@ function AddBank() {
         }
       );
 
-      console.log("Response:", response);  // Log full response to check status and data
+      console.log("Response:", response); // Log full response to check status and data
 
-      if (response.status === 201) {  // Check for '201 Created' instead of '200'
+      if (response.status === 201) {
+        // Check for '201 Created' instead of '200'
         setAlertVisible(true);
         setTimeout(() => {
           setAlertVisible(false);
@@ -97,13 +112,21 @@ function AddBank() {
         setErrorAlertVisible(true);
       }
     } catch (error) {
-      console.error("Error during bank creation:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error during bank creation:",
+        error.response ? error.response.data : error.message
+      );
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setErrorAlertVisible(true);
     } finally {
       setLoading(false); // Stop the loading spinner
     }
-};
-
+  };
 
   const validationSchema = Yup.object({
     bankName: Yup.string().required("Bank name is required"),
@@ -168,91 +191,113 @@ function AddBank() {
         </Alert>
       )}
 
-      <Formik
-        initialValues={{
-          bankName: "",
-          country: "",
-          status: "Active",
-        }}
-        validationSchema={validationSchema}
-        onSubmit={handleSave}
-      >
-        {({ setFieldValue, touched, errors, values }) => (
-          <Form>
-            <Grid container spacing={2} justifyContent="center" alignItems="center" mb={3} mt={8} p={7}>
-              <Grid item xs={12} sm={8} md={6}>
-                <Box display="flex" flexDirection="column" gap={2}>
-                  <CustomInput
-                    id="bank-name"
-                    name="bankName"
-                    label="Bank Name"
-                    placeholder="Enter bank name"
-                    value={values.bankName}
-                    onChange={(e) => setFieldValue("bankName", e.target.value)}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.bankName && errors.bankName && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.bankName}
-                    </div>
-                  )}
-
-                  <CustomSelect
-                    id="country"
-                    name="country"
-                    value={values.country}
-                    onChange={(e) => setFieldValue("country", e.target.value)}
-                    label="Country"
-                    MenuItems={countries.map((country) => ({
-                      value: country._id,
-                      label: country.name,
-                    }))}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.country && errors.country && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.country}
-                    </div>
-                  )}
-
-                  <CustomSelect
-                    id="status"
-                    name="status"
-                    value={values.status}
-                    onChange={(e) => setFieldValue("status", e.target.value)}
-                    label="Status"
-                    MenuItems={[
-                      { value: "Active", label: "Active" },
-                      { value: "Inactive", label: "Inactive" },
-                    ]}
-                    sx={{ width: "100%" }}
-                  />
-                  {touched.status && errors.status && (
-                    <div style={{ color: "red", fontSize: "12px" }}>
-                      {errors.status}
-                    </div>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-            <Box display="flex" justifyContent="center" mb={3}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                style={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
-                disabled={loading}
+      {countriesLoading ? ( // Show CircularProgress while countries are loading
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Formik
+          initialValues={{
+            bankName: "",
+            country: "",
+            status: "Active",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSave}
+        >
+          {({ setFieldValue, touched, errors, values }) => (
+            <Form>
+              <Grid
+                container
+                spacing={2}
+                justifyContent="center"
+                alignItems="center"
+                mb={3}
+                mt={8}
+                p={7}
               >
-                {loading ? "Saving..." : "Save"}
-              </Button>
-            </Box>
-          </Form>
-        )}
-      </Formik>
+                <Grid item xs={12} sm={8} md={6}>
+                  <Box display="flex" flexDirection="column" gap={2}>
+                    <CustomInput
+                      id="bank-name"
+                      name="bankName"
+                      label="Bank Name"
+                      placeholder="Enter bank name"
+                      value={values.bankName}
+                      onChange={(e) =>
+                        setFieldValue("bankName", e.target.value)
+                      }
+                      sx={{ width: "100%" }}
+                    />
+                    {touched.bankName && errors.bankName && (
+                      <div style={{ color: "red", fontSize: "12px" }}>
+                        {errors.bankName}
+                      </div>
+                    )}
+
+                    <CustomSelect
+                      id="country"
+                      name="country"
+                      value={values.country}
+                      onChange={(e) => setFieldValue("country", e.target.value)}
+                      label="Country"
+                      MenuItems={countries.map((country) => ({
+                        value: country._id,
+                        label: country.name,
+                      }))}
+                      sx={{ width: "100%" }}
+                    />
+                    {touched.country && errors.country && (
+                      <div style={{ color: "red", fontSize: "12px" }}>
+                        {errors.country}
+                      </div>
+                    )}
+
+                    <CustomSelect
+                      id="status"
+                      name="status"
+                      value={values.status}
+                      onChange={(e) => setFieldValue("status", e.target.value)}
+                      label="Status"
+                      MenuItems={[
+                        { value: "Active", label: "Active" },
+                        { value: "Inactive", label: "Inactive" },
+                      ]}
+                      sx={{ width: "100%" }}
+                    />
+                    {touched.status && errors.status && (
+                      <div style={{ color: "red", fontSize: "12px" }}>
+                        {errors.status}
+                      </div>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+              <Box display="flex" justifyContent="center" mb={3}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  startIcon={
+                    loading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <Save />
+                    )
+                  }
+                  style={{
+                    background: "linear-gradient(45deg, #556cd6, #19857b)",
+                    color: "#fff",
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </Button>
+              </Box>
+            </Form>
+          )}
+        </Formik>
+      )}
     </Box>
   );
 }

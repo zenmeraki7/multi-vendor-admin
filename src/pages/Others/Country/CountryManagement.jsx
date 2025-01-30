@@ -15,13 +15,14 @@ import {
   Paper,
   Pagination,
   Chip,
+  CircularProgress, // Import CircularProgress
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+import { logoutUser } from "../../../utils/authUtils";
 const CountryManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,6 +32,7 @@ const CountryManagement = () => {
 
   const [countries, setCountries] = useState([]);
   const [filteredCountries, setFilteredCountries] = useState(countries);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     fetchCountries();
@@ -40,7 +42,6 @@ const CountryManagement = () => {
     filterCountries(searchTerm, statusFilter);
   }, [searchTerm, statusFilter]);
 
-  
   const fetchCountries = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -49,24 +50,23 @@ const CountryManagement = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
-      
+
       if (Array.isArray(response.data.data)) {
-        setCountries(response.data.data);  
-        setFilteredCountries(response.data.data);  
-        console.log(response.data.data);
-        
+        setCountries(response.data.data);
+        setFilteredCountries(response.data.data);
+        setLoading(false); // Set loading to false after data is fetched
       } else {
         console.error("API response is not an array", response.data);
       }
     } catch (error) {
       console.error("Error fetching countries:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
+      setLoading(false); // Set loading to false even if there's an error
     }
   };
-  
 
-
-  
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -102,23 +102,17 @@ const CountryManagement = () => {
     setCurrentPage(value);
   };
 
-  
-const currentData = Array.isArray(filteredCountries)
-? filteredCountries.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
-: [];
+  const currentData = Array.isArray(filteredCountries)
+    ? filteredCountries.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : [];
 
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h4">
           <b>Country Management</b>
         </Typography>
@@ -182,46 +176,55 @@ const currentData = Array.isArray(filteredCountries)
         </Button>
       </Box>
 
+      {/* CircularProgress when loading */}
+      {loading && (
+        <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+          <CircularProgress />
+        </Box>
+      )}
+
       {/* Country Table */}
-      <TableContainer component={Paper} elevation={3}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "primary.main" }}>
-              <TableCell>#</TableCell>
-              <TableCell>Country Name</TableCell>
-              <TableCell>Country Code</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-    {currentData.map((country, index) => (
-      <TableRow key={index}>
-        <TableCell>
-          {(currentPage - 1) * itemsPerPage + index + 1}
-        </TableCell>
-        <TableCell>{country.name}</TableCell>
-        <TableCell>{country.code}</TableCell>
-        <TableCell>
-          <Chip
-            label={country.isActive ? "Active" : "Inactive"}
-            color={country.isActive ? "success" : "error"}
-          />
-        </TableCell>
-        <TableCell>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => navigate("/view-country")}
-          >
-            View
-          </Button>
-        </TableCell>
-      </TableRow>
-    ))}
-  </TableBody>
-        </Table>
-      </TableContainer>
+      {!loading && (
+        <TableContainer component={Paper} elevation={3}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "primary.main" }}>
+                <TableCell>#</TableCell>
+                <TableCell>Country Name</TableCell>
+                <TableCell>Country Code</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentData.map((country, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {(currentPage - 1) * itemsPerPage + index + 1}
+                  </TableCell>
+                  <TableCell>{country.name}</TableCell>
+                  <TableCell>{country.code}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={country.isActive ? "Active" : "Inactive"}
+                      color={country.isActive ? "success" : "error"}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => navigate(`/view-country/${country._id}`)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Pagination */}
       <Box mt={2} display="flex" justifyContent="center">
