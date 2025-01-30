@@ -40,6 +40,7 @@ import Commision from "./pages/Commision/Commision";
 import AdminLogin from "./pages/Auth/AdminLogin";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import AddSeller from "./pages/AddSeller/AddSeller";
 
 function App() {
   const dummyProduct = {
@@ -180,6 +181,8 @@ function App() {
         </Route>
 
         <Route path="add-variant" element={<AddVariant />} />
+        
+        <Route path="/add-seller" element={<AddSeller />} />
       </Routes>
     </>
   );
