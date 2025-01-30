@@ -60,27 +60,27 @@ function Navbox() {
           icon: <AddBusinessIcon />,
           path: "/shop-page-settings",
         },
-        {
-          text: "Seller Profile Page Settings",
-          icon: <PersonIcon />,
-          path: "/seller-profile-settings",
-        },
-        {
-          text: "Customize Seller Page",
-          icon: <WidgetsIcon />,
-          path: "/customize-seller-page",
-        },
-        {
-          text: "Seller Feedback",
-          icon: <FeedbackIcon />,
-          path: "/seller-feedback",
-        },
-        {
-          text: "Seller Feedback Option",
-          icon: <FeedbackIcon />,
-          path: "/seller-feedback-option",
-        },
-        { text: "Seller Policy", icon: <PolicyIcon />, path: "/seller-policy" },
+        // {
+        //   text: "Seller Profile Page Settings",
+        //   icon: <PersonIcon />,
+        //   path: "/seller-profile-settings",
+        // },
+        // {
+        //   text: "Customize Seller Page",
+        //   icon: <WidgetsIcon />,
+        //   path: "/customize-seller-page",
+        // },
+        // {
+        //   text: "Seller Feedback",
+        //   icon: <FeedbackIcon />,
+        //   path: "/seller-feedback",
+        // },
+        // {
+        //   text: "Seller Feedback Option",
+        //   icon: <FeedbackIcon />,
+        //   path: "/seller-feedback-option",
+        // },
+        // { text: "Seller Policy", icon: <PolicyIcon />, path: "/seller-policy" },
       ],
     },
     { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
@@ -88,7 +88,7 @@ function Navbox() {
     {
       text: "Transactions",
       icon: <MonetizationOnIcon />,
-      path: "/transactions",
+      path: "/",
     },
     { text: "Reviews", icon: <AssignmentIcon />, path: "/reviews" },
     {
@@ -96,28 +96,28 @@ function Navbox() {
       icon: <WidgetsIcon />,
       subItems: [
         { text: "Product List", icon: <ListAltIcon />, path: "/product-list" },
-        {
-          text: "Product Option",
-          icon: <SettingsIcon />,
-          path: "/product-option",
-        },
-        { text: "Product Tags", icon: <CategoryIcon />, path: "/product-tags" },
-        {
-          text: "Product Types",
-          icon: <CategoryIcon />,
-          path: "/product-types",
-        },
-        { text: "Collections", icon: <CategoryIcon />, path: "/collections" },
-        {
-          text: "Import Products",
-          icon: <ImportExportIcon />,
-          path: "/import-products",
-        },
-        {
-          text: "Product Form Customization",
-          icon: <SettingsSuggestIcon />,
-          path: "/product-form-customization",
-        },
+        // {
+        //   text: "Product Option",
+        //   icon: <SettingsIcon />,
+        //   path: "/product-option",
+        // },
+        // { text: "Product Tags", icon: <CategoryIcon />, path: "/product-tags" },
+        // {
+        //   text: "Product Types",
+        //   icon: <CategoryIcon />,
+        //   path: "/product-types",
+        // },
+        // { text: "Collections", icon: <CategoryIcon />, path: "/collections" },
+        // {
+        //   text: "Import Products",
+        //   icon: <ImportExportIcon />,
+        //   path: "/import-products",
+        // },
+        // {
+        //   text: "Product Form Customization",
+        //   icon: <SettingsSuggestIcon />,
+        //   path: "/product-form-customization",
+        // },
       ],
     },
     {
@@ -155,65 +155,65 @@ function Navbox() {
         {
           text: "General Settings",
           icon: <SettingsSuggestIcon />,
-          path: "/general-settings",
+          path: "/",
         },
-        {
-          text: "Merchant Settings",
-          icon: <BusinessCenterIcon />,
-          subItems: [
-            {
-              text: "Company Details",
-              icon: <BusinessCenterIcon />,
-              path: "/company-details",
-            },
-            {
-              text: "Billing & Invoice",
-              icon: <MonetizationOnIcon />,
-              path: "/billing-invoice",
-            },
-            {
-              text: "Warehouses",
-              icon: <ApartmentIcon />,
-              path: "/warehouses",
-            },
-            {
-              text: "Shipping Partners",
-              icon: <CardTravelIcon />,
-              path: "/shipping-partners",
-            },
-            {
-              text: "Users & Permissions",
-              icon: <PeopleIcon />,
-              path: "/users-permissions",
-            },
-          ],
-        },
-        {
-          text: "Message Integrations",
-          icon: <EmailIcon />,
-          subItems: [
-            {
-              text: "Email Configuration",
-              icon: <EmailIcon />,
-              path: "/email-configuration",
-            },
-          ],
-        },
-        {
-          text: "Multi Vendor Settings",
-          icon: <SettingsIcon />,
-          path: "/settings/multi-vendor",
-        },
-        {
-          text: "Shop Settings",
-          icon: <AddBusinessIcon />,
-          path: "/settings/shop",
-        },
-        {
-          text: "Subscription and Billing",
-          icon: <CardTravelIcon />,
-          path: "/settings/billing",
-        },
+        // {
+        //   text: "Merchant Settings",
+        //   icon: <BusinessCenterIcon />,
+        //   subItems: [
+        //     {
+        //       text: "Company Details",
+        //       icon: <BusinessCenterIcon />,
+        //       path: "/company-details",
+        //     },
+        //     {
+        //       text: "Billing & Invoice",
+        //       icon: <MonetizationOnIcon />,
+        //       path: "/billing-invoice",
+        //     },
+        //     {
+        //       text: "Warehouses",
+        //       icon: <ApartmentIcon />,
+        //       path: "/warehouses",
+        //     },
+        //     {
+        //       text: "Shipping Partners",
+        //       icon: <CardTravelIcon />,
+        //       path: "/shipping-partners",
+        //     },
+        //     {
+        //       text: "Users & Permissions",
+        //       icon: <PeopleIcon />,
+        //       path: "/users-permissions",
+        //     },
+        //   ],
+        // },
+        // {
+        //   text: "Message Integrations",
+        //   icon: <EmailIcon />,
+        //   subItems: [
+        //     {
+        //       text: "Email Configuration",
+        //       icon: <EmailIcon />,
+        //       path: "/email-configuration",
+        //     },
+        //   ],
+        // },
+        // {
+        //   text: "Multi Vendor Settings",
+        //   icon: <SettingsIcon />,
+        //   path: "/settings/multi-vendor",
+        // },
+        // {
+        //   text: "Shop Settings",
+        //   icon: <AddBusinessIcon />,
+        //   path: "/settings/shop",
+        // },
+        // {
+        //   text: "Subscription and Billing",
+        //   icon: <CardTravelIcon />,
+        //   path: "/settings/billing",
+        // },
       ],
     },
   ];
@@ -227,16 +227,14 @@ function Navbox() {
             expanded={expanded === item.text}
             onChange={handleAccordionChange(item.text)}
             sx={{
-              backgroundColor: "transparent",
               boxShadow: "none",
               "&:before": { display: "none" }, // Remove the default border
-              background: "linear-gradient(45deg, #A45EE5, #7C4DFF)",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              color: "white",
+              color: "#000",
+              background: "#e0e0e0",
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon sx={{ color: "white" }} />}
+              expandIcon={<ExpandMoreIcon sx={{ color: "#000" }} />}
               sx={{
                 pl: 2 + depth * 2, // Indent based on depth
                 "&:hover": { backgroundColor: "#e0e0e0" }, // Hover effect
@@ -248,8 +246,11 @@ function Navbox() {
                 {item.text}
               </Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ p: 0 }}>
-              <List disablePadding>
+            <AccordionDetails sx={{ px: 0.5 }}>
+              <List
+                disablePadding
+                sx={{ display: "flex", flexDirection: "column", gap: "10px" }}
+              >
                 {renderMenuItems(item.subItems, depth + 1)}
               </List>
             </AccordionDetails>
@@ -260,13 +261,13 @@ function Navbox() {
               onClick={() => item.path && navigate(item.path)}
               sx={{
                 borderRadius: 1, // Rounded corners
-                backgroundColor:
-                  location.pathname === item.path ? "#e0e0e0" : "transparent", // Active item background
+                background:
+                  location.pathname === item.path
+                    ? "linear-gradient(45deg, #556cd6, #19857b)"
+                    : "#e0e0e0", // Active item background
                 "&:hover": { backgroundColor: "#e0e0e0" }, // Hover effect
                 transition: "background-color 0.2s",
-                background: "linear-gradient(45deg, #A45EE5, #7C4DFF)",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                color: "white",
+                color: location.pathname === item.path ? "#fff" : "#000",
               }}
             >
               <ListItemIcon sx={{ minWidth: "40px" }}>{item.icon}</ListItemIcon>
@@ -274,7 +275,6 @@ function Navbox() {
                 primary={item.text}
                 primaryTypographyProps={{
                   fontWeight: location.pathname === item.path ? 600 : 500, // Bold for active item
-                  
                 }}
               />
             </ListItemButton>
@@ -295,7 +295,7 @@ function Navbox() {
         p: 0.5,
         overflowY: "auto",
         "&::-webkit-scrollbar": {
-          width: "8px",
+          width: "4px",
         },
         "&::-webkit-scrollbar-track": {
           backgroundColor: "#f5f5f5",
