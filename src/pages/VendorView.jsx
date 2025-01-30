@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Button } from "react-bootstrap";
 import { BASE_URL } from "../utils/baseUrl";
+import { logoutUser } from "../utils/authUtils";
 
 const VendorView = () => {
   const [vendorDetails, setVendorDetails] = useState(null);
@@ -34,6 +35,9 @@ const VendorView = () => {
         setVendorDetails(response.data.data);
       } catch (error) {
         console.error("Error fetching vendor details:", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       }
     };
 

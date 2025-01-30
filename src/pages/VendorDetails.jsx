@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom"; 
 import { BASE_URL } from "../utils/baseUrl";
+import { logoutUser } from "../utils/authUtils";
 
 function VendorDetails() {
   const [vendors, setVendors] = useState([]);
@@ -60,11 +61,9 @@ function VendorDetails() {
       } catch (err) {
         if (err.response) {
           // Handle specific error responses
-          if (err.response.status === 401) {
-            setError("Session expired. Please log in again.");
-            localStorage.removeItem("token"); // Remove expired token
-            navigate("/login"); // Redirect to login page
-          } else if (err.response.status === 403) {
+          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+            logoutUser(); // Call logoutUser if 404 or 401 status code
+          }else if (err.response.status === 403) {
             setError("You do not have permission to view the vendors.");
           } else {
             setError("Failed to fetch vendors.");

@@ -21,12 +21,12 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import { styled } from "@mui/system";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
 import { useParams } from "react-router-dom";
 import { BASE_URL } from "../../utils/baseUrl";
 import toast from "react-hot-toast";
+import { logoutUser } from "../../utils/authUtils";
 
 function removeHtmlTags(str) {
   return str.replace(/<[^>]*>/g, "");
@@ -67,9 +67,9 @@ const ViewProduct = () => {
       fetchProductData();
       toast.success(response.data.message); // Success message
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to approve product."
-      );
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
     } finally {
       setLoadingBtn(false);
       handleClose(); // Close modal after API call
@@ -96,9 +96,9 @@ const ViewProduct = () => {
         toast.success(response.data.message); // Success message
         setBlockReason("");
       } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to approve product."
-        );
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       } finally {
         setLoadingBtn(false);
         handleClose(); // Close modal after API call
@@ -121,6 +121,9 @@ const ViewProduct = () => {
       setLoading(false);
     } catch (err) {
       setError("Error fetching product data");
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setLoading(false);
     }
   };

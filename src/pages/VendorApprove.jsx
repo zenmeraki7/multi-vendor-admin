@@ -19,6 +19,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import { useParams } from "react-router-dom";
 import { BASE_URL } from "../utils/baseUrl";
+import { logoutUser } from "../utils/authUtils";
 
 // Styled components for custom stepper design
 const CustomStepIcon = styled(Box)(({ active }) => ({
@@ -107,11 +108,9 @@ const VendorApprove = () => {
         setVendorDetails(response.data.data);  
       } catch (error) {
         console.error("Error fetching vendor data:", error);
-        setSnackbar({
-          open: true,
-          message: "Failed to fetch vendor details",
-          severity: "error",
-        });
+         if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       }
     };
 

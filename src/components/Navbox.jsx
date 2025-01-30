@@ -45,7 +45,7 @@ function Navbox() {
       icon: <PeopleIcon />,
       subItems: [
         { text: "Sellers Listing", path: "/sellers" },
-        { text: "Seller form Settings", path: "" },
+        { text: "Seller form Settings", path: "/seller-form-settings" },
         { text: "Shop Page Settings", path: "" },
         { text: "Seller Profile Page Settings", path: "" },
         { text: "Customize Seller Page", path: "" },
@@ -74,6 +74,7 @@ function Navbox() {
         { text: "Import Products", path: "" },
         { text: "Product Form Customization", path: "" },
       ],
+      
     },
     {
       text: "Manage Categories",

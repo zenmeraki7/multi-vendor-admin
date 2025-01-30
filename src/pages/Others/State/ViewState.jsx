@@ -16,6 +16,7 @@ import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
+import { logoutUser } from "../../../utils/authUtils";
 
 // Validation schema
 const validationSchema = yup.object().shape({
@@ -54,6 +55,9 @@ const ViewState = () => {
         }
       } catch (error) {
         console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       }
     };
     fetchCountries();
@@ -77,6 +81,9 @@ const ViewState = () => {
         }
       } catch (error) {
         console.error("Error fetching state details:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       } finally {
         setLoading(false); // Set loading to false once the data is fetched
       }
@@ -132,6 +139,9 @@ const ViewState = () => {
       }
     } catch (error) {
       console.error("Error updating state details:", error.response ? error.response.data : error.message);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setIsSaving(false);
     }
   };
