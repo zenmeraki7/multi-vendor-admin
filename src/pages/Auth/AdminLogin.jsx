@@ -62,7 +62,7 @@ function AdminLogin() {
 
       // Show success toast and navigate
       toast.success("Login successful!");
-      navigate("/admin");
+      navigate("/");
     } catch (error) {
       setLoading(false);
 
