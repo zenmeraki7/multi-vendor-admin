@@ -41,6 +41,7 @@ import AdminLogin from "./pages/Auth/AdminLogin";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import AddSeller from "./pages/AddSeller/AddSeller";
+import TransactionPage from "./pages/Transaction/Transaction";
 
 function App() {
   const dummyProduct = {
@@ -178,11 +179,16 @@ function App() {
             element={<PrivateRoute component={<SellerPro />} />}
           />
           <Route path="/Commision" element={< PrivateRoute component={<Commision/>} /> } />
+          <Route
+            path="/transaction"
+            element={<PrivateRoute component={<TransactionPage />} />}
+          />
         </Route>
 
         <Route path="add-variant" element={<AddVariant />} />
         
         <Route path="/add-seller" element={<AddSeller />} />
+        
       </Routes>
     </>
   );

@@ -26,6 +26,7 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import EmailIcon from "@mui/icons-material/Email";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import CardTravelIcon from "@mui/icons-material/CardTravel";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import { useNavigate, useLocation } from "react-router-dom";
 
 function Navbox() {
@@ -87,6 +88,8 @@ function Navbox() {
     { text: "Bank Management", icon: <AssuredWorkloadIcon />, path: "/bank-management" },
     { text: "Country Management", icon: <PublicIcon />, path: "/country-management" },
     { text: "State Management", icon: <ApartmentIcon />, path: "/state-management" },
+    { text: "Transcation", icon: <ReceiptLongIcon />, path: "/transaction" },
+
     {
       text: "Settings",
       icon: <SettingsIcon />,
