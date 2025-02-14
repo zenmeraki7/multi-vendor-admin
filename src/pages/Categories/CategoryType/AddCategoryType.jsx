@@ -18,6 +18,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import * as yup from "yup";
+import { logoutUser } from "../../../utils/authUtils";
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
@@ -144,6 +145,9 @@ function AddCategoryType() {
     } catch (error) {
       if (error.response) {
         console.error("API Error Response:", error.response.data);
+          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+                logoutUser(); // Call logoutUser if 404 or 401 status code
+              }
         alert(`Error: ${error.response.data.message}`);
       } else {
         console.error("Error creating category type:", error);

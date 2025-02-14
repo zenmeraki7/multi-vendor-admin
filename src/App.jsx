@@ -17,7 +17,6 @@ import Review from "./pages/Review";
 import VendorApprove from "./pages/VendorApprove";
 import VendorView from "./pages/VendorView";
 import ViewProduct from "./pages/ViewProduct/ViewProduct";
-import "bootstrap/dist/css/bootstrap.min.css";
 import CategoryType from "./pages/Categories/CategoryType/CategoryType";
 import ViewCategories from "./pages/Categories/category/ViewCategories";
 import AddCategoryType from "./pages/Categories/CategoryType/AddCategoryType";
@@ -40,109 +39,23 @@ import Commision from "./pages/Commision/Commision";
 import AdminLogin from "./pages/Auth/AdminLogin";
 import ForgetPassword from "./pages/Auth/ForgetPassword";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import SellerFormSettings from "./pages/SellerFormSettings";
+import ShopPageSettings from "./pages/ShopPageSettings";
 import AddSeller from "./pages/AddSeller/AddSeller";
 import TransactionPage from "./pages/Transaction/Transaction";
 
 function App() {
-  const dummyProduct = {
-    title: "Smartphone XYZ 128GB",
-    description: "A high-performance smartphone with amazing features.",
-    brand: "XYZ Electronics",
-    price: 699.99,
-    discountedPrice: 599.99,
-    thumbnail: {
-      url: "https://via.placeholder.com/600x400",
-      altText: "Smartphone XYZ",
-    },
-    images: [
-      { url: "https://via.placeholder.com/200x200", altText: "Image 1" },
-      { url: "https://via.placeholder.com/200x200", altText: "Image 2" },
-      { url: "https://via.placeholder.com/200x200", altText: "Image 3" },
-    ],
-    specifications: [
-      { key: "RAM", value: "8GB" },
-      { key: "Storage", value: "128GB" },
-      { key: "Camera", value: "48MP" },
-    ],
-    offers: [
-      {
-        title: "10% off on XYZ Bank Cards",
-        description: "Get an additional 10% off using XYZ Bank credit cards.",
-        discountPercentage: 10,
-        validUntil: new Date("2025-12-31"),
-      },
-      {
-        title: "Free Accessories Pack",
-        description:
-          "Get a free accessories pack with the purchase of this phone.",
-        discountPercentage: 0,
-        validUntil: new Date("2025-06-30"),
-      },
-    ],
-    variants: [
-      {
-        attribute: "Color",
-        value: "Black",
-        additionalPrice: 0,
-        stock: 50,
-        image: {
-          url: "https://via.placeholder.com/100x100",
-          altText: "Black variant",
-        },
-      },
-      {
-        attribute: "Color",
-        value: "Blue",
-        additionalPrice: 10,
-        stock: 30,
-        image: {
-          url: "https://via.placeholder.com/100x100",
-          altText: "Blue variant",
-        },
-      },
-      {
-        attribute: "Storage",
-        value: "256GB",
-        additionalPrice: 50,
-        stock: 20,
-        image: {
-          url: "https://via.placeholder.com/100x100",
-          altText: "256GB variant",
-        },
-      },
-    ],
-    rating: {
-      average: 4.5,
-      count: 200,
-    },
-    shippingDetails: {
-      weight: "0.5",
-      freeShipping: true,
-      shippingCharge: 0,
-    },
-    returnPolicy: {
-      isReturnable: true,
-      returnWindow: 30,
-    },
-    seller: {
-      name: "XYZ Electronics Store",
-      contactInfo: {
-        email: "support@xyzstore.com",
-        phone: "+1 (555) 123-4567",
-      },
-      location: "123 Electronics Ave, Silicon Valley, CA",
-    },
-  };
   return (
     <>
       <Toaster />
       <Routes>
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/forget-password" element={<ForgetPassword/>} />
-        <Route path="/reset-password" element={<ResetPassword/>} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
         {/* Wrap all pages inside Layout to ensure header/footer are present */}
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<PrivateRoute component={<Layout />} />}>
           <Route index element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/sellers" element={<VendorDetails />} />
@@ -170,9 +83,11 @@ function App() {
           <Route path="/view-state/:id" element={<ViewState />} />
           <Route path="/add-state" element={<AddState />} />
           <Route
-            path="view-product/:id"
-            element={<PrivateRoute component={<ViewProduct />} />}
+            path="/seller-form-settings"
+            element={<SellerFormSettings />}
           />
+          <Route path="/shop-page-settings" element={<ShopPageSettings />} />
+          <Route path="view-product/:id" element={<ViewProduct />} />
           <Route path="/product-list" element={<ProductList />} />
           <Route
             path="/seller-profile"
@@ -189,6 +104,12 @@ function App() {
         
         <Route path="/add-seller" element={<AddSeller />} />
         
+          <Route path="/seller-profile" element={<SellerPro />} />
+          <Route path="/Commision" element={<Commision />} />
+          <Route path="/add-seller" element={<AddSeller />} />
+       
+
+        <Route path="add-variant" element={<AddVariant />} />
       </Routes>
     </>
   );

@@ -9,6 +9,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup"; 
 import axios from "axios"; 
 import { BASE_URL } from "../../../utils/baseUrl";
+import { logoutUser } from "../../../utils/authUtils";
 
 function AddCountry() {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ function AddCountry() {
         setIsPageLoading(false); // Page loaded
       } catch (error) {
         console.error("Error during page load:", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
         setIsPageLoading(false); // Ensure loader is removed even if there's an error
       }
     };
@@ -71,6 +75,9 @@ function AddCountry() {
       }
     } catch (error) {
       console.error("Error during country creation:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setErrorAlertVisible(true);
     } finally {
       setLoading(false);

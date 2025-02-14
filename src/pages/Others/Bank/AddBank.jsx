@@ -16,7 +16,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+import { logoutUser } from "../../../utils/authUtils";
 function AddBank() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -44,10 +44,21 @@ function AddBank() {
         if (response.data && Array.isArray(response.data.data)) {
           setCountries(response.data.data);
         } else {
-          console.error("Error: API response data is not in the expected format.");
+          console.error(
+            "Error: API response data is not in the expected format."
+          );
         }
       } catch (error) {
-        console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        console.error(
+          "Error fetching countries:",
+          error.response ? error.response.data : error.message
+        );
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       } finally {
         setCountriesLoading(false); // Stop loading spinner after countries are fetched
       }
@@ -87,9 +98,10 @@ function AddBank() {
         }
       );
 
-      console.log("Response:", response);  // Log full response to check status and data
+      console.log("Response:", response); // Log full response to check status and data
 
-      if (response.status === 201) {  // Check for '201 Created' instead of '200'
+      if (response.status === 201) {
+        // Check for '201 Created' instead of '200'
         setAlertVisible(true);
         setTimeout(() => {
           setAlertVisible(false);
@@ -100,7 +112,16 @@ function AddBank() {
         setErrorAlertVisible(true);
       }
     } catch (error) {
-      console.error("Error during bank creation:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error during bank creation:",
+        error.response ? error.response.data : error.message
+      );
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setErrorAlertVisible(true);
     } finally {
       setLoading(false); // Stop the loading spinner
@@ -186,7 +207,15 @@ function AddBank() {
         >
           {({ setFieldValue, touched, errors, values }) => (
             <Form>
-              <Grid container spacing={2} justifyContent="center" alignItems="center" mb={3} mt={8} p={7}>
+              <Grid
+                container
+                spacing={2}
+                justifyContent="center"
+                alignItems="center"
+                mb={3}
+                mt={8}
+                p={7}
+              >
                 <Grid item xs={12} sm={8} md={6}>
                   <Box display="flex" flexDirection="column" gap={2}>
                     <CustomInput
@@ -195,7 +224,9 @@ function AddBank() {
                       label="Bank Name"
                       placeholder="Enter bank name"
                       value={values.bankName}
-                      onChange={(e) => setFieldValue("bankName", e.target.value)}
+                      onChange={(e) =>
+                        setFieldValue("bankName", e.target.value)
+                      }
                       sx={{ width: "100%" }}
                     />
                     {touched.bankName && errors.bankName && (
@@ -247,7 +278,13 @@ function AddBank() {
                   variant="contained"
                   color="primary"
                   type="submit"
-                  startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                  startIcon={
+                    loading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <Save />
+                    )
+                  }
                   style={{
                     background: "linear-gradient(45deg, #556cd6, #19857b)",
                     color: "#fff",

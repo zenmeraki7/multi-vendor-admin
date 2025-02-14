@@ -25,7 +25,7 @@ import { Search, Refresh, Edit } from "@mui/icons-material";
 import axios from "axios"; // Alternatively, use your axiosInstance
 import { BASE_URL } from "../utils/baseUrl";
 import { useNavigate } from "react-router-dom";
-
+import { logoutUser } from "../utils/authUtils";
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
@@ -57,6 +57,9 @@ const ProductList = () => {
       setTotalPages(totalPages);
       setLoading(false);
     } catch (err) {
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setError(err.response?.data?.message || "Error fetching products");
       setLoading(false);
     }

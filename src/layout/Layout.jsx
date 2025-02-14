@@ -12,7 +12,7 @@ const Layout = () => {
       <ScrollToTop />
       <Header />
 
-      <Box sx={{ }}>
+      <Box sx={{}}>
         <Stack direction="row" spacing={2}>
           {/* Sidebar */}
           <Box
@@ -27,7 +27,8 @@ const Layout = () => {
           </Box>
 
           {/* Main Content */}
-          <Box
+          <Stack
+            width="100%"
             sx={{
               flexGrow: 1,
               height: "90vh",
@@ -41,12 +42,13 @@ const Layout = () => {
             }}
             pt={2}
           >
-            <Outlet />
-          </Box>
+            <Box mb={2}>
+              <Outlet />
+            </Box>
+            <Footer />
+          </Stack>
         </Stack>
       </Box>
-
-      <Footer />
     </>
   );
 };

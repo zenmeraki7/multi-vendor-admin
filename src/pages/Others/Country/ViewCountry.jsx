@@ -16,7 +16,7 @@ import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+import { logoutUser } from "../../../utils/authUtils";
 // Validation schema
 const validationSchema = yup.object().shape({
   countryName: yup.string().required("Country Name is required"),
@@ -58,6 +58,9 @@ const ViewCountry = () => {
         setEditedCountry(fetchedCountry);
       } catch (error) {
         console.error("Error fetching country data:", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       } finally {
         setIsLoading(false); // Stop loading once the data is fetched
       }
@@ -113,6 +116,9 @@ const ViewCountry = () => {
       }
     } catch (error) {
       console.error("Error updating country:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setIsSaving(false);
     }
   };

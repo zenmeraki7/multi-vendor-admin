@@ -1,22 +1,112 @@
 import React, { useState } from "react";
 import {
+  ResponsiveContainer,
   BarChart,
   Bar,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,
+  Tooltip,
+  Legend,
 } from "recharts";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination, Navigation } from "swiper/modules";
-import './Dashboard.css'
+import "./Dashboard.css";
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
+  Paper,
+  Box,
+} from "@mui/material";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import { FaCodePullRequest } from "react-icons/fa6";
 import { MdProductionQuantityLimits } from "react-icons/md";
+
+const sellers = [
+  {
+    id: 1,
+    name: "John Doe",
+    sales: "$12,345",
+    img: "https://randomuser.me/api/portraits/men/32.jpg",
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    sales: "$10,890",
+    img: "https://randomuser.me/api/portraits/women/44.jpg",
+  },
+  {
+    id: 3,
+    name: "Mike Ross",
+    sales: "$9,765",
+    img: "https://randomuser.me/api/portraits/men/45.jpg",
+  },
+  {
+    id: 4,
+    name: "Emma Brown",
+    sales: "$8,654",
+    img: "https://randomuser.me/api/portraits/women/50.jpg",
+  },
+  {
+    id: 4,
+    name: "Emma Brown",
+    sales: "$8,654",
+    img: "https://randomuser.me/api/portraits/women/50.jpg",
+  },
+  {
+    id: 4,
+    name: "Emma Brown",
+    sales: "$8,654",
+    img: "https://randomuser.me/api/portraits/women/50.jpg",
+  },
+  {
+    id: 4,
+    name: "Emma Brown",
+    sales: "$8,654",
+    img: "https://randomuser.me/api/portraits/women/50.jpg",
+  },
+];
+
+const popularProducts = [
+  {
+    name: "CHANELL GABRIELLE SPRAY",
+    img: "https://m.media-amazon.com/images/I/61t+UHcrOrL._SX522_.jpg",
+    earnings: "$5461",
+  },
+  {
+    name: "Canon EOS R50",
+    img: "https://m.media-amazon.com/images/I/81LskAU5h1L._AC_UL480_FMwebp_QL65_.jpg",
+    earnings: "$5461",
+  },
+  {
+    name: "Apple iPad Air 11",
+    img: "https://m.media-amazon.com/images/I/71qlYpwQTxL._SX679_.jpg",
+    earnings: "$5461",
+  },
+  {
+    name: "Blaupunkt Atomik PS30",
+    img: "https://m.media-amazon.com/images/I/41Fz1tPJkHL._SX300_SY300_QL70_FMwebp_.jpg",
+    earnings: "$5461",
+  },
+];
+
 // Data for Recharts chart
 const rechartsData = [
   { name: "January", uv: 4000, pv: 2400, amt: 2400, year: "2023" },
@@ -31,7 +121,6 @@ const rechartsData = [
   { name: "October", uv: 2100, pv: 4300, amt: 2100, year: "2023" },
   { name: "November", uv: 1500, pv: 4300, amt: 2100, year: "2023" },
   { name: "December", uv: 1234, pv: 4300, amt: 2100, year: "2023" },
-
 ];
 
 const Dashboard = () => {
@@ -49,357 +138,189 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="container py-5">
+    <div className="container py-3">
       {/* Overview Section */}
-      <div className="row mb-4">
-        <div className="col-md-8 border shadow-sm p-5">
-          {/* Filter Dropdown for Month */}
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <div className="card ">
-                <div className="card-body">
-                  <h6 className="card-title"> View Monthly Data</h6>
-                  <select
-                    className="form-select"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                  >
-                    <option value="hidden">Select a month</option>
-                    {rechartsData.map((data) => (
-                      <option key={data.name} value={data.name}>
-                        {data.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            {/* First Box - Total Orders */}
-            <div className="col-md-6">
-              <div className="card shadow-sm">
-                <div className="card-body text-center">
-                  <p className="text-muted mb-1">
-                    <AssignmentTurnedInIcon className="fs-1 " /> Total Orders
-                  </p>
-                  <h3 className="mb-1">
-                    {filteredData ? filteredData.uv : "0"}
-                  </h3>
-                  <small className="text-success">
-                    +12% vs previous 28 days
-                  </small>
-                </div>
-              </div>
-            </div>
-            {/* Second Box - Cancelled Orders */}
-            <div className="col-md-6">
-              <div className="card shadow-sm">
-                <div className="card-body text-center">
-                  <p className="text-muted mb-1">
-                    <EventBusyIcon className="fs-1 " /> Cancelled Orders
-                  </p>
-                  <h3 className="mb-1">
-                    {filteredData ? filteredData.pv : "0"}
-                  </h3>
-                  <small className="text-success">
-                    +4% vs previous 28 days
-                  </small>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="row mt-3">
-            {/* Third Box - Seller Requests */}
-            <div className="col-md-6">
-              <div className="card shadow-sm">
-                <div className="card-body text-center">
-                  <p className="text-muted mb-1">
-                    {" "}
-                    <FaCodePullRequest className="fs-1 " /> Seller Requests
-                  </p>
-                  <h3 className="mb-1">
-                    {filteredData ? filteredData.amt : "0"}
-                  </h3>
-                  <small className="text-danger">
-                    -0.89% vs previous 28 days
-                  </small>
-                </div>
-              </div>
-            </div>
-            {/* Fourth Box - Product Requests */}
-            <div className="col-md-6">
-              <div className="card shadow-sm">
-                <div className="card-body text-center">
-                  <p className="text-muted mb-1">
-                    <MdProductionQuantityLimits className="fs-1 " /> Product
-                    Requests
-                  </p>
-                  <h3 className="mb-1">
-                    {filteredData ? filteredData.amt : "0"}
-                  </h3>
-                  <small className="text-success">
-                    +2% vs previous 28 days
-                  </small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <Grid container spacing={3} mb={2}>
+        {/* Left Section */}
+        <Grid item xs={12} md={7.5}>
+          {/* Dropdown */}
+          <Card sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6">View Monthly Data</Typography>
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Select a month</InputLabel>
+              <Select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                {rechartsData.map((data) => (
+                  <MenuItem key={data.name} value={data.name}>
+                    {data.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Card>
 
-        {/* Popular Products Section */}
-        <div className="col-md-4">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <h5 className="card-title">Popular Products</h5>
-              <table className="table mt-3">
-                <thead>
-                  <tr>
-                    <th scope="col">Product</th>
-                    <th scope="col" className="text-end">
-                      Earnings
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Product A */}
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      <img
-                        src={`https://m.media-amazon.com/images/I/61t+UHcrOrL._SX522_.jpg`}
-                        alt="Product A"
-                        className="rounded me-3"
-                        width="40px"
-                        height="40px"
-                      />
-                      <div>
-                        <h6 className="mb-0">CHANELL GABRIELLE SPRAY </h6>
-                      </div>
-                    </td>
-                    <td className="text-end fw-bold">$5461</td>
-                  </tr>
+          {/* Stats Cards */}
+          <Grid container spacing={2}>
+            {[
+              {
+                title: "Total Orders",
+                value: filteredData?.uv || "0",
+                icon: (
+                  <AssignmentTurnedInIcon fontSize="large" color="primary" />
+                ),
+                change: "+12% vs previous 28 days",
+                changeColor: "success.main",
+              },
+              {
+                title: "Cancelled Orders",
+                value: filteredData?.pv || "0",
+                icon: <EventBusyIcon fontSize="large" color="error" />,
+                change: "+4% vs previous 28 days",
+                changeColor: "success.main",
+              },
+              {
+                title: "Seller Requests",
+                value: filteredData?.amt || "0",
+                icon: <FaCodePullRequest size={30} color="green" />,
+                change: "-0.89% vs previous 28 days",
+                changeColor: "error.main",
+              },
+              {
+                title: "Product Requests",
+                value: filteredData?.amt || "0",
+                icon: <MdProductionQuantityLimits size={30} color="blue" />,
+                change: "+2% vs previous 28 days",
+                changeColor: "success.main",
+              },
+            ].map((item, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Card sx={{ textAlign: "center", p: 3, boxShadow: 3 }}>
+                  {item.icon}
+                  <Typography variant="body2" color="text.secondary" mt={1}>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="h4" fontWeight="bold">
+                    {item.value}
+                  </Typography>
+                  <Typography variant="caption" color={item.changeColor}>
+                    {item.change}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Grid>
 
-                  {/* Product B */}
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      <img
-                        src={`https://m.media-amazon.com/images/I/81LskAU5h1L._AC_UL480_FMwebp_QL65_.jpg`}
-                        alt="Product B"
-                        className="rounded me-3"
-                        width="40px"
-                        height="40px"
-                      />
-                      <div>
-                        <h6 className="mb-0">Canon EOS R50 </h6>
-                      </div>
-                    </td>
-                    <td className="text-end fw-bold">$5461</td>
-                  </tr>
-
-                  {/* Product C */}
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      <img
-                        src={`https://m.media-amazon.com/images/I/71qlYpwQTxL._SX679_.jpg`}
-                        alt="Product C"
-                        className="rounded me-3"
-                        width="40px"
-                        height="40px"
-                      />
-                      <div>
-                        <h6 className="mb-0">Apple iPad Air 11</h6>
-                      </div>
-                    </td>
-                    <td className="text-end fw-bold">$5461</td>
-                  </tr>
-
-                  {/* Product D */}
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      <img
-                        src={`https://m.media-amazon.com/images/I/41Fz1tPJkHL._SX300_SY300_QL70_FMwebp_.jpg`}
-                        alt="Product D"
-                        className="rounded me-3"
-                        width="40px"
-                        height="40px"
-                      />
-                      <div>
-                        <h6 className="mb-0">Blaupunkt Atomik PS30</h6>
-                      </div>
-                    </td>
-                    <td className="text-end fw-bold">$5461</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* Right Section - Popular Products */}
+        <Grid item xs={12} md={4.5}>
+          <Card sx={{ height: "100%", p: 3, boxShadow: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              Popular Products
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Product</TableCell>
+                    <TableCell align="right">Earnings</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {popularProducts.map((product, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Grid container alignItems="center" spacing={2}>
+                          <Grid item>
+                            <Avatar
+                              src={product.img}
+                              sx={{ width: 40, height: 40 }}
+                            />
+                          </Grid>
+                          <Grid item>
+                            <Typography variant="body1">
+                              {product.name.slice(0, 15)}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </TableCell>
+                      <TableCell align="right">{product.earnings}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+        </Grid>
+      </Grid>
       {/* Top Sellers Section */}
-      <div className="row mb-4">
-      <div className="col-md-12">
-        <div className="card shadow-sm">
-          <div className="card-body">
-            <h5 className="card-title mb-3">Top Sellers</h5>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
+              Top Sellers
+            </Typography>
+
             <Swiper
               modules={[Pagination, Navigation]}
-              spaceBetween={2}
+              spaceBetween={15}
               slidesPerView={5}
               navigation
               pagination={{ clickable: true }}
               breakpoints={{
-                640: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 5 },
               }}
-              style={{ padding: "10px 0" ,color:'black' }}
+              style={{ paddingBottom: "20px" }}
             >
-              {/* Seller 1 */}
-              <SwiperSlide>
-                <div
-                  className="card shadow-sm"
-                  style={{
-                    width: "160px",
-                    borderRadius: "12px",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="Seller 1"
-                    className="card-img-top rounded-circle p-3"
-                    style={{ width: "90px", margin: "auto" }}
-                  />
-                  <div className="card-body text-center">
-                    <h6 className="card-title mb-1">John Doe</h6>
-                    <small className="text-muted">Sales: $12,345</small>
-                  </div>
-                </div>
-              </SwiperSlide>
-
-              {/* Seller 2 */}
-              <SwiperSlide>
-                <div
-                  className="card shadow-sm"
-                  style={{
-                    width: "160px",
-                    borderRadius: "12px",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <img
-                    src="https://randomuser.me/api/portraits/women/44.jpg"
-                    alt="Seller 2"
-                    className="card-img-top rounded-circle p-3"
-                    style={{ width: "90px", margin: "auto" }}
-                  />
-                  <div className="card-body text-center">
-                    <h6 className="card-title mb-1">Jane Smith</h6>
-                    <small className="text-muted">Sales: $10,890</small>
-                  </div>
-                </div>
-              </SwiperSlide>
-
-              {/* Seller 3 */}
-              <SwiperSlide>
-                <div
-                  className="card shadow-sm"
-                  style={{
-                    width: "160px",
-                    borderRadius: "12px",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <img
-                    src="https://randomuser.me/api/portraits/men/45.jpg"
-                    alt="Seller 3"
-                    className="card-img-top rounded-circle p-3"
-                    style={{ width: "90px", margin: "auto" }}
-                  />
-                  <div className="card-body text-center">
-                    <h6 className="card-title mb-1">Mike Ross</h6>
-                    <small className="text-muted">Sales: $9,765</small>
-                  </div>
-                </div>
-              </SwiperSlide>
-
-              {/* Seller 4 */}
-              <SwiperSlide>
-                <div
-                  className="card shadow-sm"
-                  style={{
-                    width: "160px",
-                    borderRadius: "12px",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <img
-                    src="https://randomuser.me/api/portraits/women/50.jpg"
-                    alt="Seller 4"
-                    className="card-img-top rounded-circle p-3"
-                    style={{ width: "90px", margin: "auto" }}
-                  />
-                  <div className="card-body text-center">
-                    <h6 className="card-title mb-1">Emma Brown</h6>
-                    <small className="text-muted">Sales: $8,654</small>
-                  </div>
-                </div>
-              </SwiperSlide>
-                   {/* Seller 1 */}
-                   <SwiperSlide>
-                <div
-                  className="card shadow-sm"
-                  style={{
-                    width: "160px",
-                    borderRadius: "12px",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="Seller 1"
-                    className="card-img-top rounded-circle p-3"
-                    style={{ width: "90px", margin: "auto" }}
-                  />
-                  <div className="card-body text-center">
-                    <h6 className="card-title mb-1">John Doe</h6>
-                    <small className="text-muted">Sales: $12,345</small>
-                  </div>
-                </div>
-              </SwiperSlide>
-                   {/* Seller 1 */}
-                   <SwiperSlide>
-                <div
-                  className="card shadow-sm"
-                  style={{
-                    width: "160px",
-                    borderRadius: "12px",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="Seller 1"
-                    className="card-img-top rounded-circle p-3"
-                    style={{ width: "90px", margin: "auto" }}
-                  />
-                  <div className="card-body text-center">
-                    <h6 className="card-title mb-1">John Doe</h6>
-                    <small className="text-muted">Sales: $12,345</small>
-                  </div>
-                </div>
-              </SwiperSlide>
+              {sellers.map((seller) => (
+                <SwiperSlide key={seller.id}>
+                  <Card
+                    sx={{
+                      width: "100%",
+                      p: 2,
+                      borderRadius: 2,
+                      textAlign: "center",
+                      transition: "transform 0.3s",
+                      "&:hover": { transform: "scale(1.05)" },
+                    }}
+                    elevation={2}
+                  >
+                    <Avatar
+                      src={seller.img}
+                      alt={seller.name}
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        margin: "auto",
+                        mb: 1,
+                        boxShadow: 3,
+                      }}
+                    />
+                    <CardContent>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: "bold" }}
+                      >
+                        {seller.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Sales: {seller.sales}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </SwiperSlide>
+              ))}
             </Swiper>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
+          </Paper>
+        </Grid>
+      </Grid>
       {/* Chart Filter Section */}
       <div className="row mb-4">
         <div className="col-md-12">
-          <div className="d-flex justify-content-between">
+          <div className="d-flex justify-content-between align-items-center">
             <div>
               <label className="mr-2">Year</label>
               <select
@@ -422,26 +343,61 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
       {/* Recharts Section */}
-      <div className="row">
-        <div className="col-md-12">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <h5 className="card-title">Yearly Data Overview</h5>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={filteredChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Bar dataKey="uv" fill="#8884d8" />
-                  <Bar dataKey="pv" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Box sx={{ mb: 4 }}>
+        <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+            Yearly Data Overview (2023)
+          </Typography>
+
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={rechartsData} barSize={20}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 14 }}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis tick={{ fontSize: 14 }} />
+              <Tooltip
+                contentStyle={{
+                  background: "#ffffff",
+                  borderRadius: "8px",
+                  border: "1px solid #ddd",
+                  padding: "10px",
+                }}
+              />
+              <Legend />
+              <Bar
+                dataKey="uv"
+                fill="url(#colorUv)"
+                name="Total Orders"
+                radius={[8, 8, 0, 0]}
+              />
+              <Bar
+                dataKey="pv"
+                fill="url(#colorPv)"
+                name="Cancelled Orders"
+                radius={[8, 8, 0, 0]}
+              />
+
+              {/* Gradient Colors */}
+              <defs>
+                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#4C8BF5" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#4C8BF5" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#E57373" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#E57373" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+            </BarChart>
+          </ResponsiveContainer>
+        </Paper>
+      </Box>
     </div>
   );
 };

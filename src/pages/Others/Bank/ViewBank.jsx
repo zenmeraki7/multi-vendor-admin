@@ -16,7 +16,7 @@ import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+import {logoutUser} from "../../../utils/authUtils"
 // Validation schema
 const validationSchema = yup.object().shape({
   bankName: yup.string().required("Bank Name is required"),
@@ -51,6 +51,9 @@ const ViewBank = () => {
         }
       } catch (error) {
         console.error("Error fetching countries:", error.response ? error.response.data : error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       }
     };
     fetchCountries();
@@ -78,6 +81,9 @@ const ViewBank = () => {
         setIsLoading(false); // Set loading to false once data is fetched
       } catch (error) {
         console.error("Error fetching bank details", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       }
     };
     fetchBankDetails();
@@ -140,6 +146,9 @@ const ViewBank = () => {
       }
     } catch (error) {
       console.error("Error updating bank details:", error.response ? error.response.data : error.message);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setIsSaving(false); // Stop saving state if error occurs
     }
   };

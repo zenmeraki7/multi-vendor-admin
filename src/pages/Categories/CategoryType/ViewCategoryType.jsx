@@ -20,6 +20,7 @@ import * as yup from "yup";
 import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { BASE_URL } from "../../../utils/baseUrl";
+import { logoutUser } from "../../../utils/authUtils";
 
 // Validation schema
 const validationSchema = yup.object().shape({
@@ -109,7 +110,9 @@ function ViewCategoryType() {
       })
       .catch((error) => {
         console.error("Error fetching categoryType:", error);
-        toast.error("Failed to fetch category types. Please try again later.");
+          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+                logoutUser(); // Call logoutUser if 404 or 401 status code
+              }
         setLoading(false); 
       });
   }, [id, navigate]);
@@ -167,6 +170,9 @@ function ViewCategoryType() {
       setErrors({});
     } catch (error) {
       console.error("Error updating category:", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+              logoutUser(); // Call logoutUser if 404 or 401 status code
+            }
     }
     
   };

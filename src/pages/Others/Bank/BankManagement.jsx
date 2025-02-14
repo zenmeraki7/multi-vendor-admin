@@ -22,7 +22,7 @@ import { Search, Refresh } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../utils/baseUrl";
-
+ import {logoutUser} from "../../../utils/authUtils";
 const BankManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,6 +51,9 @@ const BankManagement = () => {
         }
       } catch (error) {
         console.error("Error fetching banks:", error.response || error.message);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       } finally {
         setLoading(false); // Set loading to false after the API call completes
       }

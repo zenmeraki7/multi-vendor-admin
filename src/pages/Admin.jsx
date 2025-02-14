@@ -6,6 +6,7 @@ import BackupIcon from '@mui/icons-material/Backup';
 import { BASE_URL } from "../utils/baseUrl";
 import { Link } from "react-router-dom";
 import CustomInput from "../components/SharedComponents/CustomInput";  // Importing CustomInput
+import { logoutUser } from "../utils/authUtils";
 
 function Admin() {
   const [adminData, setAdminData] = useState(null);
@@ -27,6 +28,9 @@ function Admin() {
         setAdminData(response.data.data);
         setLoading(false);
       } catch (err) {
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
         setError(err.message);
         setLoading(false);
       }

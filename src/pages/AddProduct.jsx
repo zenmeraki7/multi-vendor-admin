@@ -7,6 +7,7 @@ import { Switch, FormControlLabel } from "@mui/material";
 import axios from "axios";
 import CustomInput from "../components/SharedComponents/CustomInput";
 import CustomSelect from "../components/SharedComponents/CustomSelect";
+import { logoutUser } from "../utils/authUtils";
 
 function AddProduct() {
   const [productImages, setProductImages] = useState([null, null, null, null]);
@@ -39,6 +40,9 @@ function AddProduct() {
         setSubcategories(response.data.subcategories);
       } catch (error) {
         console.error("Error fetching subcategories:", error);
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       }
     };
 
