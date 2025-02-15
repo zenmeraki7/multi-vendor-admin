@@ -58,27 +58,32 @@ const VendorView = () => {
 
   const handleConfirmBlockUnblock = async () => {
     try {
-      const action = vendorDetails.isBlocked ? "Unblocking" : "Blocking";
-      toast.loading(`${action} vendor`);
+      const action = vendorDetails.isBlocked ? "unblock" : "block"; // Fixed action value
+      toast.loading(`${action === 'block' ? 'Blocking' : 'Unblocking'} vendor`);
 
       const response = await axios.put(
         `${BASE_URL}/api/vendor/blocks/${vendorId}`,
-        {action},
-        { headers: { authorization: `Bearer ${token}` } }
+        { action }, // Send correct action value
+        { 
+          headers: { 
+            authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
       );
 
       if (response.status === 200) {
         setVendorDetails((prev) => ({ ...prev, isBlocked: !prev.isBlocked }));
-        toast.success(`Vendor ${vendorDetails.isBlocked ? "Unblocked" : "Blocked"} Successfully`);
+        toast.success(`Vendor ${action === 'block' ? 'Blocked' : 'Unblocked'} Successfully`);
       }
     } catch (error) {
       console.error("Error updating vendor status:", error.response?.data || error.message);
-      toast.error("Error updating vendor status");
+      toast.error(error.response?.data?.message || "Error updating vendor status");
     } finally {
       setOpenModal(false);
       toast.dismiss();
     }
-  };
+  }
 
   if (!vendorDetails) {
     return <Typography>Loading...</Typography>;

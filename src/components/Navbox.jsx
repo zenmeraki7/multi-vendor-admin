@@ -86,11 +86,6 @@ function Navbox() {
     },
     { text: "Orders", icon: <AssignmentIcon />, path: "/orders" },
     { text: "User Details", icon: <PeopleIcon />, path: "/user" },
-    {
-      text: "Transactions",
-      icon: <MonetizationOnIcon />,
-      path: "/",
-    },
     { text: "Reviews", icon: <AssignmentIcon />, path: "/reviews" },
     {
       text: "Product Management",

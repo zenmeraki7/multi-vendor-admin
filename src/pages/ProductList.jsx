@@ -57,6 +57,8 @@ const ProductList = () => {
       setTotalPages(totalPages);
       setLoading(false);
     } catch (err) {
+      console.log(err);
+      
       if (error.response && (error.response.status === 404 || error.response.status === 401)) {
         logoutUser(); // Call logoutUser if 404 or 401 status code
       }
