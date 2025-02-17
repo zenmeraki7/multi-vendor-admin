@@ -69,27 +69,31 @@ function UserManagement() {
     },
   ]);
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Number of users per page
+  const itemsPerPage = 5;
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedUsers = users.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "auto" }}>
-      {/* Header Section */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 2,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
         <Typography variant="h4" component="h1">
           User Management
         </Typography>
@@ -108,6 +112,8 @@ function UserManagement() {
             }}
           />
           <input
+            value={searchQuery}
+            onChange={handleSearchChange}
             placeholder="Search users..."
             style={{
               width: "100%",
@@ -138,38 +144,26 @@ function UserManagement() {
               <TableBody>
                 {paginatedUsers.map((user, index) => (
                   <TableRow key={index}>
-                    {/* Full Name Column */}
                     <TableCell>
                       <Typography variant="subtitle1" fontWeight="bold">
                         {user.fullName}
                       </Typography>
                     </TableCell>
-
-                    {/* Email Column */}
                     <TableCell>{user.email}</TableCell>
-
-                    {/* Location Column */}
                     <TableCell>{user.location}</TableCell>
-
-                    {/* Order Count Column */}
                     <TableCell>{user.orderCount}</TableCell>
-
-                    {/* Status Column */}
                     <TableCell>
                       <Typography
                         sx={{
                           padding: "4px 8px",
                           borderRadius: "4px",
-                          backgroundColor:
-                            user.status === "Inactive" ? "#f8d7da" : "#d4edda",
+                          backgroundColor: user.status === "Inactive" ? "#f8d7da" : "#d4edda",
                           color: user.status === "Inactive" ? "#721c24" : "#155724",
                         }}
                       >
                         {user.status}
                       </Typography>
                     </TableCell>
-
-                    {/* Action Column */}
                     <TableCell>
                       <Button variant="contained" color="primary">
                         View
@@ -182,15 +176,9 @@ function UserManagement() {
           </TableContainer>
 
           {/* Pagination */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 3,
-            }}
-          >
+          <Box sx={{ display: "flex", justifyContent: "center", marginTop: 3 }}>
             <Pagination
-              count={Math.ceil(users.length / itemsPerPage)}
+              count={Math.ceil(filteredUsers.length / itemsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"

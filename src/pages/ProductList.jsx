@@ -183,17 +183,24 @@ const ProductList = () => {
           </Select>
           <Select size="small" defaultValue="" displayEmpty>
             <MenuItem value="">
-              <em>Product Type</em>
+              <em>Category</em>
             </MenuItem>
             <MenuItem value="Type1">Type1</MenuItem>
             <MenuItem value="Type2">Type2</MenuItem>
           </Select>
           <Select size="small" defaultValue="" displayEmpty>
             <MenuItem value="">
-              <em>Additional Options</em>
+              <em>SubCategory</em>
             </MenuItem>
             <MenuItem value="Option1">Option1</MenuItem>
             <MenuItem value="Option2">Option2</MenuItem>
+          </Select>
+          <Select size="small" defaultValue="" displayEmpty>
+            <MenuItem value="">
+              <em>Status</em>
+            </MenuItem>
+            <MenuItem value="Option1">Inactive</MenuItem>
+            <MenuItem value="Option2">Active</MenuItem>
           </Select>
           <Button variant="contained" color="primary">
             APPLY
