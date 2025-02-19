@@ -1,403 +1,243 @@
-import React, { useState } from "react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import { Pagination, Navigation } from "swiper/modules";
-import "./Dashboard.css";
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Avatar,
-  Paper,
-  Box,
-} from "@mui/material";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import EventBusyIcon from "@mui/icons-material/EventBusy";
-import { FaCodePullRequest } from "react-icons/fa6";
-import { MdProductionQuantityLimits } from "react-icons/md";
-
-const sellers = [
-  {
-    id: 1,
-    name: "John Doe",
-    sales: "$12,345",
-    img: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    sales: "$10,890",
-    img: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    id: 3,
-    name: "Mike Ross",
-    sales: "$9,765",
-    img: "https://randomuser.me/api/portraits/men/45.jpg",
-  },
-  {
-    id: 4,
-    name: "Emma Brown",
-    sales: "$8,654",
-    img: "https://randomuser.me/api/portraits/women/50.jpg",
-  },
-  {
-    id: 4,
-    name: "Emma Brown",
-    sales: "$8,654",
-    img: "https://randomuser.me/api/portraits/women/50.jpg",
-  },
-  {
-    id: 4,
-    name: "Emma Brown",
-    sales: "$8,654",
-    img: "https://randomuser.me/api/portraits/women/50.jpg",
-  },
-  {
-    id: 4,
-    name: "Emma Brown",
-    sales: "$8,654",
-    img: "https://randomuser.me/api/portraits/women/50.jpg",
-  },
-];
-
-const popularProducts = [
-  {
-    name: "CHANELL GABRIELLE SPRAY",
-    img: "https://m.media-amazon.com/images/I/61t+UHcrOrL._SX522_.jpg",
-    earnings: "$5461",
-  },
-  {
-    name: "Canon EOS R50",
-    img: "https://m.media-amazon.com/images/I/81LskAU5h1L._AC_UL480_FMwebp_QL65_.jpg",
-    earnings: "$5461",
-  },
-  {
-    name: "Apple iPad Air 11",
-    img: "https://m.media-amazon.com/images/I/71qlYpwQTxL._SX679_.jpg",
-    earnings: "$5461",
-  },
-  {
-    name: "Blaupunkt Atomik PS30",
-    img: "https://m.media-amazon.com/images/I/41Fz1tPJkHL._SX300_SY300_QL70_FMwebp_.jpg",
-    earnings: "$5461",
-  },
-];
-
-// Data for Recharts chart
-const rechartsData = [
-  { name: "January", uv: 4000, pv: 2400, amt: 2400, year: "2023" },
-  { name: "February", uv: 3000, pv: 1398, amt: 2210, year: "2023" },
-  { name: "March", uv: 2000, pv: 9800, amt: 2290, year: "2023" },
-  { name: "April", uv: 2780, pv: 3908, amt: 2000, year: "2023" },
-  { name: "May", uv: 1890, pv: 4800, amt: 2181, year: "2023" },
-  { name: "June", uv: 2390, pv: 3800, amt: 2500, year: "2023" },
-  { name: "July", uv: 3490, pv: 4300, amt: 2100, year: "2023" },
-  { name: "August", uv: 2000, pv: 4300, amt: 2100, year: "2023" },
-  { name: "September", uv: 2500, pv: 4300, amt: 2100, year: "2023" },
-  { name: "October", uv: 2100, pv: 4300, amt: 2100, year: "2023" },
-  { name: "November", uv: 1500, pv: 4300, amt: 2100, year: "2023" },
-  { name: "December", uv: 1234, pv: 4300, amt: 2100, year: "2023" },
-];
+import React, { useState } from 'react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
 const Dashboard = () => {
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedYear, setSelectedYear] = useState("2023");
+  const [selectedPeriod, setSelectedPeriod] = useState('yearly');
+  
+  const data = [
+    { month: 'Jan', orders: 4000, cancellations: 2400 },
+    { month: 'Feb', orders: 3000, cancellations: 1398 },
+    { month: 'Mar', orders: 2000, cancellations: 9800 },
+    { month: 'Apr', orders: 2780, cancellations: 3908 },
+    { month: 'May', orders: 1890, cancellations: 4800 },
+    { month: 'Jun', orders: 2390, cancellations: 3800 }
+  ];
 
-  // Filter data based on selected month
-  const filteredData = rechartsData.filter(
-    (data) => data.name === selectedMonth
-  )[0];
+  const cardStyle = {
+    background: 'white',
+    borderRadius: '10px',
+    padding: '20px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    marginBottom: '20px'
+  };
 
-  // Filter data based on selected year
-  const filteredChartData = rechartsData.filter(
-    (data) => data.year === selectedYear
-  );
+  const gradientCardStyles = [
+    {
+      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+      color: 'white'
+    },
+    {
+      background: 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)',
+      color: 'white'
+    },
+    {
+      background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)',
+      color: 'white'
+    },
+    {
+      background: 'linear-gradient(135deg, #f97316 0%, #facc15 100%)',
+      color: 'white'
+    }
+  ];
 
   return (
-    <div className="container py-3">
-      {/* Overview Section */}
-      <Grid container spacing={3} mb={2}>
-        {/* Left Section */}
-        <Grid item xs={12} md={7.5}>
-          {/* Dropdown */}
-          <Card sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6">View Monthly Data</Typography>
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel>Select a month</InputLabel>
-              <Select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-              >
-                {rechartsData.map((data) => (
-                  <MenuItem key={data.name} value={data.name}>
-                    {data.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Card>
-
-          {/* Stats Cards */}
-          <Grid container spacing={2}>
-            {[
-              {
-                title: "Total Orders",
-                value: filteredData?.uv || "0",
-                icon: (
-                  <AssignmentTurnedInIcon fontSize="large" color="primary" />
-                ),
-                change: "+12% vs previous 28 days",
-                changeColor: "success.main",
-              },
-              {
-                title: "Cancelled Orders",
-                value: filteredData?.pv || "0",
-                icon: <EventBusyIcon fontSize="large" color="error" />,
-                change: "+4% vs previous 28 days",
-                changeColor: "success.main",
-              },
-              {
-                title: "Seller Requests",
-                value: filteredData?.amt || "0",
-                icon: <FaCodePullRequest size={30} color="green" />,
-                change: "-0.89% vs previous 28 days",
-                changeColor: "error.main",
-              },
-              {
-                title: "Product Requests",
-                value: filteredData?.amt || "0",
-                icon: <MdProductionQuantityLimits size={30} color="blue" />,
-                change: "+2% vs previous 28 days",
-                changeColor: "success.main",
-              },
-            ].map((item, index) => (
-              <Grid item xs={12} sm={6} key={index}>
-                <Card sx={{ textAlign: "center", p: 3, boxShadow: 3 }}>
-                  {item.icon}
-                  <Typography variant="body2" color="text.secondary" mt={1}>
-                    {item.title}
-                  </Typography>
-                  <Typography variant="h4" fontWeight="bold">
-                    {item.value}
-                  </Typography>
-                  <Typography variant="caption" color={item.changeColor}>
-                    {item.change}
-                  </Typography>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Grid>
-
-        {/* Right Section - Popular Products */}
-        <Grid item xs={12} md={4.5}>
-          <Card sx={{ height: "100%", p: 3, boxShadow: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              Popular Products
-            </Typography>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Product</TableCell>
-                    <TableCell align="right">Earnings</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {popularProducts.map((product, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Grid container alignItems="center" spacing={2}>
-                          <Grid item>
-                            <Avatar
-                              src={product.img}
-                              sx={{ width: 40, height: 40 }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="body1">
-                              {product.name.slice(0, 15)}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </TableCell>
-                      <TableCell align="right">{product.earnings}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Card>
-        </Grid>
-      </Grid>
-      {/* Top Sellers Section */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold" }}>
-              Top Sellers
-            </Typography>
-
-            <Swiper
-              modules={[Pagination, Navigation]}
-              spaceBetween={15}
-              slidesPerView={5}
-              navigation
-              pagination={{ clickable: true }}
-              breakpoints={{
-                640: { slidesPerView: 2 },
-                768: { slidesPerView: 3 },
-                1024: { slidesPerView: 5 },
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #f3f4f6 0%, #f0f7ff 100%)',
+      padding: '24px'
+    }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Header Section */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          <div>
+            <h1 style={{ 
+              fontSize: '24px', 
+              fontWeight: 'bold',
+              background: 'linear-gradient(to right, #6366f1, #ec4899)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>Dashboard Overview</h1>
+            <p style={{ color: '#666' }}>Welcome back, Admin</p>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                outline: 'none'
               }}
-              style={{ paddingBottom: "20px" }}
+            />
+            <select 
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                outline: 'none'
+              }}
             >
-              {sellers.map((seller) => (
-                <SwiperSlide key={seller.id}>
-                  <Card
-                    sx={{
-                      width: "100%",
-                      p: 2,
-                      borderRadius: 2,
-                      textAlign: "center",
-                      transition: "transform 0.3s",
-                      "&:hover": { transform: "scale(1.05)" },
-                    }}
-                    elevation={2}
-                  >
-                    <Avatar
-                      src={seller.img}
-                      alt={seller.name}
-                      sx={{
-                        width: 80,
-                        height: 80,
-                        margin: "auto",
-                        mb: 1,
-                        boxShadow: 3,
-                      }}
-                    />
-                    <CardContent>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: "bold" }}
-                      >
-                        {seller.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Sales: {seller.sales}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </Paper>
-        </Grid>
-      </Grid>
-      {/* Chart Filter Section */}
-      <div className="row mb-4">
-        <div className="col-md-12">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <label className="mr-2">Year</label>
-              <select
-                className="form-select"
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-              >
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-              </select>
+              <option value="yearly">Yearly</option>
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gap: '20px',
+          marginBottom: '24px'
+        }}>
+          {['Total Orders', 'Cancelled Orders', 'New Sellers', 'Total Revenue'].map((title, index) => (
+            <div key={title} style={{
+              ...cardStyle,
+              ...gradientCardStyles[index]
+            }}>
+              <div style={{ marginBottom: '12px' }}>{title}</div>
+              <div style={{ 
+                fontSize: '24px', 
+                fontWeight: 'bold',
+                marginBottom: '8px'
+              }}>
+                {index === 3 ? '$45,678' : '3,457'}
+              </div>
+              <div style={{ 
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                +12.5% vs last month
+              </div>
             </div>
-            <div>
-              <button
-                className="btn btn-dark"
-                onClick={() => console.log("Generate report clicked")}
-              >
-                Generate Report
-              </button>
+          ))}
+        </div>
+
+        {/* Charts Section */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+          {/* Main Chart */}
+          <div style={cardStyle}>
+            <h2 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              marginBottom: '20px'
+            }}>Sales Overview</h2>
+            <div style={{ height: '400px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line 
+                    type="monotone" 
+                    dataKey="orders" 
+                    stroke="#6366f1" 
+                    strokeWidth={3}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="cancellations" 
+                    stroke="#ec4899" 
+                    strokeWidth={3}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Popular Products */}
+          <div style={cardStyle}>
+            <h2 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold',
+              marginBottom: '20px'
+            }}>Popular Products</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                { name: 'CHANELL GABRIELLE', sales: '$5,461' },
+                { name: 'Canon EOS R50', sales: '$4,875' },
+                { name: 'Apple iPad Air', sales: '$3,543' },
+                { name: 'Blaupunkt Speaker', sales: '$2,842' }
+              ].map((product, index) => (
+                <div key={index} style={{
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, #f3f4f6 0%, #f9fafb 100%)',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ fontWeight: '500' }}>{product.name}</span>
+                  <span style={{ color: '#6366f1', fontWeight: 'bold' }}>{product.sales}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Top Sellers Section */}
+        <div style={cardStyle}>
+          <h2 style={{ 
+            fontSize: '18px', 
+            fontWeight: 'bold',
+            marginBottom: '20px'
+          }}>Top Sellers</h2>
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '20px'
+          }}>
+            {[
+              { name: 'John Doe', revenue: '$12,345', color: '#6366f1' },
+              { name: 'Jane Smith', revenue: '$10,890', color: '#ec4899' },
+              { name: 'Mike Ross', revenue: '$9,765', color: '#3b82f6' },
+              { name: 'Emma Brown', revenue: '$8,654', color: '#f97316' }
+            ].map((seller, index) => (
+              <div key={index} style={{
+                padding: '16px',
+                borderRadius: '8px',
+                background: `linear-gradient(135deg, ${seller.color}20 0%, ${seller.color}10 100%)`,
+                border: `1px solid ${seller.color}30`
+              }}>
+                <div style={{ 
+                  fontWeight: '500',
+                  marginBottom: '8px'
+                }}>{seller.name}</div>
+                <div style={{ 
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  color: seller.color
+                }}>{seller.revenue}</div>
+                <div style={{ 
+                  fontSize: '14px',
+                  color: '#22c55e',
+                  marginTop: '4px'
+                }}>+12.5% vs last month</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      {/* Recharts Section */}
-      <Box sx={{ mb: 4 }}>
-        <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-            Yearly Data Overview (2023)
-          </Typography>
-
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={rechartsData} barSize={20}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 14 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis tick={{ fontSize: 14 }} />
-              <Tooltip
-                contentStyle={{
-                  background: "#ffffff",
-                  borderRadius: "8px",
-                  border: "1px solid #ddd",
-                  padding: "10px",
-                }}
-              />
-              <Legend />
-              <Bar
-                dataKey="uv"
-                fill="url(#colorUv)"
-                name="Total Orders"
-                radius={[8, 8, 0, 0]}
-              />
-              <Bar
-                dataKey="pv"
-                fill="url(#colorPv)"
-                name="Cancelled Orders"
-                radius={[8, 8, 0, 0]}
-              />
-
-              {/* Gradient Colors */}
-              <defs>
-                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#4C8BF5" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#4C8BF5" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#E57373" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#E57373" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-            </BarChart>
-          </ResponsiveContainer>
-        </Paper>
-      </Box>
     </div>
   );
 };
