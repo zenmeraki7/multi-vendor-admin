@@ -28,10 +28,10 @@ function Admin() {
         setAdminData(response.data.data);
         setLoading(false);
       } catch (err) {
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        if (err.response && (err.response.status === 404 || err.response.status === 401)) {
           logoutUser(); // Call logoutUser if 404 or 401 status code
         }
-        setError(err.message);
+        // setError(err.message);
         setLoading(false);
       }
     };

@@ -236,7 +236,6 @@ function Navbox() {
             <AccordionSummary
               expandIcon={<ExpandMoreIcon sx={{ color: "#000" }} />}
               sx={{
-                pl: 2 + depth * 2, // Indent based on depth
                 "&:hover": { backgroundColor: "#e0e0e0" }, // Hover effect
                 borderRadius: 1, // Rounded corners
               }}
@@ -246,7 +245,7 @@ function Navbox() {
                 {item.text}
               </Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ px: 0.5 }}>
+            <AccordionDetails >
               <List
                 disablePadding
                 sx={{ display: "flex", flexDirection: "column", gap: "10px" }}
