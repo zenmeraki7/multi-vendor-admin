@@ -13,13 +13,20 @@ import {
 import { Button } from "react-bootstrap";
 import { BASE_URL } from "../utils/baseUrl";
 import { logoutUser } from "../utils/authUtils";
+import toast from "react-hot-toast";
 
 const VendorView = () => {
   const [vendorDetails, setVendorDetails] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  console.log(vendorDetails);
+  
 
   const { vendorId } = useParams();
   const token = localStorage.getItem("token");
+
+  
+
+ 
 
   useEffect(() => {
     const fetchVendorDetails = async () => {
@@ -46,12 +53,37 @@ const VendorView = () => {
     }
   }, [vendorId, token]);
 
-  const handleBlockClick = () => setOpenModal(true);
+  const handleBlockUnblockClick = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
-  const handleConfirmBlock = () => {
-    console.log("Vendor blocked");
-    setOpenModal(false);
-  };
+
+  const handleConfirmBlockUnblock = async () => {
+    try {
+      const action = vendorDetails.isBlocked ? "unblock" : "block"; // Fixed action value
+      toast.loading(`${action === 'block' ? 'Blocking' : 'Unblocking'} vendor`);
+
+      const response = await axios.put(
+        `${BASE_URL}/api/vendor/blocks/${vendorId}`,
+        { action }, // Send correct action value
+        { 
+          headers: { 
+            authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
+      );
+
+      if (response.status === 200) {
+        setVendorDetails((prev) => ({ ...prev, isBlocked: !prev.isBlocked }));
+        toast.success(`Vendor ${action === 'block' ? 'Blocked' : 'Unblocked'} Successfully`);
+      }
+    } catch (error) {
+      console.error("Error updating vendor status:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Error updating vendor status");
+    } finally {
+      setOpenModal(false);
+      toast.dismiss();
+    }
+  }
 
   if (!vendorDetails) {
     return <Typography>Loading...</Typography>;
@@ -95,38 +127,38 @@ const VendorView = () => {
       label: "PAN Document",
       value: (
         <Box>
-        <Typography variant="body1" sx={{ fontWeight: "bold", marginBottom: 1 }}>
-          PAN Number: {vendorDetails.PAN?.documentNumber || "N/A"}
-        </Typography>
-        <img
-          src={vendorDetails.PAN?.documentUrl}
-          alt="PAN Document"
-          style={{
-            width: "300px",
-            borderRadius: "8px",
-            height: "350px",
-          }}
-        />
-      </Box>
+          <Typography variant="body1" sx={{ fontWeight: "bold", marginBottom: 1 }}>
+            PAN Number: {vendorDetails.PAN?.documentNumber || "N/A"}
+          </Typography>
+          <img
+            src={vendorDetails.PAN?.documentUrl}
+            alt="PAN Document"
+            style={{
+              width: "300px",
+              borderRadius: "8px",
+              height: "350px",
+            }}
+          />
+        </Box>
       ),
     },
     {
       label: "GSTIN Document",
       value: (
         <Box>
-        <Typography variant="body1" sx={{ fontWeight: "bold", marginBottom: 1 }}>
-          GSTIN Number: {vendorDetails.GSTIN?.documentNumber || "N/A"}
-        </Typography>
-        <img
-          src={vendorDetails.GSTIN?.documentUrl}
-          alt="GSTIN Document"
-          style={{
-            width: "300px",
-            borderRadius: "8px",
-            height: "350px",
-          }}
-        />
-      </Box>
+          <Typography variant="body1" sx={{ fontWeight: "bold", marginBottom: 1 }}>
+            GSTIN Number: {vendorDetails.GSTIN?.documentNumber || "N/A"}
+          </Typography>
+          <img
+            src={vendorDetails.GSTIN?.documentUrl}
+            alt="GSTIN Document"
+            style={{
+              width: "300px",
+              borderRadius: "8px",
+              height: "350px",
+            }}
+          />
+        </Box>
       ),
     },
   ];
@@ -179,36 +211,36 @@ const VendorView = () => {
       <Button
         style={{
           marginTop: "20px",
-          backgroundColor: "#d32f2f",
-          border: "1px solid #d32f2f",
+          backgroundColor: vendorDetails.isBlocked ? "#388e3c" : "#d32f2f",
+          border: "1px solid",
           color: "white",
           padding: "10px 20px",
           fontSize: "16px",
           borderRadius: "5px",
         }}
-        onClick={handleBlockClick}
+        onClick={handleBlockUnblockClick}
       >
-        Block Vendor
+        {vendorDetails.isBlocked ? "Unblock Vendor" : "Block Vendor"}
       </Button>
 
       <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Confirm Block</DialogTitle>
+        <DialogTitle>Confirm {vendorDetails.isBlocked ? "Unblock" : "Block"}</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to block this vendor?</Typography>
+          <Typography>
+            Are you sure you want to {vendorDetails.isBlocked ? "unblock" : "block"} this vendor?
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">
-            Cancel
-          </Button>
+          <Button onClick={handleCloseModal} color="primary">Cancel</Button>
           <Button
-            onClick={handleConfirmBlock}
+            onClick={handleConfirmBlockUnblock}
             style={{
-              backgroundColor: "#d32f2f",
-              border: "1px solid #d32f2f",
+              backgroundColor: vendorDetails.isBlocked ? "#388e3c" : "#d32f2f",
+              border: "1px solid",
               color: "white",
             }}
           >
-            Block
+            {vendorDetails.isBlocked ? "Unblock" : "Block"}
           </Button>
         </DialogActions>
       </Dialog>

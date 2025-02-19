@@ -42,6 +42,7 @@ import ResetPassword from "./pages/Auth/ResetPassword";
 import SellerFormSettings from "./pages/SellerFormSettings";
 import ShopPageSettings from "./pages/ShopPageSettings";
 import AddSeller from "./pages/AddSeller/AddSeller";
+import TransactionPage from "./pages/Transaction/Transaction";
 
 function App() {
   return (
@@ -88,10 +89,25 @@ function App() {
           <Route path="/shop-page-settings" element={<ShopPageSettings />} />
           <Route path="view-product/:id" element={<ViewProduct />} />
           <Route path="/product-list" element={<ProductList />} />
+          <Route
+            path="/seller-profile"
+            element={<PrivateRoute component={<SellerPro />} />}
+          />
+          <Route path="/Commision" element={< PrivateRoute component={<Commision/>} /> } />
+          <Route
+            path="/transaction"
+            element={<PrivateRoute component={<TransactionPage />} />}
+          />
+        </Route>
+
+        <Route path="add-variant" element={<AddVariant />} />
+        
+        <Route path="/add-seller" element={<AddSeller />} />
+        
           <Route path="/seller-profile" element={<SellerPro />} />
           <Route path="/Commision" element={<Commision />} />
           <Route path="/add-seller" element={<AddSeller />} />
-        </Route>
+       
 
         <Route path="add-variant" element={<AddVariant />} />
       </Routes>
