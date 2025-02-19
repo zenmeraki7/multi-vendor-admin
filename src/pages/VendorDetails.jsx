@@ -19,7 +19,7 @@ import {
   Box,
   Pagination,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/baseUrl";
 import { logoutUser } from "../utils/authUtils";
 
@@ -46,24 +46,24 @@ function VendorDetails() {
 
       try {
         setLoading(true);
-        const response = await axios.get(
-          `${BASE_URL}/api/vendor/all`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${BASE_URL}/api/vendor/all`, {
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
+        });
         console.log(response.data.data);
 
-        setVendors(response.data.data || []); 
+        setVendors(response.data.data || []);
       } catch (err) {
         if (err.response) {
           // Handle specific error responses
-          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          if (
+            error.response &&
+            (error.response.status === 404 || error.response.status === 401)
+          ) {
             logoutUser(); // Call logoutUser if 404 or 401 status code
-          }else if (err.response.status === 403) {
+          } else if (err.response.status === 403) {
             setError("You do not have permission to view the vendors.");
           } else {
             setError("Failed to fetch vendors.");
@@ -82,14 +82,13 @@ function VendorDetails() {
   const handleSearchChange = (e) => {
     setSearchText(e.target.value);
   };
-  const handleView = ( isVerified,id) => {
+  const handleView = (isVerified, id) => {
     if (isVerified) {
-        navigate(`/vendor-view/${id}`);
+      navigate(`/vendor-view/${id}`);
     } else {
       navigate(`/vendor-approve/${id}`); // Navigate to the approval page
     }
   };
-  
 
   const getStatusChip = (isVerified) => {
     const status = isVerified ? "Approved" : "Pending";
@@ -150,7 +149,12 @@ function VendorDetails() {
           action={
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button variant="contained">
-                <Link style={{textDecoration:"none",color:"white"}} to={"/add-seller"}>ADD SELLER </Link> 
+                <Link
+                  style={{ textDecoration: "none", color: "white" }}
+                  to={"/add-seller"}
+                >
+                  ADD SELLER{" "}
+                </Link>
               </Button>
             </Box>
           }
@@ -183,41 +187,76 @@ function VendorDetails() {
           <Typography>
             Vendors: <strong>{vendors.length}</strong>
           </Typography>
-          <TableContainer sx={{ overflowX: "auto" , marginTop:"40px"}}>
+          <TableContainer sx={{ overflowX: "auto", marginTop: "40px" }}>
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "primary.main" }}>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Company Name</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Total Sales</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>State</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Country</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Status</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Action</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Company Name
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Email
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Total Sales
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    State
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Country
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Status
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Action
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {vendors.length > 0 ? (
-                  vendors.map((vendor, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{vendor.companyName}</TableCell>
-                      <TableCell>{vendor.email}</TableCell>
-
-                      <TableCell>{vendor.salesData?.totalSales || 0}</TableCell>
-                      <TableCell>{vendor.state.name}</TableCell>
-                      <TableCell>{vendor.country.name}</TableCell>
-                      <TableCell>{getStatusChip(vendor.isVerified)}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleView(vendor.isVerified,vendor._id)}
-                        >
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  vendors
+                    .filter(
+                      (vendor) =>
+                        vendor.companyName
+                          .toLowerCase()
+                          .includes(searchText.toLowerCase()) ||
+                        vendor.email
+                          .toLowerCase()
+                          .includes(searchText.toLowerCase()) ||
+                        vendor.state.name
+                          .toLowerCase()
+                          .includes(searchText.toLowerCase()) ||
+                        vendor.country.name
+                          .toLowerCase()
+                          .includes(searchText.toLowerCase())
+                    )
+                    .map((vendor, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{vendor.companyName}</TableCell>
+                        <TableCell>{vendor.email}</TableCell>
+                        <TableCell>
+                          {vendor.salesData?.totalSales || 0}
+                        </TableCell>
+                        <TableCell>{vendor.state.name}</TableCell>
+                        <TableCell>{vendor.country.name}</TableCell>
+                        <TableCell>
+                          {getStatusChip(vendor.isVerified)}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() =>
+                              handleView(vendor.isVerified, vendor._id)
+                            }
+                          >
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={10} align="center">
