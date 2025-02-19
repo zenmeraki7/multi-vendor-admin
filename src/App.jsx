@@ -43,6 +43,7 @@ import SellerFormSettings from "./pages/SellerFormSettings";
 import ShopPageSettings from "./pages/ShopPageSettings";
 import AddSeller from "./pages/AddSeller/AddSeller";
 import TransactionPage from "./pages/Transaction/Transaction";
+import Configuration from "./pages/Configuration/Configuration";
 
 function App() {
   return (
@@ -97,6 +98,10 @@ function App() {
           <Route
             path="/transaction"
             element={<PrivateRoute component={<TransactionPage />} />}
+          />
+           <Route
+            path="/configuration"
+            element={<PrivateRoute component={<Configuration />} />}
           />
         </Route>
 
