@@ -46,6 +46,7 @@ function Navbox() {
     { text: "Country Management", icon: "🌎", path: "/country-management" },
     { text: "State Management", icon: "🏛️", path: "/state-management" },
     { text: "Transaction", icon: "💳", path: "/transaction" },
+    { text: "Configuration", icon: "🛠️", path: "/configuration" },
     {
       text: "Settings",
       icon: "⚙️",
