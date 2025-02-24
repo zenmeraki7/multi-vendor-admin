@@ -75,21 +75,15 @@ function UserManagement() {
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
+    // Search functionality will be implemented in backend
   };
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedUsers = users.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "auto" }}>
@@ -178,7 +172,7 @@ function UserManagement() {
           {/* Pagination */}
           <Box sx={{ display: "flex", justifyContent: "center", marginTop: 3 }}>
             <Pagination
-              count={Math.ceil(filteredUsers.length / itemsPerPage)}
+              count={Math.ceil(users.length / itemsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"
