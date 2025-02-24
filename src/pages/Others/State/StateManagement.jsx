@@ -21,44 +21,39 @@ import { Search, Refresh } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { BASE_URL } from "../../../utils/baseUrl"; // Import base URL
+import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+
 const StateManagement = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [countryFilter, setCountryFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const [states, setStates] = useState([]); // State to store fetched states
-  const [filteredStates, setFilteredStates] = useState([]); // State to store filtered states
-  const [loading, setLoading] = useState(false); // Loading state for spinner
+  const [states, setStates] = useState([]);
+  const [filteredStates, setFilteredStates] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch States from API
   useEffect(() => {
     fetchStates();
   }, []);
 
-  useEffect(() => {
-    filterStates(searchTerm, statusFilter);
-  }, [searchTerm, statusFilter]);
-
-  // API Fetching Logic
   const fetchStates = async () => {
-    setLoading(true); // Set loading to true while fetching data
+    setLoading(true);
     try {
-      const token = localStorage.getItem("token"); // Get token from local storage
+      const token = localStorage.getItem("token");
       const response = await axios.get(`${BASE_URL}/api/states/admin`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Ensure the response contains the expected data
       if (response.data && Array.isArray(response.data.data)) {
-        setStates(response.data.data); // Set fetched states
-        setFilteredStates(response.data.data); // Set filtered states
+        setStates(response.data.data);
+        setFilteredStates(response.data.data);
       } else {
         console.error(
           "Error: API response data is not in the expected format."
@@ -66,15 +61,17 @@ const StateManagement = () => {
       }
     } catch (error) {
       console.error("Error fetching states:", error);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser();
       }
     } finally {
-      setLoading(false); // Set loading to false after fetching data
+      setLoading(false);
     }
   };
 
-  // Search and Filter Logic
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -82,28 +79,15 @@ const StateManagement = () => {
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
   };
-
-  const filterStates = (searchTerm, statusFilter) => {
-    let filtered = states;
-
-    if (searchTerm) {
-      filtered = filtered.filter((state) =>
-        state.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== "All") {
-      const isActive = statusFilter === "Active";
-      filtered = filtered.filter((state) => state.isActive === isActive);
-    }
-
-    setFilteredStates(filtered);
+  const handleCountryFilterChange = (e) => {
+    setCountryFilter(e.target.value);
   };
 
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setFilteredStates(states);
+    setCountryFilter("All");
+    fetchStates();
   };
 
   const handlePageChange = (event, value) => {
@@ -142,7 +126,7 @@ const StateManagement = () => {
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         {/* Search by State Name */}
         <TextField
-          placeholder="Search States by Name"
+          placeholder="Search States "
           size="small"
           value={searchTerm}
           onChange={handleSearch}
@@ -172,10 +156,27 @@ const StateManagement = () => {
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
         </TextField>
+        <TextField
+          select
+          label="Country"
+          size="small"
+          value={countryFilter}
+          onChange={handleCountryFilterChange}  // Add this line
+
+          SelectProps={{
+            native: true,
+          }}
+          sx={{ width: "150px" }}
+        >
+          <option value="All">All</option>
+          <option value="India">India</option>
+          <option value="Australia">Australia</option>
+          <option value="Canada">Canada</option>
+        </TextField>
 
         {/* Clear Filters Button */}
         <Button variant="outlined" onClick={clearFilters}>
-          Clear Filters
+          Clear
         </Button>
         <Button
           variant="contained"
@@ -189,7 +190,12 @@ const StateManagement = () => {
 
       {/* Loading Spinner */}
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="300px"
+        >
           <CircularProgress />
         </Box>
       ) : (
@@ -216,8 +222,7 @@ const StateManagement = () => {
                     <TableCell>{state.name}</TableCell>
                     <TableCell>
                       {state.country ? state.country.name : "N/A"}
-                    </TableCell>{" "}
-                    {/* Access country name correctly */}
+                    </TableCell>
                     <TableCell>{state.code}</TableCell>
                     <TableCell>
                       <Chip

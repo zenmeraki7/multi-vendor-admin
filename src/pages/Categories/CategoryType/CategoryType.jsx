@@ -39,7 +39,6 @@ function CategoryType() {
   const [loading, setLoading] = useState(true); 
   const itemsPerPage = 10;
 
-  
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -69,64 +68,31 @@ function CategoryType() {
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-                logoutUser(); // Call logoutUser if 404 or 401 status code
-              }
+        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+          logoutUser();
+        }
         setLoading(false); 
       });
   }, []);
 
-   // Handle Search
-   const handleSearch = (e) => {
+  const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    filterCategories(e.target.value, statusFilter);
   };
 
-  // Handle Status Filter
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
   };
 
-  // Filter Logic
-  const filterCategories = (searchTerm, statusFilter) => {
-    let filtered = [...categoryTypes]; // Ensure it's an array
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter((categoryType) =>
-        categoryType.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by status
-    if (statusFilter !== "All") {
-      const isActive = statusFilter === "Active";
-      filtered = filtered.filter(
-        (categoryType) => categoryType.isActive === isActive
-      );
-    }
-
-    setFilteredCategoryTypes(filtered);
-  };
-
-  // Apply Filter
-  const applyFilter = () => {
-    filterCategories(searchTerm, statusFilter);
-  };
-
-  // Clear Filters
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setFilteredCategoryTypes(categoryTypes); // Reset to original data
+    setFilteredCategoryTypes(categoryTypes);
   };
 
-  // Handle Page Change
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
-  // Paginate Data
   const paginatedData = filteredCategoryTypes.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -186,10 +152,10 @@ function CategoryType() {
                 <MenuItem value="Inactive">Inactive</MenuItem>
               </Select>
             </FormControl>
-            <Button variant="outlined" onClick={() => filterCategories(searchTerm, statusFilter)}>
+            <Button variant="outlined" onClick={() => setFilteredCategoryTypes(categoryTypes)}>
               Apply
             </Button>
-            <Button variant="outlined" onClick={() => clearFilters()}>
+            <Button variant="outlined" onClick={clearFilters}>
               Clear
             </Button>
             <Button

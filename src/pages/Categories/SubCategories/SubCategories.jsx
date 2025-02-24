@@ -34,9 +34,8 @@ function SubCategories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
-  const [categories, setCategories] = useState([]); // To store the categories list
-  const [subCategories, setSubCategories] = useState([]); // To store all subcategories from API
-  const [filteredSubCategories, setFilteredSubCategories] = useState([]); // For filtered results
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
@@ -58,8 +57,7 @@ function SubCategories() {
         );
 
         const data = response.data;
-        setSubCategories(data.data || []); // Assuming API returns subcategories in `data.data`
-        setFilteredSubCategories(data.data || []); // Initialize filtered data
+        setSubCategories(data.data || []);
 
         // Extract unique categories
         const uniqueCategories = Array.from(
@@ -76,7 +74,7 @@ function SubCategories() {
           error.response &&
           (error.response.status === 404 || error.response.status === 401)
         ) {
-          logoutUser(); // Call logoutUser if 404 or 401 status code
+          logoutUser();
         }
         setLoading(false);
       }
@@ -87,54 +85,24 @@ function SubCategories() {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    filterSubCategories(e.target.value, statusFilter, categoryFilter);
+    // Search functionality will be implemented in backend
   };
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
-    filterSubCategories(searchTerm, e.target.value, categoryFilter);
+    // Status filtering will be implemented in backend
   };
 
   const handleCategoryFilterChange = (e) => {
     setCategoryFilter(e.target.value);
-    filterSubCategories(searchTerm, statusFilter, e.target.value);
-  };
-
-  const filterSubCategories = (searchTerm, statusFilter, categoryFilter) => {
-    let filtered = subCategories;
-
-    if (categoryFilter !== "All") {
-      filtered = filtered.filter(
-        (subcategory) =>
-          subcategory.category &&
-          subcategory.category.name &&
-          subcategory.category.name === categoryFilter
-      );
-    }
-
-    // Apply search term filter
-    if (searchTerm) {
-      filtered = filtered.filter((subcategory) =>
-        subcategory.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply status filter
-    if (statusFilter !== "All") {
-      const isActive = statusFilter === "Active";
-      filtered = filtered.filter(
-        (subcategory) => subcategory.isActive === isActive
-      );
-    }
-
-    setFilteredSubCategories(filtered);
+    // Category filtering will be implemented in backend
   };
 
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
     setCategoryFilter("All");
-    setFilteredSubCategories(subCategories);
+    // Reset filters - will need to fetch fresh data from backend
   };
 
   const handlePageChange = (event, value) => {
@@ -269,7 +237,7 @@ function SubCategories() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredSubCategories.map((subcategory, index) => (
+                {subCategories.map((subcategory, index) => (
                   <TableRow
                     key={subcategory._id}
                     sx={{
@@ -312,7 +280,7 @@ function SubCategories() {
           {/* Pagination */}
           <Box display="flex" justifyContent="center" marginTop={3}>
             <Pagination
-              count={Math.ceil(filteredSubCategories.length / itemsPerPage)}
+              count={Math.ceil(subCategories.length / itemsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"

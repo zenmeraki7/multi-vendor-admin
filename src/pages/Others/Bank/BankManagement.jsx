@@ -22,94 +22,84 @@ import { Search, Refresh } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../utils/baseUrl";
- import {logoutUser} from "../../../utils/authUtils";
+import { logoutUser } from "../../../utils/authUtils";
+
 const BankManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [countryFilter, setCountryFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [banks, setBanks] = useState([]);
-  const [filteredBanks, setFilteredBanks] = useState([]);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchBanks = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        setLoading(true); // Set loading to true before the API call
-        const response = await axios.get(`${BASE_URL}/api/banks/admin`, {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        });
+  const fetchBanks = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      setLoading(true);
+      const response = await axios.get(`${BASE_URL}/api/banks/admin`, {
+        params: {
+          search: searchTerm,
+          page: currentPage,
+          limit: itemsPerPage
+        },
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (response.data && response.data.data) {
-          console.log("Fetched Banks:", response.data.data);
-          setBanks(response.data.data);
-          setFilteredBanks(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching banks:", error.response || error.message);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-          logoutUser(); // Call logoutUser if 404 or 401 status code
-        }
-      } finally {
-        setLoading(false); // Set loading to false after the API call completes
+      if (response.data && response.data.data) {
+        console.log("Fetched Banks:", response.data.data);
+        setBanks(response.data.data);
       }
-    };
-
-    fetchBanks();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching banks:", error.response || error.message);
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    filterBanks(searchTerm, statusFilter);
-  }, [searchTerm, statusFilter, banks]);
+    fetchBanks();
+  }, [searchTerm, currentPage]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on new search
   };
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
   };
-
-  const filterBanks = (searchTerm, statusFilter) => {
-    let filtered = banks || [];
-
-    if (searchTerm) {
-      filtered = filtered.filter((bank) =>
-        bank.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== "All") {
-      const isActive = statusFilter === "Active";
-      filtered = filtered.filter((bank) => bank.isActive === isActive);
-    }
-
-    setFilteredBanks(filtered);
+  const handleCountryFilterChange = (e) => {
+    setCountryFilter(e.target.value);
   };
-
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setFilteredBanks(banks);
+    setCountryFilter("All");
   };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
-  const currentData = (filteredBanks || []).slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Typography variant="h4">
           <b>Bank Management</b>
         </Typography>
@@ -118,14 +108,16 @@ const BankManagement = () => {
           <IconButton color="primary">
             <Refresh />
           </IconButton>
-          <Typography fontWeight="bold">{new Date().toLocaleString()}</Typography>
+          <Typography fontWeight="bold">
+            {new Date().toLocaleString()}
+          </Typography>
         </Box>
       </Box>
 
       {/* Search Bar and Filters */}
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         <TextField
-          placeholder="Search Banks by Name"
+          placeholder="Search Banks"
           size="small"
           value={searchTerm}
           onChange={handleSearch}
@@ -154,7 +146,22 @@ const BankManagement = () => {
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
         </TextField>
-
+        <TextField
+          select
+          label="Country"
+          size="small"
+          value={countryFilter}
+          onChange={handleCountryFilterChange}
+          SelectProps={{
+            native: true,
+          }}
+          sx={{ width: "150px" }}
+        >
+          <option value="All">All</option>
+          <option value="India">India</option>
+          <option value="Australia">Australia</option>
+          <option value="Canada">Canada</option>
+        </TextField>
         <Button variant="outlined" onClick={clearFilters}>
           Clear
         </Button>
@@ -170,7 +177,12 @@ const BankManagement = () => {
 
       {/* Loading Indicator */}
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="50vh"
+        >
           <CircularProgress color="primary" />
         </Box>
       ) : (
@@ -188,13 +200,18 @@ const BankManagement = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {currentData.map((bank, index) => (
+                {banks.map((bank, index) => (
                   <TableRow key={index}>
-                    <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                    <TableCell>
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </TableCell>
                     <TableCell>{bank.name}</TableCell>
                     <TableCell>{bank.country.name}</TableCell>
                     <TableCell>
-                      <Chip label={bank.isActive ? "Active" : "Inactive"} color={bank.isActive ? "success" : "error"} />
+                      <Chip
+                        label={bank.isActive ? "Active" : "Inactive"}
+                        color={bank.isActive ? "success" : "error"}
+                      />
                     </TableCell>
                     <TableCell>
                       <Button
@@ -214,7 +231,7 @@ const BankManagement = () => {
           {/* Pagination */}
           <Box mt={2} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(filteredBanks.length / itemsPerPage)}
+              count={Math.ceil(banks.length / itemsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"

@@ -15,7 +15,7 @@ import {
   Paper,
   Pagination,
   Chip,
-  CircularProgress, // Import CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+
 const CountryManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,16 +32,12 @@ const CountryManagement = () => {
   const itemsPerPage = 10;
 
   const [countries, setCountries] = useState([]);
-  const [filteredCountries, setFilteredCountries] = useState(countries);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [filteredCountries, setFilteredCountries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCountries();
   }, []);
-
-  useEffect(() => {
-    filterCountries(searchTerm, statusFilter);
-  }, [searchTerm, statusFilter]);
 
   const fetchCountries = async () => {
     try {
@@ -54,16 +51,16 @@ const CountryManagement = () => {
       if (Array.isArray(response.data.data)) {
         setCountries(response.data.data);
         setFilteredCountries(response.data.data);
-        setLoading(false); // Set loading to false after data is fetched
+        setLoading(false);
       } else {
         console.error("API response is not an array", response.data);
       }
     } catch (error) {
       console.error("Error fetching countries:", error);
       if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+        logoutUser();
       }
-      setLoading(false); // Set loading to false even if there's an error
+      setLoading(false);
     }
   };
 
@@ -75,27 +72,10 @@ const CountryManagement = () => {
     setStatusFilter(e.target.value);
   };
 
-  const filterCountries = (searchTerm, statusFilter) => {
-    let filtered = countries;
-
-    if (searchTerm) {
-      filtered = filtered.filter((country) =>
-        country.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== "All") {
-      const isActive = statusFilter === "Active";
-      filtered = filtered.filter((country) => country.isActive === isActive);
-    }
-
-    setFilteredCountries(filtered);
-  };
-
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
-    setFilteredCountries(countries);
+    fetchCountries();
   };
 
   const handlePageChange = (event, value) => {
@@ -131,7 +111,7 @@ const CountryManagement = () => {
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         {/* Search by Country Name */}
         <TextField
-          placeholder="Search Countries by Name"
+          placeholder="Search Countries"
           size="small"
           value={searchTerm}
           onChange={handleSearch}
