@@ -15,7 +15,7 @@ import {
   Paper,
   Pagination,
   Chip,
-  CircularProgress, // Import CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -23,91 +23,96 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+
 const CountryManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
   const [countries, setCountries] = useState([]);
-  const [filteredCountries, setFilteredCountries] = useState(countries);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 10;
+  const [filters, setFilters] = useState({
+    isActive: "all"
+  });
 
-  useEffect(() => {
-    fetchCountries();
-  }, []);
-
-  useEffect(() => {
-    filterCountries(searchTerm, statusFilter);
-  }, [searchTerm, statusFilter]);
-
+  // Fetch countries with filters and pagination
   const fetchCountries = async () => {
     try {
       const token = localStorage.getItem("token");
+      setLoading(true);
+      
+      // Prepare query parameters based on filters and search
+      const params = {
+        search: searchTerm,
+        page: currentPage,
+        limit: itemsPerPage,
+        isActive: filters.isActive
+      };
+      
       const response = await axios.get(`${BASE_URL}/api/countries/admin`, {
+        params,
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (Array.isArray(response.data.data)) {
+      if (response.data) {
+        console.log("Fetched Countries:", response.data);
         setCountries(response.data.data);
-        setFilteredCountries(response.data.data);
-        setLoading(false); // Set loading to false after data is fetched
-      } else {
-        console.error("API response is not an array", response.data);
+        setTotalPages(response.data.totalPages);
+        setTotalCount(response.data.totalCount);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error fetching countries:", error);
       if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+        logoutUser();
       }
-      setLoading(false); // Set loading to false even if there's an error
+      setLoading(false);
     }
   };
 
+  // Fetch countries when filters, search, or page changes
+  useEffect(() => {
+    fetchCountries();
+  }, [searchTerm, currentPage, filters]);
+
+  // Handler for search input change
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page on new search
   };
 
+  // Handler for status filter change
   const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
+    const value = e.target.value;
+    // Convert UI-friendly values to backend-expected values
+    let isActiveValue = "all";
+    if (value === "Active") isActiveValue = "true";
+    if (value === "Inactive") isActiveValue = "false";
+    
+    setFilters({
+      ...filters,
+      isActive: isActiveValue
+    });
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
-  const filterCountries = (searchTerm, statusFilter) => {
-    let filtered = countries;
-
-    if (searchTerm) {
-      filtered = filtered.filter((country) =>
-        country.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== "All") {
-      const isActive = statusFilter === "Active";
-      filtered = filtered.filter((country) => country.isActive === isActive);
-    }
-
-    setFilteredCountries(filtered);
-  };
-
+  // Reset all filters
   const clearFilters = () => {
     setSearchTerm("");
-    setStatusFilter("All");
-    setFilteredCountries(countries);
+    setFilters({
+      isActive: "all"
+    });
+    setCurrentPage(1);
   };
 
+  // Handle pagination
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
-
-  const currentData = Array.isArray(filteredCountries)
-    ? filteredCountries.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-      )
-    : [];
 
   return (
     <Box padding={2}>
@@ -131,7 +136,7 @@ const CountryManagement = () => {
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         {/* Search by Country Name */}
         <TextField
-          placeholder="Search Countries by Name"
+          placeholder="Search Countries"
           size="small"
           value={searchTerm}
           onChange={handleSearch}
@@ -150,7 +155,7 @@ const CountryManagement = () => {
           select
           label="Status"
           size="small"
-          value={statusFilter}
+          value={filters.isActive === "true" ? "Active" : filters.isActive === "false" ? "Inactive" : "All"}
           onChange={handleStatusFilterChange}
           SelectProps={{
             native: true,
@@ -169,7 +174,7 @@ const CountryManagement = () => {
         <Button
           variant="contained"
           color="primary"
-          style={{ marginLeft: "400px" }}
+          style={{ marginLeft: "auto" }}
           onClick={() => navigate("/add-country")}
         >
           <AddIcon /> Add
@@ -177,64 +182,83 @@ const CountryManagement = () => {
       </Box>
 
       {/* CircularProgress when loading */}
-      {loading && (
+      {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="300px">
           <CircularProgress />
         </Box>
-      )}
-
-      {/* Country Table */}
-      {!loading && (
-        <TableContainer component={Paper} elevation={3}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "primary.main" }}>
-                <TableCell>#</TableCell>
-                <TableCell>Country Name</TableCell>
-                <TableCell>Country Code</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {currentData.map((country, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    {(currentPage - 1) * itemsPerPage + index + 1}
-                  </TableCell>
-                  <TableCell>{country.name}</TableCell>
-                  <TableCell>{country.code}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={country.isActive ? "Active" : "Inactive"}
-                      color={country.isActive ? "success" : "error"}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => navigate(`/view-country/${country._id}`)}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
+      ) : (
+        <>
+          {/* Country Table */}
+          <TableContainer component={Paper} elevation={3}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "primary.main" }}>
+                  <TableCell>#</TableCell>
+                  <TableCell>Country Name</TableCell>
+                  <TableCell>Country Code</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+              </TableHead>
+              <TableBody>
+                {countries.length > 0 ? (
+                  countries.map((country, index) => (
+                    <TableRow key={country._id}>
+                      <TableCell>
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </TableCell>
+                      <TableCell>{country.name}</TableCell>
+                      <TableCell>{country.code}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={country.isActive ? "Active" : "Inactive"}
+                          color={country.isActive ? "success" : "error"}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => navigate(`/view-country/${country._id}`)}
+                        >
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      No countries found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-      {/* Pagination */}
-      <Box mt={2} display="flex" justifyContent="center">
-        <Pagination
-          count={Math.ceil(filteredCountries.length / itemsPerPage)}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </Box>
+          {/* Pagination */}
+          {totalPages > 0 && (
+            <Box mt={2} display="flex" justifyContent="center">
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
+          
+          {/* Total count display */}
+          {totalCount > 0 && (
+            <Box mt={1} display="flex" justifyContent="center">
+              <Typography variant="body2" color="textSecondary">
+                Showing {countries.length} of {totalCount} countries
+              </Typography>
+            </Box>
+          )}
+        </>
+      )}
     </Box>
   );
 };

@@ -119,7 +119,12 @@ function VendorDetails() {
   };
 
   const getStatusChip = (isVerified) => {
-    return <Chip label={isVerified ? "Approved" : "Pending"} color={isVerified ? "success" : "warning"} />;
+    return (
+      <Chip
+        label={isVerified ? "Approved" : "Pending"}
+        color={isVerified ? "success" : "warning"}
+      />
+    );
   };
 
   const handlePageChange = (event, newPage) => {
@@ -131,9 +136,24 @@ function VendorDetails() {
     setPage(1); // Reset to first page on filter change
   };
 
+  const handleClearFilters = () => {
+    setState("all");
+    setCountry("all");
+    setStatus("all");
+    setSearchText("");
+    setPage(1);
+  };
+
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "auto" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 2,
+        }}
+      >
         <Typography variant="h4">Vendor Management</Typography>
         <Typography variant="body1" color="text.secondary">
           {new Date().toLocaleString()}
@@ -147,7 +167,10 @@ function VendorDetails() {
         <CardHeader
           action={
             <Button variant="contained">
-              <Link style={{ textDecoration: "none", color: "white" }} to={"/add-seller"}>
+              <Link
+                style={{ textDecoration: "none", color: "white" }}
+                to={"/add-seller"}
+              >
                 ADD SELLER
               </Link>
             </Button>
@@ -158,7 +181,6 @@ function VendorDetails() {
           <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
             <TextField
               placeholder="Search vendors..."
-              fullWidth
               value={searchText}
               onChange={handleSearchChange}
               variant="outlined"
@@ -193,9 +215,18 @@ function VendorDetails() {
                 <MenuItem value="false">Pending</MenuItem>
               </Select>
             </FormControl>
+            <Button 
+              variant="outlined" 
+              onClick={handleClearFilters}
+              sx={{ height: '56px' }}
+            >
+              Clear 
+            </Button>
           </Box>
 
-          <Typography>Vendors: <strong>{vendors.length}</strong></Typography>
+          <Typography>
+            Vendors: <strong>{vendors.length}</strong>
+          </Typography>
 
           {/* Vendor Table */}
           <TableContainer>
@@ -212,23 +243,32 @@ function VendorDetails() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {vendors.length > 0 ? vendors.map((vendor, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{vendor.companyName}</TableCell>
-                    <TableCell>{vendor.email}</TableCell>
-                    <TableCell>{vendor.salesData?.totalSales || 0}</TableCell>
-                    <TableCell>{vendor.state?.name}</TableCell>
-                    <TableCell>{vendor.country?.name}</TableCell>
-                    <TableCell>{getStatusChip(vendor.isVerified)}</TableCell>
-                    <TableCell>
-                      <Button variant="contained" onClick={() => handleView(vendor.isVerified, vendor._id)}>
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )) : (
+                {vendors.length > 0 ? (
+                  vendors.map((vendor, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{vendor.companyName}</TableCell>
+                      <TableCell>{vendor.email}</TableCell>
+                      <TableCell>{vendor.salesData?.totalSales || 0}</TableCell>
+                      <TableCell>{vendor.state?.name}</TableCell>
+                      <TableCell>{vendor.country?.name}</TableCell>
+                      <TableCell>{getStatusChip(vendor.isVerified)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          onClick={() =>
+                            handleView(vendor.isVerified, vendor._id)
+                          }
+                        >
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
                   <TableRow>
-                    <TableCell colSpan={7} align="center">No vendors found.</TableCell>
+                    <TableCell colSpan={7} align="center">
+                      No vendors found.
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -237,7 +277,12 @@ function VendorDetails() {
 
           {/* Pagination */}
           <Box sx={{ display: "flex", justifyContent: "center", marginTop: 3 }}>
-            <Pagination count={10} page={page} onChange={handlePageChange} color="primary" />
+            <Pagination
+              count={10}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+            />
           </Box>
         </CardContent>
       </Card>

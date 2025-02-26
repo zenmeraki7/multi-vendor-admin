@@ -196,17 +196,7 @@ const Configuration = () => {
       borderBottom: '1px solid #eee',
       paddingBottom: '24px'
     },
-    settingTitle: {
-      fontSize: '16px',
-      color: '#333',
-      fontWeight: '600',
-      marginBottom: '8px'
-    },
-    settingDescription: {
-      fontSize: '14px',
-      color: '#666',
-      marginBottom: '16px'
-    },
+   
     toggleWrapper: {
       display: 'inline-flex',
       alignItems: 'center',
@@ -261,11 +251,7 @@ const Configuration = () => {
     activeButton: {
       opacity: 1
     },
-    settingSection: {
-      marginBottom: '24px',
-      borderBottom: '1px solid #eee',
-      paddingBottom: '20px'
-    },
+  
     settingTitle: {
       fontSize: '14px',
       fontWeight: '600',
