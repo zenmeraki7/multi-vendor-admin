@@ -31,29 +31,54 @@ const StateManagement = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [countryFilter, setCountryFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   const [states, setStates] = useState([]);
-  const [filteredStates, setFilteredStates] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchStates();
-  }, []);
+  }, [currentPage, searchTerm, statusFilter, countryFilter]);
 
   const fetchStates = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${BASE_URL}/api/states/admin`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      
+      // Build query params based on filters
+      let queryParams = new URLSearchParams();
+      queryParams.append('page', currentPage);
+      queryParams.append('limit', itemsPerPage);
+      
+      if (searchTerm) {
+        queryParams.append('search', searchTerm);
+      }
+      
+      if (statusFilter !== "All") {
+        queryParams.append('isActive', statusFilter === "Active" ? "true" : "false");
+      }
+      
+      if (countryFilter !== "All") {
+        // Assuming the country filter requires the country ID
+        // You might need to adjust this based on your API requirements
+        queryParams.append('country', countryFilter);
+      }
+      
+      const response = await axios.get(
+        `${BASE_URL}/api/states/admin?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.data && Array.isArray(response.data.data)) {
         setStates(response.data.data);
-        setFilteredStates(response.data.data);
+        setTotalCount(response.data.totalCount || 0);
+        setTotalPages(response.data.totalPages || 1);
       } else {
         console.error(
           "Error: API response data is not in the expected format."
@@ -74,30 +99,29 @@ const StateManagement = () => {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when search changes
   };
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
+  
   const handleCountryFilterChange = (e) => {
     setCountryFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("All");
     setCountryFilter("All");
-    fetchStates();
+    setCurrentPage(1);
   };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
-
-  const currentData = filteredStates.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <Box padding={2}>
@@ -161,8 +185,7 @@ const StateManagement = () => {
           label="Country"
           size="small"
           value={countryFilter}
-          onChange={handleCountryFilterChange}  // Add this line
-
+          onChange={handleCountryFilterChange}
           SelectProps={{
             native: true,
           }}
@@ -214,7 +237,7 @@ const StateManagement = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {currentData.map((state, index) => (
+                {states.map((state, index) => (
                   <TableRow key={index}>
                     <TableCell>
                       {(currentPage - 1) * itemsPerPage + index + 1}
@@ -248,7 +271,7 @@ const StateManagement = () => {
           {/* Pagination */}
           <Box mt={2} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(filteredStates.length / itemsPerPage)}
+              count={totalPages}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"

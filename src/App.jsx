@@ -44,6 +44,7 @@ import ShopPageSettings from "./pages/ShopPageSettings";
 import AddSeller from "./pages/AddSeller/AddSeller";
 import TransactionPage from "./pages/Transaction/Transaction";
 import Configuration from "./pages/Configuration/Configuration";
+import SellerAnalytics from "./pages/SellerAnalytics/SellerAnalytics";
 
 function App() {
   return (
@@ -115,6 +116,7 @@ function App() {
        
 
         <Route path="add-variant" element={<AddVariant />} />
+        <Route path="seller-analytics" element={<SellerAnalytics />} />
       </Routes>
     </>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios"; 
 import {
   Box,
@@ -32,14 +32,29 @@ import { logoutUser } from "../../../utils/authUtils";
 function CategoryType() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryTypes, setCategoryTypes] = useState([]);
-  const [filteredCategoryTypes, setFilteredCategoryTypes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
 
+  // Debounce search term
   useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset to first page when search term changes
+    }, 500); // 500ms delay
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
+
+  // Fetch data with filters
+  const fetchCategoryTypes = useCallback(async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -48,55 +63,82 @@ function CategoryType() {
       return;
     }
 
-    setLoading(true); 
-    axios
-      .get(`${BASE_URL}/api/category-type/all-admin`, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        console.log("API Response:", response.data);
-        if (response.data && Array.isArray(response.data.data)) {
-          setCategoryTypes(response.data.data);
-          setFilteredCategoryTypes(response.data.data);
-        } else {
-          setCategoryTypes([]);
-          setFilteredCategoryTypes([]);
+    setLoading(true);
+    try {
+      // Build query params based on filters
+      let queryParams = new URLSearchParams();
+      queryParams.append('page', currentPage);
+      queryParams.append('limit', itemsPerPage);
+      
+      if (debouncedSearchTerm) {
+        queryParams.append('search', debouncedSearchTerm);
+      }
+      
+      if (statusFilter !== "All") {
+        queryParams.append('isActive', statusFilter === "Active" ? "true" : "false");
+      }
+
+      const response = await axios.get(
+        `${BASE_URL}/api/category-type/all-admin?${queryParams.toString()}`,
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
         }
-        setLoading(false); 
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-          logoutUser();
-        }
-        setLoading(false); 
-      });
-  }, []);
+      );
+
+      console.log("API Response:", response.data);
+      if (response.data && Array.isArray(response.data.data)) {
+        setCategoryTypes(response.data.data);
+        setTotalCount(response.data.totalCount || 0);
+        setTotalPages(response.data.totalPages || 1);
+      } else {
+        setCategoryTypes([]);
+        setTotalCount(0);
+        setTotalPages(1);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        logoutUser();
+      }
+      setCategoryTypes([]);
+      setTotalCount(0);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, debouncedSearchTerm, statusFilter, navigate]);
+
+  // Call the API when filters or pagination changes
+  useEffect(() => {
+    fetchCategoryTypes();
+  }, [fetchCategoryTypes]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    // The debounce effect will handle setting currentPage and triggering the search
   };
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when status filter changes
   };
 
   const clearFilters = () => {
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setStatusFilter("All");
-    setFilteredCategoryTypes(categoryTypes);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
-  const paginatedData = filteredCategoryTypes.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const handleRefresh = () => {
+    fetchCategoryTypes();
+  };
 
   return (
     <Box padding={2}>
@@ -107,7 +149,7 @@ function CategoryType() {
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
-          <IconButton color="primary">
+          <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -129,7 +171,7 @@ function CategoryType() {
               placeholder="Search Category Type"
               size="small"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -143,7 +185,7 @@ function CategoryType() {
               <InputLabel>Status</InputLabel>
               <Select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={handleStatusFilterChange}
                 label="Status"
                 size="small"
               >
@@ -152,9 +194,6 @@ function CategoryType() {
                 <MenuItem value="Inactive">Inactive</MenuItem>
               </Select>
             </FormControl>
-            <Button variant="outlined" onClick={() => setFilteredCategoryTypes(categoryTypes)}>
-              Apply
-            </Button>
             <Button variant="outlined" onClick={clearFilters}>
               Clear
             </Button>
@@ -190,7 +229,7 @@ function CategoryType() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedData.map((categoryType, index) => (
+                {categoryTypes.map((categoryType, index) => (
                   <TableRow key={categoryType._id}>
                     <TableCell>
                       {(currentPage - 1) * itemsPerPage + index + 1}
@@ -208,7 +247,7 @@ function CategoryType() {
                       <Chip
                         label={categoryType.isActive ? "Active" : "Inactive"}
                         color={categoryType.isActive ? "success" : "error"}
-                        variant="outlined"
+                       
                       />
                     </TableCell>
                     <TableCell>
@@ -230,9 +269,9 @@ function CategoryType() {
           {/* Pagination */}
           <Box display="flex" justifyContent="center" mt={2}>
             <Pagination
-              count={Math.ceil(filteredCategoryTypes.length / itemsPerPage)}
+              count={totalPages}
               page={currentPage}
-              onChange={(event, value) => setCurrentPage(value)}
+              onChange={handlePageChange}
               color="primary"
             />
           </Box>

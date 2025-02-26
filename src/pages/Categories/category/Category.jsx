@@ -38,10 +38,12 @@ function Category() {
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [categoryTypes, setCategoryTypes] = useState([]);
 
   const itemsPerPage = 10;
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (page = 1, filters = null) => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No authentication token found. Please log in.");
@@ -51,14 +53,54 @@ function Category() {
     setLoading(true);
 
     try {
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('page', page);
+      params.append('limit', itemsPerPage);
+      
+      // Use provided filters or current state
+      const search = filters?.searchTerm !== undefined ? filters.searchTerm : searchTerm;
+      const status = filters?.statusFilter !== undefined ? filters.statusFilter : statusFilter;
+      const category = filters?.categoryFilter !== undefined ? filters.categoryFilter : categoryFilter;
+      
+      if (search) {
+        params.append('search', search);
+      }
+      
+      if (status !== "All") {
+        params.append('isActive', status === "Active" ? "true" : "false");
+      }
+      
+      if (category !== "All") {
+        // Find the categoryType ID that matches the selected name
+        const selectedType = categoryTypes.find(type => type.name === category);
+        if (selectedType && selectedType._id) {
+          params.append('categoryType', selectedType._id);
+        }
+      }
+
       const response = await axios.get(`${BASE_URL}/api/category/admin-all`, {
         headers: {
           authorization: `Bearer ${token}`,
         },
+        params: params
       });
+      
       const data = response.data.data || [];
       setCategories(data);
       setFilteredCategories(data);
+      setTotalPages(response.data.totalPages || Math.ceil(data.length / itemsPerPage));
+      
+      // Extract unique category types for the filter dropdown
+      if (filters === null) { // Only update category types on initial load or refresh
+        const uniqueTypes = data
+          .map(category => category.categoryType)
+          .filter((type, index, self) => 
+            type && self.findIndex(t => t && t._id === type._id) === index
+          );
+        setCategoryTypes(uniqueTypes);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -77,41 +119,42 @@ function Category() {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    // Search functionality moved to backend
   };
 
   const handleStatusFilterChange = (e) => {
     setStatusFilter(e.target.value);
-    // Status filtering moved to backend
   };
 
   const handleCategoryFilterChange = (e) => {
     setCategoryFilter(e.target.value);
-    filterCategories(e.target.value);
   };
 
-  const filterCategories = (categoryFilter) => {
-    let filtered = categories;
-
-    // Only keep category type filtering
-    if (categoryFilter !== "All") {
-      filtered = filtered.filter(
-        (category) => category.categoryType.name === categoryFilter
-      );
-    }
-
-    setFilteredCategories(filtered);
+  const applyFilters = () => {
+    setCurrentPage(1);
+    fetchCategories(1);
   };
 
   const clearFilters = () => {
+    // Update state and immediately fetch with cleared filters
+    const clearedFilters = {
+      searchTerm: "",
+      statusFilter: "All",
+      categoryFilter: "All"
+    };
+    
+    // Update state
     setSearchTerm("");
     setStatusFilter("All");
     setCategoryFilter("All");
-    setFilteredCategories(categories);
+    setCurrentPage(1);
+    
+    // Fetch with cleared filters immediately
+    fetchCategories(1, clearedFilters);
   };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
+    fetchCategories(value);
   };
 
   return (
@@ -128,7 +171,7 @@ function Category() {
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography color="primary">DATA REFRESH</Typography>
-          <IconButton color="primary" onClick={fetchCategories}>
+          <IconButton color="primary" onClick={() => fetchCategories(currentPage)}>
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -180,23 +223,18 @@ function Category() {
                 size="small"
               >
                 <MenuItem value="All">All</MenuItem>
-                {categories
-                  .map((category) =>
-                    category.categoryType ? category.categoryType.name : null
-                  )
-                  .filter(
-                    (value, index, self) => value && self.indexOf(value) === index
-                  )
-                  .map((name) => (
-                    <MenuItem key={name} value={name}>
-                      {name}
+                {categoryTypes
+                  .filter(type => type && type.name)
+                  .map(type => (
+                    <MenuItem key={type._id} value={type.name}>
+                      {type.name}
                     </MenuItem>
                   ))}
               </Select>
             </FormControl>
             <Button
               variant="outlined"
-              onClick={() => filterCategories(categoryFilter)}
+              onClick={applyFilters}
             >
               Apply
             </Button>
@@ -232,41 +270,36 @@ function Category() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredCategories
-                  .slice(
-                    (currentPage - 1) * itemsPerPage,
-                    currentPage * itemsPerPage
-                  )
-                  .map((category, index) => (
-                    <TableRow key={category._id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{category?.categoryType?.name}</TableCell>
-                      <TableCell>{category.name}</TableCell>
-                      <TableCell>{category.description}</TableCell>
-                      <TableCell>
-                        <Avatar
-                          src={category.icon}
-                          variant="rounded"
-                          sx={{ height: "100px", width: "100px" }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={category.isActive ? "Active" : "Inactive"}
-                          color={category.isActive ? "success" : "error"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => navigate(`/view-category/${category._id}`)}
-                        >
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                {filteredCategories.map((category, index) => (
+                  <TableRow key={category._id}>
+                    <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                    <TableCell>{category?.categoryType?.name}</TableCell>
+                    <TableCell>{category.name}</TableCell>
+                    <TableCell>{category.description}</TableCell>
+                    <TableCell>
+                      <Avatar
+                        src={category.icon}
+                        variant="rounded"
+                        sx={{ height: "100px", width: "100px" }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={category.isActive ? "Active" : "Inactive"}
+                        color={category.isActive ? "success" : "error"}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => navigate(`/view-category/${category._id}`)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -274,7 +307,7 @@ function Category() {
           {/* Pagination */}
           <Box mt={2} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(filteredCategories.length / itemsPerPage)}
+              count={totalPages}
               page={currentPage}
               onChange={handlePageChange}
               color="primary"
