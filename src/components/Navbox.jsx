@@ -17,7 +17,11 @@ function Navbox() {
       icon: "👥",
       subItems: [
         { text: "Sellers Listing", icon: "📋", path: "/sellers" },
-        { text: "Seller Form Settings", icon: "⚙️", path: "/seller-form-settings" },
+        {
+          text: "Seller Form Settings",
+          icon: "⚙️",
+          path: "/seller-form-settings",
+        },
         { text: "Shop Page Settings", icon: "🏪", path: "/shop-page-settings" },
       ],
     },
@@ -27,9 +31,7 @@ function Navbox() {
     {
       text: "Product Management",
       icon: "🛍️",
-      subItems: [
-        { text: "Product List", icon: "📝", path: "/product-list" },
-      ],
+      subItems: [{ text: "Product List", icon: "📝", path: "/product-list" }],
     },
     {
       text: "Manage Categories",
@@ -48,9 +50,7 @@ function Navbox() {
     {
       text: "Settings",
       icon: "⚙️",
-      subItems: [
-        { text: "General Settings", icon: "🔧", path: "/" },
-      ],
+      subItems: [{ text: "General Settings", icon: "🔧", path: "/" }],
     },
   ];
 
@@ -62,7 +62,9 @@ function Navbox() {
     return (
       <div style={{ marginBottom: "4px" }}>
         <div
-          onClick={() => hasSubItems ? handleExpand(item.text) : navigate(item.path)}
+          onClick={() =>
+            hasSubItems ? handleExpand(item.text) : navigate(item.path)
+          }
           style={{
             display: "flex",
             alignItems: "center",
@@ -89,31 +91,37 @@ function Navbox() {
             }
           }}
         >
-          <span style={{ 
-            marginRight: "12px",
-            fontSize: "16px",
-            display: "flex",
-            alignItems: "center"
-          }}>
+          <span
+            style={{
+              marginRight: "12px",
+              fontSize: "16px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
             {item.icon}
           </span>
           <span style={{ flex: 1 }}>{item.text}</span>
           {hasSubItems && (
-            <span style={{
-              transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s ease",
-              fontSize: "12px"
-            }}>
+            <span
+              style={{
+                transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+                fontSize: "12px",
+              }}
+            >
               ▼
             </span>
           )}
         </div>
         {hasSubItems && isExpanded && (
-          <div style={{
-            marginTop: "4px",
-            overflow: "hidden",
-            transition: "all 0.2s ease",
-          }}>
+          <div
+            style={{
+              marginTop: "4px",
+              overflow: "hidden",
+              transition: "all 0.2s ease",
+            }}
+          >
             {item.subItems.map((subItem) => (
               <MenuItem key={subItem.text} item={subItem} depth={depth + 1} />
             ))}
@@ -124,16 +132,18 @@ function Navbox() {
   };
 
   return (
-    <div style={{
-      width: "280px",
-      height: "100vh",
-      backgroundColor: "#ffffff",
-      borderRight: "1px solid #e2e8f0",
-      display: "flex",
-      flexDirection: "column",
-      overflowY: "auto",
-      padding: "16px",
-    }}>
+    <div
+      style={{
+        width: "280px",
+        height: "100vh",
+        backgroundColor: "#ffffff",
+        borderRight: "1px solid #e2e8f0",
+        display: "flex",
+        flexDirection: "column",
+        overflowY: "auto",
+        padding: "16px",
+      }}
+    >
       <style>
         {`
           ::-webkit-scrollbar {
@@ -151,11 +161,13 @@ function Navbox() {
           }
         `}
       </style>
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "4px"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "4px",
+        }}
+      >
         {menuItems.map((item) => (
           <MenuItem key={item.text} item={item} />
         ))}

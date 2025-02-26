@@ -76,7 +76,7 @@ function Header() {
                 color: "#fff",
               }}
             >
-              Zen Store
+              Zen Store Admin
             </Typography>
           </Box>
 
