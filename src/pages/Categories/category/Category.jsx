@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Button,
@@ -32,6 +32,7 @@ import { logoutUser } from "../../../utils/authUtils";
 function Category() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [categories, setCategories] = useState([]);
@@ -59,7 +60,7 @@ function Category() {
       params.append('limit', itemsPerPage);
       
       // Use provided filters or current state
-      const search = filters?.searchTerm !== undefined ? filters.searchTerm : searchTerm;
+      const search = filters?.searchTerm !== undefined ? filters.searchTerm : debouncedSearchTerm;
       const status = filters?.statusFilter !== undefined ? filters.statusFilter : statusFilter;
       const category = filters?.categoryFilter !== undefined ? filters.categoryFilter : categoryFilter;
       
@@ -113,25 +114,55 @@ function Category() {
     }
   };
 
+  // Set up debounce effect for search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch categories when debounced search term changes
+  useEffect(() => {
+    if (debouncedSearchTerm !== undefined) {
+      setCurrentPage(1);
+      fetchCategories(1, { ...getFilters(), searchTerm: debouncedSearchTerm });
+    }
+  }, [debouncedSearchTerm]);
+
   useEffect(() => {
     fetchCategories();
   }, []);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
+    // Actual search will be triggered by the debounce effect
   };
 
   const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
+    const value = e.target.value;
+    setStatusFilter(value);
+    // Apply filter immediately
+    setCurrentPage(1);
+    fetchCategories(1, { ...getFilters(), statusFilter: value });
   };
 
   const handleCategoryFilterChange = (e) => {
-    setCategoryFilter(e.target.value);
+    const value = e.target.value;
+    setCategoryFilter(value);
+    // Apply filter immediately
+    setCurrentPage(1);
+    fetchCategories(1, { ...getFilters(), categoryFilter: value });
   };
 
-  const applyFilters = () => {
-    setCurrentPage(1);
-    fetchCategories(1);
+  // Helper function to get current filters
+  const getFilters = () => {
+    return {
+      searchTerm: debouncedSearchTerm,
+      statusFilter,
+      categoryFilter
+    };
   };
 
   const clearFilters = () => {
@@ -144,6 +175,7 @@ function Category() {
     
     // Update state
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setStatusFilter("All");
     setCategoryFilter("All");
     setCurrentPage(1);
@@ -232,12 +264,6 @@ function Category() {
                   ))}
               </Select>
             </FormControl>
-            <Button
-              variant="outlined"
-              onClick={applyFilters}
-            >
-              Apply
-            </Button>
             <Button variant="outlined" onClick={clearFilters}>
               Clear
             </Button>
@@ -307,7 +333,7 @@ function Category() {
           {/* Pagination */}
           <Box mt={2} display="flex" justifyContent="center">
             <Pagination
-              count={totalPages}
+              count={totalPages}  
               page={currentPage}
               onChange={handlePageChange}
               color="primary"

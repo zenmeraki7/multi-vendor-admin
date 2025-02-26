@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   Box,
@@ -39,10 +39,24 @@ function SubCategories() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [debouncedStatusFilter, setDebouncedStatusFilter] = useState("All");
+  const [debouncedCategoryFilter, setDebouncedCategoryFilter] = useState("All");
   const itemsPerPage = 10;
 
+  // Apply debounce to search and filter inputs
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setDebouncedStatusFilter(statusFilter);
+      setDebouncedCategoryFilter(categoryFilter);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, statusFilter, categoryFilter]);
+
   // Fetch subcategories and categories from API
-  const fetchSubCategories = async () => {
+  const fetchSubCategories = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       setLoading(true);
@@ -54,19 +68,19 @@ function SubCategories() {
       };
 
       // Add search parameter if exists
-      if (searchTerm) {
-        params.search = searchTerm;
+      if (debouncedSearchTerm) {
+        params.search = debouncedSearchTerm;
       }
 
       // Add status filter if not "All"
-      if (statusFilter !== "All") {
-        params.isActive = statusFilter === "Active" ? "true" : "false";
+      if (debouncedStatusFilter !== "All") {
+        params.isActive = debouncedStatusFilter === "Active" ? "true" : "false";
       }
 
       // Add category filter if not "All"
-      if (categoryFilter !== "All") {
+      if (debouncedCategoryFilter !== "All") {
         // Find the category ID that matches the selected category name
-        const selectedCategory = categories.find(cat => cat.name === categoryFilter);
+        const selectedCategory = categories.find(cat => cat.name === debouncedCategoryFilter);
         if (selectedCategory && selectedCategory._id) {
           params.category = selectedCategory._id;
         }
@@ -111,26 +125,21 @@ function SubCategories() {
       }
       setLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearchTerm, debouncedStatusFilter, debouncedCategoryFilter, categories]);
 
-  // Initial data fetch
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchSubCategories();
+    }
+  }, [debouncedSearchTerm, debouncedStatusFilter, debouncedCategoryFilter, fetchSubCategories]);
+
+  // Fetch data when page changes
   useEffect(() => {
     fetchSubCategories();
-  }, [currentPage]); // Re-fetch when page changes
-
-  // Handle search with debounce
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (currentPage === 1) {
-        fetchSubCategories();
-      } else {
-        // Reset to page 1 when search/filters change
-        setCurrentPage(1);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, statusFilter, categoryFilter]);
+  }, [currentPage, fetchSubCategories]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -148,13 +157,6 @@ function SubCategories() {
     setSearchTerm("");
     setStatusFilter("All");
     setCategoryFilter("All");
-    // If we're already on page 1, manually trigger a fetch
-    if (currentPage === 1) {
-      fetchSubCategories();
-    } else {
-      // Otherwise, changing the page will trigger a fetch
-      setCurrentPage(1);
-    }
   };
 
   const handlePageChange = (event, value) => {
