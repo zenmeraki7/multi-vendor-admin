@@ -23,10 +23,13 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import TableInput from "../../../components/SharedComponents/TableInput";
+import TableSelect from "../../../components/SharedComponents/TableSelect";
 
 const BankManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,24 +38,24 @@ const BankManagement = () => {
   const itemsPerPage = 10;
   const [filters, setFilters] = useState({
     isActive: "all",
-    country: "all"
+    country: "all",
   });
-  
+
   // Function to fetch banks with filters and pagination
   const fetchBanks = async () => {
     try {
       const token = localStorage.getItem("token");
       setLoading(true);
-      
+
       // Prepare query parameters based on filters and search
       const params = {
         search: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
         isActive: filters.isActive,
-        country: filters.country
+        country: filters.country,
       };
-      
+
       const response = await axios.get(`${BASE_URL}/api/banks/admin`, {
         params,
         headers: {
@@ -86,7 +89,7 @@ const BankManagement = () => {
 
   // Fetch countries for the filter dropdown
   const [countries, setCountries] = useState([]);
-  
+
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -96,15 +99,18 @@ const BankManagement = () => {
             authorization: `Bearer ${token}`,
           },
         });
-        
+
         if (response.data && response.data.data) {
           setCountries(response.data.data);
         }
       } catch (error) {
-        console.error("Error fetching countries:", error.response || error.message);
+        console.error(
+          "Error fetching countries:",
+          error.response || error.message
+        );
       }
     };
-    
+
     fetchCountries();
   }, []);
 
@@ -117,24 +123,24 @@ const BankManagement = () => {
   const handleStatusFilterChange = (e) => {
     setFilters({
       ...filters,
-      isActive: e.target.value
+      isActive: e.target.value,
     });
     setCurrentPage(1); // Reset to first page on filter change
   };
-  
+
   const handleCountryFilterChange = (e) => {
     setFilters({
       ...filters,
-      country: e.target.value
+      country: e.target.value,
     });
     setCurrentPage(1); // Reset to first page on filter change
   };
-  
+
   const clearFilters = () => {
     setSearchTerm("");
     setFilters({
       isActive: "all",
-      country: "all"
+      country: "all",
     });
     setCurrentPage(1);
   };
@@ -160,7 +166,7 @@ const BankManagement = () => {
           <b>Bank Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography color="primary">DATA REFRESH</Typography>
+
           <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
@@ -172,11 +178,14 @@ const BankManagement = () => {
 
       {/* Search Bar and Filters */}
       <Box display="flex" alignItems="center" gap={2} mb={2}>
-        <TextField
-          placeholder="Search Banks"
-          size="small"
+        <TableInput
+          id="search-category"
+          name="search"
+          placeholder="Search Category "
           value={searchTerm}
           onChange={handleSearch}
+          label="Search"
+          type="text"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -184,44 +193,35 @@ const BankManagement = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ width: "250px" }}
+          sx={{ width: "300px" }}
         />
 
-        <TextField
-          select
-          label="Status"
-          size="small"
-          value={filters.isActive}
+        <TableSelect
+          id="status-filter"
+          name="statusFilter"
+          value={statusFilter}
           onChange={handleStatusFilterChange}
-          SelectProps={{
-            native: true,
-          }}
-          sx={{ width: "150px" }}
-        >
-          <option value="all">All</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </TextField>
-        
-        <TextField
-          select
-          label="Country"
-          size="small"
-          value={filters.country}
-          onChange={handleCountryFilterChange}
-          SelectProps={{
-            native: true,
-          }}
-          sx={{ width: "150px" }}
-        >
-          <option value="all">All</option>
-          {countries.map(country => (
-            <option key={country._id} value={country._id}>
-              {country.name}
-            </option>
-          ))}
-        </TextField>
-        
+          label="Status"
+          MenuItems={[
+            { value: "All", label: "All" },
+            { value: "Active", label: "Active" },
+            { value: "Inactive", label: "Inactive" },
+          ]}
+        />
+
+<TableSelect
+  id="country-filter"
+  name="country"
+  value={filters.country}
+  onChange={handleCountryFilterChange}
+  label="Country"
+  MenuItems={[
+    { value: "all", label: "All" },
+    ...countries.map((country) => ({ value: country._id, label: country.name }))
+  ]}
+/>
+
+
         <Button variant="outlined" onClick={clearFilters}>
           Clear
         </Button>
@@ -267,7 +267,7 @@ const BankManagement = () => {
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </TableCell>
                       <TableCell>{bank.name}</TableCell>
-                      <TableCell>{bank.country?.name || 'N/A'}</TableCell>
+                      <TableCell>{bank.country?.name || "N/A"}</TableCell>
                       <TableCell>
                         <Chip
                           label={bank.isActive ? "Active" : "Inactive"}
@@ -307,7 +307,7 @@ const BankManagement = () => {
               />
             </Box>
           )}
-          
+
           {/* Total count display */}
           {totalCount > 0 && (
             <Box mt={1} display="flex" justifyContent="center">

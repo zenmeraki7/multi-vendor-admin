@@ -23,10 +23,12 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
-
+import TableSelect from "../../../components/SharedComponents/TableSelect";
+import TableInput from "../../../components/SharedComponents/TableInput";
 const CountryManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ const CountryManagement = () => {
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
   const [filters, setFilters] = useState({
-    isActive: "all"
+    isActive: "all",
   });
 
   // Fetch countries with filters and pagination
@@ -42,15 +44,15 @@ const CountryManagement = () => {
     try {
       const token = localStorage.getItem("token");
       setLoading(true);
-      
+
       // Prepare query parameters based on filters and search
       const params = {
         search: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
-        isActive: filters.isActive
+        isActive: filters.isActive,
       };
-      
+
       const response = await axios.get(`${BASE_URL}/api/countries/admin`, {
         params,
         headers: {
@@ -67,7 +69,10 @@ const CountryManagement = () => {
       }
     } catch (error) {
       console.error("Error fetching countries:", error);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser();
       }
       setLoading(false);
@@ -92,10 +97,10 @@ const CountryManagement = () => {
     let isActiveValue = "all";
     if (value === "Active") isActiveValue = "true";
     if (value === "Inactive") isActiveValue = "false";
-    
+
     setFilters({
       ...filters,
-      isActive: isActiveValue
+      isActive: isActiveValue,
     });
     setCurrentPage(1); // Reset to first page on filter change
   };
@@ -104,7 +109,7 @@ const CountryManagement = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setFilters({
-      isActive: "all"
+      isActive: "all",
     });
     setCurrentPage(1);
   };
@@ -117,12 +122,17 @@ const CountryManagement = () => {
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Typography variant="h4">
           <b>Country Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography color="primary">DATA REFRESH</Typography>
+
           <IconButton color="primary" onClick={fetchCountries}>
             <Refresh />
           </IconButton>
@@ -135,11 +145,14 @@ const CountryManagement = () => {
       {/* Search Bar and Filters */}
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         {/* Search by Country Name */}
-        <TextField
-          placeholder="Search Countries"
-          size="small"
+        <TableInput
+          id="search-category"
+          name="search"
+          placeholder="Search Category Type"
           value={searchTerm}
           onChange={handleSearch}
+          label="Search"
+          type="text"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -147,25 +160,22 @@ const CountryManagement = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ width: "250px" }}
+          sx={{ width: "300px" }}
         />
 
         {/* Status Filter Dropdown */}
-        <TextField
-          select
-          label="Status"
-          size="small"
-          value={filters.isActive === "true" ? "Active" : filters.isActive === "false" ? "Inactive" : "All"}
+        <TableSelect
+          id="status-filter"
+          name="statusFilter"
+          value={statusFilter}
           onChange={handleStatusFilterChange}
-          SelectProps={{
-            native: true,
-          }}
-          sx={{ width: "150px" }}
-        >
-          <option value="All">All</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </TextField>
+          label="Status"
+          MenuItems={[
+            { value: "All", label: "All" },
+            { value: "Active", label: "Active" },
+            { value: "Inactive", label: "Inactive" },
+          ]}
+        />
 
         {/* Clear Filters Button */}
         <Button variant="outlined" onClick={clearFilters}>
@@ -183,7 +193,12 @@ const CountryManagement = () => {
 
       {/* CircularProgress when loading */}
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="300px"
+        >
           <CircularProgress />
         </Box>
       ) : (
@@ -219,7 +234,9 @@ const CountryManagement = () => {
                         <Button
                           variant="contained"
                           size="small"
-                          onClick={() => navigate(`/view-country/${country._id}`)}
+                          onClick={() =>
+                            navigate(`/view-country/${country._id}`)
+                          }
                         >
                           View
                         </Button>
@@ -248,7 +265,7 @@ const CountryManagement = () => {
               />
             </Box>
           )}
-          
+
           {/* Total count display */}
           {totalCount > 0 && (
             <Box mt={1} display="flex" justifyContent="center">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import {
   Button,
   Card,
@@ -13,8 +13,11 @@ import {
   Typography,
   Box,
   Pagination,
+  InputAdornment,
+  Chip
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
+import TableInput from "../components/SharedComponents/TableInput";
 
 function UserManagement() {
   const [users, setUsers] = useState([
@@ -95,28 +98,23 @@ function UserManagement() {
 
       {/* Search Bar Section */}
       <Box sx={{ display: "flex", gap: 2, marginBottom: 2, width: "400px" }}>
-        <Box sx={{ position: "relative", flex: 1 }}>
-          <Search
-            sx={{
-              position: "absolute",
-              left: 10,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "gray",
-            }}
-          />
-          <input
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Search users..."
-            style={{
-              width: "100%",
-              padding: "10px 40px 10px 30px",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-            }}
-          />
-        </Box>
+        <TableInput
+          id="search-user"
+          name="search"
+          placeholder="Search Users"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          label="Search"
+          type="text"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: "300px" }}
+        />
       </Box>
 
       {/* User Table Section */}
@@ -147,16 +145,10 @@ function UserManagement() {
                     <TableCell>{user.location}</TableCell>
                     <TableCell>{user.orderCount}</TableCell>
                     <TableCell>
-                      <Typography
-                        sx={{
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          backgroundColor: user.status === "Inactive" ? "#f8d7da" : "#d4edda",
-                          color: user.status === "Inactive" ? "#721c24" : "#155724",
-                        }}
-                      >
-                        {user.status}
-                      </Typography>
+                      <Chip
+                        label={user.status}
+                        color={user.status === "Active" ? "success" : "error"}
+                      />
                     </TableCell>
                     <TableCell>
                       <Button variant="contained" color="primary">

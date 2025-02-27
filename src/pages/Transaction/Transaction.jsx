@@ -1,245 +1,271 @@
-import React, { useState } from 'react';
-import { Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
+  Chip,
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { Search, Refresh } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import TableInput from "../../components/SharedComponents/TableInput";
+import TableSelect from "../../components/SharedComponents/TableSelect";
 
 const TransactionPage = () => {
+  const navigate = useNavigate();
+
+  // States for filtering and pagination
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("Last 30 Days");
   const [currentPage, setCurrentPage] = useState(1);
-  
+  const [totalPages, setTotalPages] = useState(3);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+
+  // Sample transaction data
   const transactions = [
     {
-      id: 'ORD-2025-001',
-      date: 'Feb 12, 2025',
-      vendor: 'Vendor A',
-      items: 'iPhone 15 Pro',
-      amount: 999.00,
-      status: 'completed'
+      id: "ORD-2025-001",
+      date: "Feb 12, 2025",
+      vendor: "Vendor A",
+      items: "iPhone 15 Pro",
+      amount: 999.0,
+      status: "completed",
     },
     {
-      id: 'ORD-2025-002',
-      date: 'Feb 11, 2025',
-      vendor: 'Vendor B',
-      items: 'MacBook Air M3',
-      amount: 1299.00,
-      status: 'pending'
+      id: "ORD-2025-002",
+      date: "Feb 11, 2025",
+      vendor: "Vendor B",
+      items: "MacBook Air M3",
+      amount: 1299.0,
+      status: "pending",
     },
     {
-      id: 'ORD-2025-003',
-      date: 'Feb 10, 2025',
-      vendor: 'Vendor C',
-      items: 'AirPods Pro',
-      amount: 249.00,
-      status: 'cancelled'
-    }
+      id: "ORD-2025-003",
+      date: "Feb 10, 2025",
+      vendor: "Vendor C",
+      items: "AirPods Pro",
+      amount: 249.0,
+      status: "cancelled",
+    },
   ];
 
-  const StatusBadge = ({ status }) => {
-    const styles = {
-      completed: { backgroundColor: '#dcfce7', color: '#166534' },
-      pending: { backgroundColor: '#fef9c3', color: '#854d0e' },
-      cancelled: { backgroundColor: '#fee2e2', color: '#991b1b' }
-    };
-
-    return (
-      <span style={{
-        ...styles[status],
-        padding: '4px 12px',
-        borderRadius: '9999px',
-        fontSize: '14px',
-        fontWeight: 500,
-        display: 'inline-block'
-      }}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
+  // Function to refresh transaction data
+  const fetchTransactions = () => {
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+    }, 600);
   };
 
+  useEffect(() => {
+    fetchTransactions();
+  }, [currentPage, searchTerm, statusFilter, dateFilter]);
+
+  // Handler functions
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleVendorFilterChange = (e) => {
+    setVendorFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleDateFilterChange = (e) => {
+    setDateFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setVendorFilter("All");
+    setDateFilter("Last 30 Days");
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+  const handleStatusFilterChange = (e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f9fafb',
-      padding: '32px'
-    }}>
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '24px'
-      }}>
-        <h1 style={{
-          fontSize: '24px',
-          fontWeight: 600,
-          marginBottom: '24px',
-          color: '#111827'
-        }}>Transaction History</h1>
+    <Box padding={2}>
+      {/* Header Section */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h4">
+          <b>Transaction History</b>
+        </Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <IconButton color="primary" onClick={fetchTransactions}>
+            <Refresh />
+          </IconButton>
+          <Typography fontWeight="bold">
+            {new Date().toLocaleString()}
+          </Typography>
+        </Box>
+      </Box>
 
-        {/* Filters */}
-        <div style={{
-          marginBottom: '24px',
-          padding: '16px',
-          backgroundColor: '#f9fafb',
-          borderRadius: '8px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <select style={{
-            padding: '8px 12px',
-            border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            backgroundColor: 'white'
-          }}>
-            <option>All Vendors</option>
-            <option>Vendor A</option>
-            <option>Vendor B</option>
-            <option>Vendor C</option>
-          </select>
-          
-          <select style={{
-            padding: '8px 12px',
-            border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            backgroundColor: 'white'
-          }}>
-            <option>Last 30 Days</option>
-            <option>Last 90 Days</option>
-            <option>This Year</option>
-          </select>
-          
-          <div style={{
-            position: 'relative',
-            flexGrow: 1
-          }}>
-            <Search style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: '#9ca3af'
-            }} />
-            <input
-              type="text"
-              placeholder="Search transactions..."
-              style={{
-                width: '100%',
-                padding: '8px 12px 8px 40px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px'
-              }}
+      {/* Search Bar and Filters */}
+      <Box display="flex" alignItems="center" gap={2} mb={2}>
+        {/* Search by Transaction ID or Items */}
+        <TableInput
+          id="search-transaction"
+          name="search"
+          placeholder="Search "
+          value={searchTerm}
+          onChange={handleSearch}
+          label="Search"
+          type="text"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: "300px" }}
+        />
+
+        <TableSelect
+          id="status-filter"
+          name="statusFilter"
+          value={statusFilter}
+          onChange={handleStatusFilterChange}
+          label="Status"
+          MenuItems={[
+            { value: "All", label: "All" },
+            { value: "Pending", label: "Pending" },
+            { value: "Completed", label: "Completed" },
+            { value: "Cancelled", label: "Cancelled" },
+          ]}
+        />
+
+<TableSelect
+  id="date-filter"
+  name="dateFilter"
+  value={dateFilter}
+  onChange={handleDateFilterChange}
+  label="Date Range"
+  MenuItems={[
+    { value: "Last 30 Days", label: "Last 30 Days" },
+    { value: "Last 90 Days", label: "Last 90 Days" },
+    { value: "This Year", label: "This Year" },
+  ]}
+/>
+
+
+        {/* Clear Filters Button */}
+        <Button variant="outlined" onClick={clearFilters}>
+          Clear
+        </Button>
+      </Box>
+
+      {/* Loading Spinner */}
+      {loading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="300px"
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          {/* Transaction Table */}
+          <TableContainer component={Paper} elevation={3}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "primary.main" }}>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Order ID</TableCell>
+                  <TableCell>Vendor</TableCell>
+                  <TableCell>Items</TableCell>
+                  <TableCell align="right">Amount</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {transactions.map((transaction) => (
+                  <TableRow key={transaction.id}>
+                    <TableCell>{transaction.date}</TableCell>
+                    <TableCell>{transaction.id}</TableCell>
+                    <TableCell>{transaction.vendor}</TableCell>
+                    <TableCell>{transaction.items}</TableCell>
+                    <TableCell align="right">
+                      ${transaction.amount.toFixed(2)}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={
+                          transaction.status.charAt(0).toUpperCase() +
+                          transaction.status.slice(1)
+                        }
+                        color={
+                          transaction.status === "completed"
+                            ? "success"
+                            : transaction.status === "pending"
+                            ? "warning"
+                            : "error"
+                        }
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() =>
+                          navigate(`/transaction/${transaction.id}`)
+                        }
+                      >
+                        Details
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination */}
+          <Box mt={2} display="flex" justifyContent="center">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
             />
-          </div>
-        </div>
-
-        {/* Transaction Table */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse'
-          }}>
-            <thead>
-              <tr style={{
-                borderBottom: '1px solid #e5e7eb',
-                backgroundColor: '#f9fafb'
-              }}>
-                <th style={{ padding: '12px 24px', textAlign: 'left' }}>Date</th>
-                <th style={{ padding: '12px 24px', textAlign: 'left' }}>Order ID</th>
-                <th style={{ padding: '12px 24px', textAlign: 'left' }}>Vendor</th>
-                <th style={{ padding: '12px 24px', textAlign: 'left' }}>Items</th>
-                <th style={{ padding: '12px 24px', textAlign: 'right' }}>Amount</th>
-                <th style={{ padding: '12px 24px', textAlign: 'center' }}>Status</th>
-                <th style={{ padding: '12px 24px', textAlign: 'center' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction) => (
-                <tr 
-                  key={transaction.id}
-                  style={{
-                    borderBottom: '1px solid #e5e7eb',
-                    ':hover': { backgroundColor: '#f9fafb' }
-                  }}
-                >
-                  <td style={{ padding: '16px 24px' }}>{transaction.date}</td>
-                  <td style={{ padding: '16px 24px' }}>{transaction.id}</td>
-                  <td style={{ padding: '16px 24px' }}>{transaction.vendor}</td>
-                  <td style={{ padding: '16px 24px' }}>{transaction.items}</td>
-                  <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    ${transaction.amount.toFixed(2)}
-                  </td>
-                  <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                    <StatusBadge status={transaction.status} />
-                  </td>
-                  <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                    <button style={{
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      ':hover': { backgroundColor: '#2563eb' }
-                    }}>
-                      Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div style={{
-          marginTop: '24px',
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '8px'
-        }}>
-          <button 
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            style={{
-              padding: '8px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              backgroundColor: 'white',
-              cursor: 'pointer'
-            }}
-          >
-            <ChevronLeft />
-          </button>
-          
-          {[1, 2, 3].map((page) => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              style={{
-                padding: '8px 16px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                backgroundColor: currentPage === page ? '#3b82f6' : 'white',
-                color: currentPage === page ? 'white' : 'black',
-                cursor: 'pointer'
-              }}
-            >
-              {page}
-            </button>
-          ))}
-          
-          <button 
-            onClick={() => setCurrentPage(Math.min(3, currentPage + 1))}
-            style={{
-              padding: '8px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              backgroundColor: 'white',
-              cursor: 'pointer'
-            }}
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      </div>
-    </div>
+          </Box>
+        </>
+      )}
+    </Box>
   );
 };
 

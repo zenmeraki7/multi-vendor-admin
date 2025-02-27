@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios"; 
+import axios from "axios";
 import {
   Box,
   Button,
   Typography,
-  TextField,
   InputAdornment,
   IconButton,
   Table,
@@ -17,17 +16,15 @@ import {
   Avatar,
   Pagination,
   Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress, 
+  CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import { BASE_URL } from "../../../utils/baseUrl"; 
+import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import TableSelect from "../../../components/SharedComponents/TableSelect";
+import TableInput from "../../../components/SharedComponents/TableInput";
 
 function CategoryType() {
   const navigate = useNavigate();
@@ -67,15 +64,18 @@ function CategoryType() {
     try {
       // Build query params based on filters
       let queryParams = new URLSearchParams();
-      queryParams.append('page', currentPage);
-      queryParams.append('limit', itemsPerPage);
-      
+      queryParams.append("page", currentPage);
+      queryParams.append("limit", itemsPerPage);
+
       if (debouncedSearchTerm) {
-        queryParams.append('search', debouncedSearchTerm);
+        queryParams.append("search", debouncedSearchTerm);
       }
-      
+
       if (statusFilter !== "All") {
-        queryParams.append('isActive', statusFilter === "Active" ? "true" : "false");
+        queryParams.append(
+          "isActive",
+          statusFilter === "Active" ? "true" : "false"
+        );
       }
 
       const response = await axios.get(
@@ -99,7 +99,10 @@ function CategoryType() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser();
       }
       setCategoryTypes([]);
@@ -143,12 +146,17 @@ function CategoryType() {
   return (
     <Box padding={2}>
       {/* Header Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Typography variant="h4">
           <b>Category Type Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography color="primary">DATA REFRESH</Typography>
+
           <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
@@ -160,18 +168,26 @@ function CategoryType() {
 
       {/* Loader */}
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="50vh"
+        >
           <CircularProgress color="primary" />
         </Box>
       ) : (
         <>
           {/* Search Bar and Filters */}
           <Box display="flex" alignItems="center" gap={2} mb={2}>
-            <TextField
+            <TableInput
+              id="search-category"
+              name="search"
               placeholder="Search Category Type"
-              size="small"
               value={searchTerm}
               onChange={handleSearch}
+              label="Search"
+              type="text"
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -181,33 +197,35 @@ function CategoryType() {
               }}
               sx={{ width: "300px" }}
             />
-            <FormControl fullWidth variant="outlined" sx={{ width: 150 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                label="Status"
-                size="small"
-              >
-                <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-            <Button variant="outlined" onClick={clearFilters}>
+            <TableSelect
+              id="status-filter"
+              name="statusFilter"
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              label="Status"
+              MenuItems={[
+                { value: "All", label: "All" },
+                { value: "Active", label: "Active" },
+                { value: "Inactive", label: "Inactive" },
+              ]}
+            />
+            <Button
+              variant="outlined"
+              onClick={clearFilters}
+              sx={{ height: "50px" }}
+            >
               Clear
             </Button>
             <Button
               variant="contained"
               color="primary"
-              style={{ marginLeft: "400px" }}
+              style={{ marginLeft: "400px", height: "50px" }}
               onClick={() => navigate("/add-Categorytype")}
             >
               <AddIcon />
               Add
             </Button>
           </Box>
-
           {/* Category Type Table */}
           <TableContainer
             component={Paper}
@@ -220,12 +238,24 @@ function CategoryType() {
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "primary.main" }}>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}></TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>NAME</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>DESCRIPTION</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>ICON</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
+                  <TableCell
+                    sx={{ color: "white", fontWeight: "bold" }}
+                  ></TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    NAME
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    DESCRIPTION
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    ICON
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    STATUS
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    ACTIONS
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -247,7 +277,6 @@ function CategoryType() {
                       <Chip
                         label={categoryType.isActive ? "Active" : "Inactive"}
                         color={categoryType.isActive ? "success" : "error"}
-                       
                       />
                     </TableCell>
                     <TableCell>
@@ -255,7 +284,9 @@ function CategoryType() {
                         variant="contained"
                         color="primary"
                         size="small"
-                        onClick={() => navigate(`/viewcategorytype/${categoryType._id}`)}
+                        onClick={() =>
+                          navigate(`/viewcategorytype/${categoryType._id}`)
+                        }
                       >
                         View
                       </Button>

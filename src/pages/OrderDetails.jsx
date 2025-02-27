@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  Search,
-  Download,
-  Refresh,
-} from "@mui/icons-material";
+import { Search, Download, Refresh } from "@mui/icons-material";
 import {
   Card,
   CardContent,
@@ -16,14 +12,13 @@ import {
   TableHead,
   TableRow,
   Button,
-  TextField,
   Box,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
   Pagination,
+  InputAdornment,
+  Chip,
 } from "@mui/material";
+import TableInput from "../components/SharedComponents/TableInput";
+import TableSelect from "../components/SharedComponents/TableSelect";
 
 function OrderDetails() {
   const [orders, setOrders] = useState([
@@ -124,7 +119,6 @@ function OrderDetails() {
             color="primary"
             sx={{ display: "flex", alignItems: "center" }}
           >
-            DATA REFRESH
             <Refresh sx={{ ml: 1, cursor: "pointer" }} />
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ ml: 2 }}>
@@ -181,47 +175,44 @@ function OrderDetails() {
                 Export
               </Button>
 
-              <FormControl fullWidth variant="outlined" sx={{ width: 100 }}>
-                <InputLabel>Orders</InputLabel>
-                <Select
-                  name="order"
-                  value={filters.order}
-                  onChange={handleFilterChange}
-                  label="Order Status"
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="Shipped">Shipped</MenuItem>
-                  <MenuItem value="Pending">Pending</MenuItem>
-                </Select>
-              </FormControl>
+              <TableSelect
+                id="order-filter"
+                name="order"
+                value={filters.order}
+                onChange={handleFilterChange}
+                label="Orders"
+                MenuItems={[
+                  { value: "", label: "All" },
+                  { value: "Shipped", label: "Shipped" },
+                  { value: "Pending", label: "Pending" },
+                ]}
+              />
 
-              <FormControl fullWidth variant="outlined" sx={{ width: 120 }}>
-                <InputLabel>Payments</InputLabel>
-                <Select
-                  name="payment"
-                  value={filters.payment}
-                  onChange={handleFilterChange}
-                  label="Payment Status"
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="Completed">Completed</MenuItem>
-                  <MenuItem value="Pending">Pending</MenuItem>
-                </Select>
-              </FormControl>
+              <TableSelect
+                id="payment-filter"
+                name="payment"
+                value={filters.payment}
+                onChange={handleFilterChange}
+                label="Payment"
+                MenuItems={[
+                  { value: "", label: "All" },
+                  { value: "Completed", label: "Completed" },
+                  { value: "Pending", label: "Pending" },
+                ]}
+              />
 
-              <FormControl fullWidth variant="outlined" sx={{ width: 140 }}>
-                <InputLabel>Shipments</InputLabel>
-                <Select
-                  name="shipment"
-                  value={filters.shipment}
-                  onChange={handleFilterChange}
-                  label="Shipment Status"
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="Delivered">Delivered</MenuItem>
-                  <MenuItem value="Pending">Pending</MenuItem>
-                </Select>
-              </FormControl>
+              <TableSelect
+                id="shipment-filter"
+                name="shipment"
+                value={filters.shipment}
+                onChange={handleFilterChange}
+                label="Shipped"
+                MenuItems={[
+                  { value: "", label: "All" },
+                  { value: "Delivered", label: "Delivered" },
+                  { value: "Pending", label: "Pending" },
+                ]}
+              />
 
               <Button variant="outlined" onClick={handleApplyFilters}>
                 Apply
@@ -244,43 +235,61 @@ function OrderDetails() {
         />
         <CardContent>
           {/* Search Bar */}
-          <Box sx={{ display: "flex", gap: 2, marginBottom: 2, width: "400px" }}>
-            <Box sx={{ position: "relative", flex: 1 }}>
-              <Search
-                sx={{
-                  position: "absolute",
-                  left: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "gray",
-                }}
-              />
-              <TextField
-                placeholder="Search orders..."
-                fullWidth
-                variant="outlined"
-                sx={{ paddingLeft: 4 }}
-              />
-            </Box>
+          <Box
+            sx={{ display: "flex", gap: 2, marginBottom: 2, width: "400px" }}
+          >
+            <TableInput
+              id="search-order"
+              name="search"
+              placeholder="Search Orders"
+              // value={searchTerm}
+              //  onChange={handleSearch}
+              label="Search"
+              type="text"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ width: "300px" }}
+            />
           </Box>
 
           {/* Orders Table */}
-          <TableContainer sx={{marginTop:'40px'}}>
+          <TableContainer sx={{ marginTop: "40px" }}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "primary.main"}}>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Product</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>User</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Category</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Price</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Order Delivery</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Order Date</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Order Status</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Action</TableCell>
+                <TableRow sx={{ backgroundColor: "primary.main" }}>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Product
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    User
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Category
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Price
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Order Delivery
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Order Date
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Order Status
+                  </TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                    Action
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-              {paginatedOrders.map((order, index) => (
+                {paginatedOrders.map((order, index) => (
                   <TableRow key={index}>
                     {/* Product Column */}
                     <TableCell>
@@ -317,26 +326,11 @@ function OrderDetails() {
 
                     {/* Order Status Column */}
                     <TableCell>
-                      <Typography
-                        sx={{
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          backgroundColor:
-                            order.status === "Canceled"
-                              ? "#f8d7da"
-                              : order.status === "Shipped"
-                              ? "#d1ecf1"
-                              : "#ffeeba",
-                          color:
-                            order.status === "Canceled"
-                              ? "#721c24"
-                              : order.status === "Shipped"
-                              ? "#0c5460"
-                              : "#856404",
-                        }}
-                      >
-                        {order.status}
-                      </Typography>
+                      <Chip
+                        label={ order.status}
+                        color={ order.status === "Shipped" ? "success" : "error"}
+                      />
+                   
                     </TableCell>
 
                     {/* Action Column */}
@@ -350,8 +344,8 @@ function OrderDetails() {
               </TableBody>
             </Table>
           </TableContainer>
-           {/* Pagination */}
-           <Box
+          {/* Pagination */}
+          <Box
             sx={{
               display: "flex",
               justifyContent: "center",
@@ -364,7 +358,7 @@ function OrderDetails() {
               onChange={handlePageChange}
               color="primary"
             />
-            </Box>
+          </Box>
         </CardContent>
       </Card>
     </div>

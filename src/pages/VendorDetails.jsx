@@ -14,7 +14,7 @@ import {
   TableRow,
   Chip,
   Button,
-  TextField,
+  InputAdornment,
   Box,
   Pagination,
   InputLabel,
@@ -25,6 +25,9 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/baseUrl";
 import { logoutUser } from "../utils/authUtils";
+import TableInput from "../components/SharedComponents/TableInput";
+import TableSelect from "../components/SharedComponents/TableSelect";
+import CustomButton from "../components/SharedComponents/CustomButton";
 
 function VendorDetails() {
   const [vendors, setVendors] = useState([]);
@@ -166,62 +169,83 @@ function VendorDetails() {
       <Card>
         <CardHeader
           action={
-            <Button variant="contained">
+            <CustomButton variant="contained">
               <Link
-                style={{ textDecoration: "none", color: "white" }}
+                style={{ textDecoration: "none", color: "inherit" }}
                 to={"/add-seller"}
               >
-                ADD SELLER
+                ADD
               </Link>
-            </Button>
+            </CustomButton>
           }
         />
+
         <CardContent>
           {/* Search & Filters */}
           <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
-            <TextField
-              placeholder="Search vendors..."
+            <TableInput
+              id="search-category"
+              name="search"
+              placeholder="Search Category Type"
               value={searchText}
               onChange={handleSearchChange}
-              variant="outlined"
+              label="Search"
+              type="text"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ width: "300px" }}
             />
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel>State</InputLabel>
-              <Select value={state} onChange={handleFilterChange(setState)}>
-                <MenuItem value="all">All</MenuItem>
-                {stateOptions.map((s) => (
-                  <MenuItem key={s._id} value={s._id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel>Country</InputLabel>
-              <Select value={country} onChange={handleFilterChange(setCountry)}>
-                <MenuItem value="all">All</MenuItem>
-                {countryOptions.map((c) => (
-                  <MenuItem key={c._id} value={c._id}>
-                    {c.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
-              <Select value={status} onChange={handleFilterChange(setStatus)}>
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="true">Approved</MenuItem>
-                <MenuItem value="false">Pending</MenuItem>
-              </Select>
-            </FormControl>
-            <Button 
-              variant="outlined" 
-              onClick={handleClearFilters}
-              sx={{ height: '56px' }}
-            >
-              Clear 
-            </Button>
+
+            <TableSelect
+              id="state-filter"
+              name="state"
+              value={state}
+              onChange={handleFilterChange(setState)}
+              label="State"
+              MenuItems={[
+                { value: "all", label: "All" },
+                ...stateOptions.map((s) => ({ value: s._id, label: s.name })),
+              ]}
+            />
+
+            <TableSelect
+              id="country-filter"
+              name="country"
+              value={country}
+              onChange={handleFilterChange(setCountry)}
+              label="Country"
+              MenuItems={[
+                { value: "all", label: "All" },
+                ...countryOptions.map((c) => ({ value: c._id, label: c.name })),
+              ]}
+            />
+
+            <TableSelect
+              id="status-filter"
+              name="status"
+              value={status}
+              onChange={handleFilterChange(setStatus)}
+              label="Status"
+              MenuItems={[
+                { value: "all", label: "All" },
+                { value: "true", label: "Approved" },
+                { value: "false", label: "Pending" },
+              ]}
+            />
+
+<CustomButton
+  variant="outlined"
+  onClick={handleClearFilters}
+  style={{ height: "56px" }} 
+>
+  Clear
+</CustomButton>
+
           </Box>
 
           <Typography>
@@ -253,14 +277,15 @@ function VendorDetails() {
                       <TableCell>{vendor.country?.name}</TableCell>
                       <TableCell>{getStatusChip(vendor.isVerified)}</TableCell>
                       <TableCell>
-                        <Button
+                        <CustomButton
+                        isSmall
                           variant="contained"
                           onClick={() =>
                             handleView(vendor.isVerified, vendor._id)
                           }
                         >
                           View
-                        </Button>
+                        </CustomButton>
                       </TableCell>
                     </TableRow>
                   ))

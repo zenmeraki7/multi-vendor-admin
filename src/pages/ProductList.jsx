@@ -26,6 +26,8 @@ import axios from "axios"; // Alternatively, use your axiosInstance
 import { BASE_URL } from "../utils/baseUrl";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../utils/authUtils";
+import TableSelect from "../components/SharedComponents/TableSelect";
+import TableInput from "../components/SharedComponents/TableInput";
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
@@ -121,7 +123,6 @@ const ProductList = () => {
       >
         <Typography variant="h5">Products Management</Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography color="primary">DATA REFRESH</Typography>
           <IconButton color="primary">
             <Refresh />
           </IconButton>
@@ -133,20 +134,24 @@ const ProductList = () => {
 
       {/* Search Bar */}
       <Box display="flex" justifyContent="flex-end" alignItems="center" mb={2}>
-        <TextField
-          placeholder="Search Product"
-          size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: "300px" }}
-        />
+      <TableInput
+  id="search-product"
+  name="searchTerm"
+  placeholder="Search Product"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  label="Search"
+  type="text"
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <Search />
+      </InputAdornment>
+    ),
+  }}
+  sx={{ width: "300px" }}
+/>
+
       </Box>
 
       {/* Filters and Actions */}
@@ -168,42 +173,66 @@ const ProductList = () => {
         </Typography>
         <Box display="flex" gap={1}>
           {/* Example Filters - Implement actual filtering logic as needed */}
-          <Select size="small" defaultValue="" displayEmpty>
-            <MenuItem value="">
-              <em>Stock</em>
-            </MenuItem>
-            <MenuItem value="In Stock">In Stock</MenuItem>
-            <MenuItem value="Out of Stock">Out of Stock</MenuItem>
-          </Select>
-          <Select size="small" defaultValue="" displayEmpty>
-            <MenuItem value="">
-              <em>Product Category</em>
-            </MenuItem>
-            {/* Populate categories dynamically if possible */}
-            <MenuItem value="Fashion">Fashion</MenuItem>
-            <MenuItem value="Electronics">Electronics</MenuItem>
-          </Select>
-          <Select size="small" defaultValue="" displayEmpty>
-            <MenuItem value="">
-              <em>Category</em>
-            </MenuItem>
-            <MenuItem value="Type1">Type1</MenuItem>
-            <MenuItem value="Type2">Type2</MenuItem>
-          </Select>
-          <Select size="small" defaultValue="" displayEmpty>
-            <MenuItem value="">
-              <em>SubCategory</em>
-            </MenuItem>
-            <MenuItem value="Option1">Option1</MenuItem>
-            <MenuItem value="Option2">Option2</MenuItem>
-          </Select>
-          <Select size="small" defaultValue="" displayEmpty>
-            <MenuItem value="">
-              <em>Status</em>
-            </MenuItem>
-            <MenuItem value="Option1">Inactive</MenuItem>
-            <MenuItem value="Option2">Active</MenuItem>
-          </Select>
+          <TableSelect
+  id="stock-filter"
+  name="stock"
+  value=""
+  onChange={() => {}}
+  label="Stock"
+  MenuItems={[
+    { value: "In Stock", label: "In Stock" },
+    { value: "Out of Stock", label: "Out of Stock" }
+  ]}
+/>
+
+<TableSelect
+  id="product-category-filter"
+  name="productCategory"
+  value=""
+  onChange={() => {}}
+  label="CategoryType"
+  MenuItems={[
+    { value: "Fashion", label: "Fashion" },
+    { value: "Electronics", label: "Electronics" }
+  ]}
+/>
+
+<TableSelect
+  id="category-filter"
+  name="category"
+  value=""
+  onChange={() => {}}
+  label="Category"
+  MenuItems={[
+    { value: "Type1", label: "Type1" },
+    { value: "Type2", label: "Type2" }
+  ]}
+/>
+
+<TableSelect
+  id="subcategory-filter"
+  name="subcategory"
+  value=""
+  onChange={() => {}}
+  label="SubCategory"
+  MenuItems={[
+    { value: "Option1", label: "Option1" },
+    { value: "Option2", label: "Option2" }
+  ]}
+/>
+
+<TableSelect
+  id="status-filter"
+  name="status"
+  value=""
+  onChange={() => {}}
+  label="Status"
+  MenuItems={[
+    { value: "Option1", label: "Inactive" },
+    { value: "Option2", label: "Active" }
+  ]}
+/>
+
           <Button variant="contained" color="primary">
             APPLY
           </Button>
@@ -263,7 +292,7 @@ const ProductList = () => {
                   <Chip
                     label={product.isApproved ? "Approved" : "Pending"}
                     color={product.isApproved ? "success" : "error"}
-                    variant="outlined"
+
                     sx={{
                       fontWeight: "bold",
                       textTransform: "uppercase",
