@@ -3,11 +3,8 @@ import {
   Box,
   Button,
   Typography,
-  TextField,
   InputAdornment,
   IconButton,
-  Select,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -28,6 +25,8 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../utils/authUtils";
 import TableSelect from "../components/SharedComponents/TableSelect";
 import TableInput from "../components/SharedComponents/TableInput";
+import CustomButton from "../components/SharedComponents/CustomButton";
+
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
@@ -60,8 +59,11 @@ const ProductList = () => {
       setLoading(false);
     } catch (err) {
       console.log(err);
-      
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser(); // Call logoutUser if 404 or 401 status code
       }
       setError(err.response?.data?.message || "Error fetching products");
@@ -134,24 +136,23 @@ const ProductList = () => {
 
       {/* Search Bar */}
       <Box display="flex" justifyContent="flex-end" alignItems="center" mb={2}>
-      <TableInput
-  id="search-product"
-  name="searchTerm"
-  placeholder="Search Product"
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  label="Search"
-  type="text"
-  InputProps={{
-    endAdornment: (
-      <InputAdornment position="end">
-        <Search />
-      </InputAdornment>
-    ),
-  }}
-  sx={{ width: "300px" }}
-/>
-
+        <TableInput
+          id="search-product"
+          name="searchTerm"
+          placeholder="Search Product"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          label="Search"
+          type="text"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: "300px" }}
+        />
       </Box>
 
       {/* Filters and Actions */}
@@ -174,71 +175,71 @@ const ProductList = () => {
         <Box display="flex" gap={1}>
           {/* Example Filters - Implement actual filtering logic as needed */}
           <TableSelect
-  id="stock-filter"
-  name="stock"
-  value=""
-  onChange={() => {}}
-  label="Stock"
-  MenuItems={[
-    { value: "In Stock", label: "In Stock" },
-    { value: "Out of Stock", label: "Out of Stock" }
-  ]}
-/>
+            id="stock-filter"
+            name="stock"
+            value=""
+            onChange={() => {}}
+            label="Stock"
+            MenuItems={[
+              { value: "In Stock", label: "In Stock" },
+              { value: "Out of Stock", label: "Out of Stock" },
+            ]}
+          />
 
-<TableSelect
-  id="product-category-filter"
-  name="productCategory"
-  value=""
-  onChange={() => {}}
-  label="CategoryType"
-  MenuItems={[
-    { value: "Fashion", label: "Fashion" },
-    { value: "Electronics", label: "Electronics" }
-  ]}
-/>
+          <TableSelect
+            id="product-category-filter"
+            name="productCategory"
+            value=""
+            onChange={() => {}}
+            label="CategoryType"
+            MenuItems={[
+              { value: "Fashion", label: "Fashion" },
+              { value: "Electronics", label: "Electronics" },
+            ]}
+          />
 
-<TableSelect
-  id="category-filter"
-  name="category"
-  value=""
-  onChange={() => {}}
-  label="Category"
-  MenuItems={[
-    { value: "Type1", label: "Type1" },
-    { value: "Type2", label: "Type2" }
-  ]}
-/>
+          <TableSelect
+            id="category-filter"
+            name="category"
+            value=""
+            onChange={() => {}}
+            label="Category"
+            MenuItems={[
+              { value: "Type1", label: "Type1" },
+              { value: "Type2", label: "Type2" },
+            ]}
+          />
 
-<TableSelect
-  id="subcategory-filter"
-  name="subcategory"
-  value=""
-  onChange={() => {}}
-  label="SubCategory"
-  MenuItems={[
-    { value: "Option1", label: "Option1" },
-    { value: "Option2", label: "Option2" }
-  ]}
-/>
+          <TableSelect
+            id="subcategory-filter"
+            name="subcategory"
+            value=""
+            onChange={() => {}}
+            label="SubCategory"
+            MenuItems={[
+              { value: "Option1", label: "Option1" },
+              { value: "Option2", label: "Option2" },
+            ]}
+          />
 
-<TableSelect
-  id="status-filter"
-  name="status"
-  value=""
-  onChange={() => {}}
-  label="Status"
-  MenuItems={[
-    { value: "Option1", label: "Inactive" },
-    { value: "Option2", label: "Active" }
-  ]}
-/>
+          <TableSelect
+            id="status-filter"
+            name="status"
+            value=""
+            onChange={() => {}}
+            label="Status"
+            MenuItems={[
+              { value: "Option1", label: "Inactive" },
+              { value: "Option2", label: "Active" },
+            ]}
+          />
 
-          <Button variant="contained" color="primary">
+          <CustomButton variant="contained" color="primary">
             APPLY
-          </Button>
-          <Button variant="outlined" color="secondary">
+          </CustomButton>
+          <CustomButton variant="outlined" color="secondary">
             CLEAR
-          </Button>
+          </CustomButton>
         </Box>
       </Box>
 
@@ -246,18 +247,32 @@ const ProductList = () => {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "primary.main" }} >
+            <TableRow sx={{ backgroundColor: "primary.main" }}>
               <TableCell></TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>PRODUCT NAME</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STOCK</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>PRICE</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>CATEGORY</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>SELLER</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                PRODUCT NAME
+              </TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                STOCK
+              </TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                PRICE
+              </TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                CATEGORY
+              </TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                SELLER
+              </TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                STATUS
+              </TableCell>
               <TableCell sx={{ color: "white", fontWeight: "bold" }}>
                 LAST MODIFIED
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+                ACTIONS
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -292,7 +307,6 @@ const ProductList = () => {
                   <Chip
                     label={product.isApproved ? "Approved" : "Pending"}
                     color={product.isApproved ? "success" : "error"}
-
                     sx={{
                       fontWeight: "bold",
                       textTransform: "uppercase",
@@ -304,14 +318,14 @@ const ProductList = () => {
                   {new Date(product.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outlined"
+                  <CustomButton
+                    variant="contained"
                     color="primary"
-                    size="small"
+                    isSmall
                     onClick={() => navigate(`/view-product/${product._id}`)} // Replace with your logic
                   >
                     View
-                  </Button>
+                  </CustomButton>
                 </TableCell>
               </TableRow>
             ))}

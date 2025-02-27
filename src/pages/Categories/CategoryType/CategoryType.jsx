@@ -25,6 +25,7 @@ import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
 import TableSelect from "../../../components/SharedComponents/TableSelect";
 import TableInput from "../../../components/SharedComponents/TableInput";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function CategoryType() {
   const navigate = useNavigate();
@@ -156,7 +157,6 @@ function CategoryType() {
           <b>Category Type Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-
           <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
@@ -209,22 +209,23 @@ function CategoryType() {
                 { value: "Inactive", label: "Inactive" },
               ]}
             />
-            <Button
+            <CustomButton
               variant="outlined"
               onClick={clearFilters}
-              sx={{ height: "50px" }}
+              style={{ height: "55px" }}
             >
               Clear
-            </Button>
-            <Button
+            </CustomButton>
+
+            <CustomButton
               variant="contained"
               color="primary"
               style={{ marginLeft: "400px", height: "50px" }}
               onClick={() => navigate("/add-Categorytype")}
+              icon={AddIcon} // Pass the icon
             >
-              <AddIcon />
               Add
-            </Button>
+            </CustomButton>
           </Box>
           {/* Category Type Table */}
           <TableContainer
@@ -267,11 +268,7 @@ function CategoryType() {
                     <TableCell>{categoryType.name}</TableCell>
                     <TableCell>{categoryType.description}</TableCell>
                     <TableCell>
-                      <Avatar
-                        variant="rounded"
-                        src={categoryType.icon || "path/to/default/icon.jpg"}
-                        sx={{ width: 80, height: 80 }}
-                      />
+                      <Avatar src={categoryType.icon || "path/to/default/icon.jpg"} alt={categoryType.name} />
                     </TableCell>
                     <TableCell>
                       <Chip
@@ -280,16 +277,16 @@ function CategoryType() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() =>
-                          navigate(`/viewcategorytype/${categoryType._id}`)
-                        }
-                      >
-                        View
-                      </Button>
+                    <CustomButton
+                        isSmall
+                          variant="contained"
+                          onClick={() =>
+                            navigate(`/viewcategorytype/${categoryType._id}`)
+                          }
+                        >
+                          View
+                        </CustomButton>
+                   
                     </TableCell>
                   </TableRow>
                 ))}

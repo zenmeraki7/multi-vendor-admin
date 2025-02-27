@@ -340,11 +340,7 @@ function Category() {
                     <TableCell>{category.name}</TableCell>
                     <TableCell>{category.description}</TableCell>
                     <TableCell>
-                      <Avatar
-                        src={category.icon}
-                        variant="rounded"
-                        sx={{ height: "100px", width: "100px" }}
-                      />
+                      <Avatar src={category.icon} alt={category.name} />
                     </TableCell>
                     <TableCell>
                       <Chip

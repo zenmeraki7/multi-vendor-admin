@@ -16,10 +16,6 @@ import {
   Avatar,
   Pagination,
   Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
@@ -29,6 +25,7 @@ import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
 import TableInput from "../../../components/SharedComponents/TableInput";
 import TableSelect from "../../../components/SharedComponents/TableSelect";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function SubCategories() {
   const navigate = useNavigate();
@@ -196,7 +193,6 @@ function SubCategories() {
           SubCategory Management
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-
           <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
@@ -263,18 +259,22 @@ function SubCategories() {
                 })),
               ]}
             />
-
-            <Button variant="outlined" onClick={clearFilters}>
+            <CustomButton
+              variant="outlined"
+              onClick={clearFilters}
+              style={{ height: "55px" }}
+            >
               Clear
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="contained"
               color="primary"
-              style={{ marginLeft: "400px" }}
+              style={{ marginLeft: "400px", height: "50px" }}
               onClick={() => navigate("/add-subcategory")}
+              icon={AddIcon} // Pass the icon
             >
-              <AddIcon /> Add
-            </Button>
+              Add
+            </CustomButton>
           </Box>
 
           {/* SubCategory Table */}
@@ -340,16 +340,17 @@ function SubCategories() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
+                        
+                        <CustomButton
                           variant="contained"
-                          size="small"
+                          isSmall
                           color="primary"
                           onClick={() =>
                             navigate(`/view-subcategory/${subcategory._id}`)
                           }
                         >
                           View
-                        </Button>
+                        </CustomButton>
                       </TableCell>
                     </TableRow>
                   ))

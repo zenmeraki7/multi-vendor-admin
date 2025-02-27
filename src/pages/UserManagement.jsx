@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import TableInput from "../components/SharedComponents/TableInput";
+import CustomButton from "../components/SharedComponents/CustomButton";
 
 function UserManagement() {
   const [users, setUsers] = useState([
@@ -151,9 +152,9 @@ function UserManagement() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button variant="contained" color="primary">
+                      <CustomButton variant="contained" color="primary" isSmall>
                         View
-                      </Button>
+                      </CustomButton>
                     </TableCell>
                   </TableRow>
                 ))}

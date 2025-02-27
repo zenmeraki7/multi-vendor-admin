@@ -12,11 +12,10 @@ function CustomButton({ onClick, children, isActive = false, isSmall = false, va
         color: isActive || variant === "contained" ? "#ffffff" : "#2563EB",
         fontWeight: isActive ? 600 : 500,
         borderRadius: "10px",
-        padding: isSmall ? "6px 12px" : "12px 16px",
+        padding: isSmall ? "6px 12px" : "10px 13px",
         fontSize: isSmall ? "12px" : "14px",
         minWidth: isSmall ? "80px" : "auto",
         display: "flex",
-        alignItems: "center",
         justifyContent: "center",
         gap: "8px", // Space between icon and text
         transition: "all 0.2s ease",

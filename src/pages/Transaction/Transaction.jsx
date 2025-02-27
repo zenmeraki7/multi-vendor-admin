@@ -25,6 +25,7 @@ import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import TableInput from "../../components/SharedComponents/TableInput";
 import TableSelect from "../../components/SharedComponents/TableSelect";
+import CustomButton from "../../components/SharedComponents/CustomButton";
 
 const TransactionPage = () => {
   const navigate = useNavigate();
@@ -181,9 +182,13 @@ const TransactionPage = () => {
 
 
         {/* Clear Filters Button */}
-        <Button variant="outlined" onClick={clearFilters}>
+        <CustomButton
+          variant="outlined"
+          onClick={clearFilters}
+          style={{ height: "55px" }}
+        >
           Clear
-        </Button>
+        </CustomButton>
       </Box>
 
       {/* Loading Spinner */}
@@ -238,15 +243,15 @@ const TransactionPage = () => {
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <Button
+                      <CustomButton
                         variant="contained"
-                        size="small"
+                        isSmall
                         onClick={() =>
                           navigate(`/transaction/${transaction.id}`)
                         }
                       >
                         Details
-                      </Button>
+                      </CustomButton>
                     </TableCell>
                   </TableRow>
                 ))}

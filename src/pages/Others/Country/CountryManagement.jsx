@@ -25,6 +25,7 @@ import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
 import TableSelect from "../../../components/SharedComponents/TableSelect";
 import TableInput from "../../../components/SharedComponents/TableInput";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 const CountryManagement = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -178,17 +179,23 @@ const CountryManagement = () => {
         />
 
         {/* Clear Filters Button */}
-        <Button variant="outlined" onClick={clearFilters}>
-          Clear
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ marginLeft: "auto" }}
-          onClick={() => navigate("/add-country")}
+        
+        <CustomButton
+          variant="outlined"
+          onClick={clearFilters}
+          style={{ height: "55px" }}
         >
-          <AddIcon /> Add
-        </Button>
+          Clear
+        </CustomButton>
+        <CustomButton
+              variant="contained"
+              color="primary"
+              style={{ marginLeft: "400px", height: "50px" }}
+              onClick={() => navigate("/add-country")}
+              icon={AddIcon} // Pass the icon
+            >
+              Add
+            </CustomButton>
       </Box>
 
       {/* CircularProgress when loading */}
@@ -231,15 +238,15 @@ const CountryManagement = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Button
+                        <CustomButton
                           variant="contained"
-                          size="small"
+                          isSmall
                           onClick={() =>
                             navigate(`/view-country/${country._id}`)
                           }
                         >
                           View
-                        </Button>
+                        </CustomButton>
                       </TableCell>
                     </TableRow>
                   ))

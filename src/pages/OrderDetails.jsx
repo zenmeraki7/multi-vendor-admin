@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import TableInput from "../components/SharedComponents/TableInput";
 import TableSelect from "../components/SharedComponents/TableSelect";
-
+import CustomButton from "../components/SharedComponents/CustomButton";
 function OrderDetails() {
   const [orders, setOrders] = useState([
     {
@@ -166,14 +166,14 @@ function OrderDetails() {
         <CardHeader
           action={
             <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
+              <CustomButton
                 variant="outlined"
                 startIcon={<Download />}
                 onClick={handleExport}
                 sx={{ width: 150, marginRight: 50 }}
               >
                 Export
-              </Button>
+              </CustomButton>
 
               <TableSelect
                 id="order-filter"
@@ -214,11 +214,11 @@ function OrderDetails() {
                 ]}
               />
 
-              <Button variant="outlined" onClick={handleApplyFilters}>
+              <CustomButton variant="contained" onClick={handleApplyFilters}>
                 Apply
-              </Button>
+              </CustomButton>
 
-              <Button
+              <CustomButton
                 variant="outlined"
                 onClick={() =>
                   setFilters({
@@ -229,7 +229,7 @@ function OrderDetails() {
                 }
               >
                 Clear
-              </Button>
+              </CustomButton>
             </Box>
           }
         />
@@ -335,9 +335,9 @@ function OrderDetails() {
 
                     {/* Action Column */}
                     <TableCell>
-                      <Button variant="contained" color="primary">
+                      <CustomButton variant="contained" color="primary" isSmall>
                         View
-                      </Button>
+                      </CustomButton>
                     </TableCell>
                   </TableRow>
                 ))}

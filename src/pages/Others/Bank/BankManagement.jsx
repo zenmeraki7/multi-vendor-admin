@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Typography,
-  TextField,
   InputAdornment,
   IconButton,
   Table,
@@ -25,6 +24,7 @@ import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
 import TableInput from "../../../components/SharedComponents/TableInput";
 import TableSelect from "../../../components/SharedComponents/TableSelect";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 const BankManagement = () => {
   const navigate = useNavigate();
@@ -166,7 +166,6 @@ const BankManagement = () => {
           <b>Bank Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-
           <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
@@ -209,30 +208,37 @@ const BankManagement = () => {
           ]}
         />
 
-<TableSelect
-  id="country-filter"
-  name="country"
-  value={filters.country}
-  onChange={handleCountryFilterChange}
-  label="Country"
-  MenuItems={[
-    { value: "all", label: "All" },
-    ...countries.map((country) => ({ value: country._id, label: country.name }))
-  ]}
-/>
+        <TableSelect
+          id="country-filter"
+          name="country"
+          value={filters.country}
+          onChange={handleCountryFilterChange}
+          label="Country"
+          MenuItems={[
+            { value: "all", label: "All" },
+            ...countries.map((country) => ({
+              value: country._id,
+              label: country.name,
+            })),
+          ]}
+        />
 
-
-        <Button variant="outlined" onClick={clearFilters}>
-          Clear
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ marginLeft: "auto" }}
-          onClick={() => navigate("/add-bank")}
+        <CustomButton
+          variant="outlined"
+          onClick={clearFilters}
+          style={{ height: "55px" }}
         >
-          <AddIcon /> Add
-        </Button>
+          Clear
+        </CustomButton>
+        <CustomButton
+              variant="contained"
+              color="primary"
+              style={{ marginLeft: "400px", height: "50px" }}
+              onClick={() => navigate("/add-bank")}
+              icon={AddIcon} 
+            >
+              Add
+            </CustomButton>
       </Box>
 
       {/* Loading Indicator */}
@@ -275,13 +281,15 @@ const BankManagement = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Button
+                      <CustomButton
                           variant="contained"
-                          size="small"
+                          isSmall
+                          color="primary"
                           onClick={() => navigate(`/view-bank/${bank._id}`)}
                         >
                           View
-                        </Button>
+                        </CustomButton>
+                      
                       </TableCell>
                     </TableRow>
                   ))
