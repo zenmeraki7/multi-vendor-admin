@@ -30,6 +30,7 @@ import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
 import TableSelect from "../../../components/SharedComponents/TableSelect";
 import TableInput from "../../../components/SharedComponents/TableInput";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function Category() {
   const navigate = useNavigate();
@@ -291,21 +292,24 @@ function Category() {
               ]}
             />
 
-            <Button
-              variant="outlined"
-              onClick={clearFilters}
-              sx={{ height: "50px" }}
-            >
-              Clear
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: "400px" ,height:"50px"}}
-              onClick={() => navigate("/add-category")}
-            >
-              <AddIcon /> Add
-            </Button>
+<CustomButton 
+  variant="outlined" 
+  onClick={clearFilters} 
+  style={{ height: "55px" }}
+>
+  Clear
+</CustomButton>
+
+<CustomButton 
+  variant="contained" 
+  color="primary" 
+  style={{ marginLeft: "400px", height: "50px" }} 
+  onClick={() => navigate("/add-category")}
+  icon={AddIcon} // Pass the icon
+>
+  Add
+</CustomButton>
+
           </Box>
 
           {/* Category Table */}
@@ -349,15 +353,15 @@ function Category() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() =>
-                          navigate(`/view-category/${category._id}`)
-                        }
-                      >
-                        View
-                      </Button>
+                    <CustomButton
+                        isSmall
+                          variant="contained"
+                          onClick={() =>
+                            navigate(`/view-category/${category._id}`)                          }
+                        >
+                          View
+                        </CustomButton>
+
                     </TableCell>
                   </TableRow>
                 ))}
