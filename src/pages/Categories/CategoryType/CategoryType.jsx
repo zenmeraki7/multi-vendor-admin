@@ -309,4 +309,4 @@ function CategoryType() {
   );
 }
 
-export default CategoryType;
+export default CategoryType; 
