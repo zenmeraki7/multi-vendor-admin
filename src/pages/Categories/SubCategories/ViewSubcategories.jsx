@@ -20,6 +20,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import UploadIcon from "@mui/icons-material/Upload";
 import EditIcon from "@mui/icons-material/Edit";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 // Validation schema
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
@@ -269,18 +270,9 @@ function ViewSubCategories() {
         <Typography variant="h4" fontWeight="bold">
           View Subcategory Details
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          sx={{
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
+        <CustomButton onClick={() => navigate(-1)}>
           <ArrowBackIcon />
-          Back
-        </Button>
+        </CustomButton>
       </Box>
       <Divider sx={{ mb: 3 }} />
 
@@ -301,22 +293,28 @@ function ViewSubCategories() {
           />
 
           {isEditing && (
-            <IconButton
-              color="primary"
-              component="label"
-              sx={{
-                background: "linear-gradient(45deg, #556cd6, #19857b)",
-                color: "#fff",
-              }}
-            >
-              <UploadIcon sx={{ fontSize: 40 }} />
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageUpload}
-              />
-            </IconButton>
+          <IconButton
+          component="label"
+          sx={{
+            backgroundColor: "#2563EB",
+            color: "#ffffff",
+            borderRadius: "10px",
+            padding: "10px",
+            minWidth: "50px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            transition: "all 0.2s ease",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            "&:hover": {
+              backgroundColor: "#1E40AF",
+            },
+          }}
+        >
+          <UploadIcon sx={{ fontSize: 40 }} />
+          <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+        </IconButton>
+        
           )}
         </Box>
 
@@ -412,44 +410,32 @@ function ViewSubCategories() {
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           {isEditing ? (
             <>
-              <Button
-                variant="contained"
-                color="success"
+              <CustomButton
+               
                 onClick={handleSaveClick}
                 endIcon={<SaveIcon />}
-                sx={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
+              
               >
                 Save
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
+              </CustomButton>
+              <CustomButton
+              variant="outlined"
                 onClick={handleCancelClick}
                 endIcon={<CancelIcon />}
-                sx={{
-                  background: "linear-gradient(45deg, #FF0000, #FF7878)",
-                  color: "#fff",
-                }}
+            
               >
                 Cancel
-              </Button>
+              </CustomButton>
             </>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
+            <CustomButton
+              
               onClick={handleEditClick}
               endIcon={<EditIcon />}
-              sx={{
-                background: "linear-gradient(45deg, #556cd6, #19857b)",
-                color: "#fff",
-              }}
+            
             >
               Edit
-            </Button>
+            </CustomButton>
           )}
         </Box>
       </Box>

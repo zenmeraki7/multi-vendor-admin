@@ -16,6 +16,7 @@ import {
   Pagination,
   Chip,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -144,59 +145,60 @@ const CountryManagement = () => {
       </Box>
 
       {/* Search Bar and Filters */}
-      <Box display="flex" alignItems="center" gap={2} mb={2}>
-        {/* Search by Country Name */}
-        <TableInput
-          id="search-category"
-          name="search"
-          placeholder="Search Category Type"
-          value={searchTerm}
-          onChange={handleSearch}
-          label="Search"
-          type="text"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: "300px" }}
-        />
+      <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2} width="100%">
+  {/* Left Side: Search & Filters */}
+  <Box display="flex" alignItems="center" flexWrap="wrap" gap={2}>
+    {/* Search by Country Name */}
+    <TableInput
+      id="search-category"
+      name="search"
+      placeholder="Search Category Type"
+      value={searchTerm}
+      onChange={handleSearch}
+      label="Search"
+      type="text"
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <Search />
+          </InputAdornment>
+        ),
+      }}
+      sx={{ width: "300px" }}
+    />
 
-        {/* Status Filter Dropdown */}
-        <TableSelect
-          id="status-filter"
-          name="statusFilter"
-          value={statusFilter}
-          onChange={handleStatusFilterChange}
-          label="Status"
-          MenuItems={[
-            { value: "All", label: "All" },
-            { value: "Active", label: "Active" },
-            { value: "Inactive", label: "Inactive" },
-          ]}
-        />
+    {/* Status Filter Dropdown */}
+    <TableSelect
+      id="status-filter"
+      name="statusFilter"
+      value={statusFilter}
+      onChange={handleStatusFilterChange}
+      label="Status"
+      MenuItems={[
+        { value: "All", label: "All" },
+        { value: "Active", label: "Active" },
+        { value: "Inactive", label: "Inactive" },
+      ]}
+    />
 
-        {/* Clear Filters Button */}
-        
-        <CustomButton
-          variant="outlined"
-          onClick={clearFilters}
-          style={{ height: "55px" }}
-        >
-          Clear
-        </CustomButton>
-        <CustomButton
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: "400px", height: "50px" }}
-              onClick={() => navigate("/add-country")}
-              icon={AddIcon} // Pass the icon
-            >
-              Add
-            </CustomButton>
-      </Box>
+    {/* Clear Filters Button */}
+    <CustomButton variant="outlined" onClick={clearFilters} style={{ height: "55px" }}>
+      Clear
+    </CustomButton>
+  </Box>
+
+  {/* Right Side: Add Button */}
+  <CustomButton
+    variant="contained"
+    color="primary"
+    style={{ height: "50px" }}
+    onClick={() => navigate("/add-country")}
+    icon={AddIcon}
+  >
+    Add
+  </CustomButton>
+</Box>
+
 
       {/* CircularProgress when loading */}
       {loading ? (
@@ -210,6 +212,23 @@ const CountryManagement = () => {
         </Box>
       ) : (
         <>
+          {/* Total count and showing information above the table */}
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            mb={1} 
+            ml={1}
+            mt={2}
+          >
+            <Typography variant="body1" fontWeight="medium">
+              Total Countries: {totalCount}
+            </Typography>
+            <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+            <Typography variant="body1" fontWeight="medium">
+              Showing: {countries.length} countries
+            </Typography>
+          </Box>
+          
           {/* Country Table */}
           <TableContainer component={Paper} elevation={3}>
             <Table>
@@ -270,15 +289,6 @@ const CountryManagement = () => {
                 onChange={handlePageChange}
                 color="primary"
               />
-            </Box>
-          )}
-
-          {/* Total count display */}
-          {totalCount > 0 && (
-            <Box mt={1} display="flex" justifyContent="center">
-              <Typography variant="body2" color="textSecondary">
-                Showing {countries.length} of {totalCount} countries
-              </Typography>
             </Box>
           )}
         </>

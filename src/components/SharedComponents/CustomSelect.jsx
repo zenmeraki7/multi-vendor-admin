@@ -13,10 +13,8 @@ function CustomSelect({ id, name, value, onChange, label, MenuItems = [] }) {
       variant="outlined"
       style={{ marginTop: "5px" }}
       sx={{
-        backgroundColor: "#f5f5f5",
         borderRadius: "8px",
         "& .MuiOutlinedInput-root": {
-          backgroundColor: "#f5f5f5", // Light background when readonly
           borderRadius: "8px",
           "& fieldset": {
             borderColor: "#1976d2", // Blue border by default

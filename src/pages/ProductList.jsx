@@ -36,6 +36,14 @@ const ProductList = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [filters, setFilters] = useState({
+    inStock: "all",
+    categoryType: "all",
+    category: "all",
+    subcategory: "all",
+    isActive: "all"
+  });
 
   const itemsPerPage = 10; // Adjust items per page as needed
 
@@ -45,17 +53,22 @@ const ProductList = () => {
     setError(null);
     try {
       const response = await axios.get(`${BASE_URL}/api/product/allproduct`, {
-        params: { page, limit: itemsPerPage },
+        params: { 
+          page, 
+          limit: itemsPerPage,
+          ...filters
+        },
         headers: {
           authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure the token is stored correctly
         },
       });
 
-      const { data, totalPages } = response.data;
+      const { data, totalPages, totalItems } = response.data;
 
       setProducts(data);
       setFilteredProducts(data);
       setTotalPages(totalPages);
+      setTotalProducts(totalItems);
       setLoading(false);
     } catch (err) {
       console.log(err);
@@ -88,6 +101,34 @@ const ProductList = () => {
     }
   }, [searchTerm, products]);
 
+  // Handle filter changes
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Apply filters
+  const applyFilters = () => {
+    setCurrentPage(1); // Reset to first page when applying filters
+    fetchProducts(1);
+  };
+
+  // Clear filters
+  const clearFilters = () => {
+    setFilters({
+      inStock: "all",
+      categoryType: "all",
+      category: "all",
+      subcategory: "all",
+      isActive: "all"
+    });
+    setCurrentPage(1);
+    fetchProducts(1);
+  };
+
   // Handle Page Change
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -114,6 +155,10 @@ const ProductList = () => {
     );
   }
 
+  // Calculate the range of products currently being displayed
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalProducts);
+
   return (
     <Box padding={2}>
       {/* Header Section */}
@@ -125,7 +170,7 @@ const ProductList = () => {
       >
         <Typography variant="h5">Products Management</Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <IconButton color="primary">
+          <IconButton color="primary" onClick={() => fetchProducts(currentPage)}>
             <Refresh />
           </IconButton>
           <Typography fontWeight="bold">
@@ -163,36 +208,37 @@ const ProductList = () => {
         mb={2}
       >
         <Typography>
-          Products: <strong>{products.length}</strong> |{" "}
+          Showing: <strong>{startItem}-{endItem}</strong> |{" "}
           <Typography
             component="span"
-            color="error"
-            sx={{ textDecoration: "underline" }}
+            sx={{ fontWeight: "medium" }}
           >
-            Trash: {/* Implement trash count if applicable */}0
+            Total Products: <strong>{totalProducts}</strong>
           </Typography>
         </Typography>
         <Box display="flex" gap={1}>
           {/* Example Filters - Implement actual filtering logic as needed */}
           <TableSelect
             id="stock-filter"
-            name="stock"
-            value=""
-            onChange={() => {}}
+            name="inStock"
+            value={filters.inStock}
+            onChange={handleFilterChange}
             label="Stock"
             MenuItems={[
-              { value: "In Stock", label: "In Stock" },
-              { value: "Out of Stock", label: "Out of Stock" },
+              { value: "all", label: "All" },
+              { value: "true", label: "In Stock" },
+              { value: "false", label: "Out of Stock" },
             ]}
           />
 
           <TableSelect
             id="product-category-filter"
-            name="productCategory"
-            value=""
-            onChange={() => {}}
+            name="categoryType"
+            value={filters.categoryType}
+            onChange={handleFilterChange}
             label="CategoryType"
             MenuItems={[
+              { value: "all", label: "All" },
               { value: "Fashion", label: "Fashion" },
               { value: "Electronics", label: "Electronics" },
             ]}
@@ -201,10 +247,11 @@ const ProductList = () => {
           <TableSelect
             id="category-filter"
             name="category"
-            value=""
-            onChange={() => {}}
+            value={filters.category}
+            onChange={handleFilterChange}
             label="Category"
             MenuItems={[
+              { value: "all", label: "All" },
               { value: "Type1", label: "Type1" },
               { value: "Type2", label: "Type2" },
             ]}
@@ -213,10 +260,11 @@ const ProductList = () => {
           <TableSelect
             id="subcategory-filter"
             name="subcategory"
-            value=""
-            onChange={() => {}}
+            value={filters.subcategory}
+            onChange={handleFilterChange}
             label="SubCategory"
             MenuItems={[
+              { value: "all", label: "All" },
               { value: "Option1", label: "Option1" },
               { value: "Option2", label: "Option2" },
             ]}
@@ -224,20 +272,29 @@ const ProductList = () => {
 
           <TableSelect
             id="status-filter"
-            name="status"
-            value=""
-            onChange={() => {}}
+            name="isActive"
+            value={filters.isActive}
+            onChange={handleFilterChange}
             label="Status"
             MenuItems={[
-              { value: "Option1", label: "Inactive" },
-              { value: "Option2", label: "Active" },
+              { value: "all", label: "All" },
+              { value: "false", label: "Inactive" },
+              { value: "true", label: "Active" },
             ]}
           />
 
-          <CustomButton variant="contained" color="primary">
+          <CustomButton 
+            variant="contained" 
+            color="primary"
+            onClick={applyFilters}
+          >
             APPLY
           </CustomButton>
-          <CustomButton variant="outlined" color="secondary">
+          <CustomButton 
+            variant="outlined" 
+            color="secondary"
+            onClick={clearFilters}
+          >
             CLEAR
           </CustomButton>
         </Box>

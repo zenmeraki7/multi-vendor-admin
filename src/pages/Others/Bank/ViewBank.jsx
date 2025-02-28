@@ -3,8 +3,13 @@ import {
   Box,
   Typography,
   Divider,
-  Button,
   CircularProgress,
+  Paper,
+  Alert,
+  Snackbar,
+  Grid,
+  Container,
+  useTheme
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
@@ -16,7 +21,9 @@ import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-import {logoutUser} from "../../../utils/authUtils"
+import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
+
 // Validation schema
 const validationSchema = yup.object().shape({
   bankName: yup.string().required("Bank Name is required"),
@@ -27,6 +34,8 @@ const validationSchema = yup.object().shape({
 const ViewBank = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
+  
   const [bank, setBank] = useState({
     bankName: "",
     country: "",
@@ -36,9 +45,15 @@ const ViewBank = () => {
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [editedBank, setEditedBank] = useState({ ...bank });
-  const [countries, setCountries] = useState([]); // State to store fetched countries
-  const [isLoading, setIsLoading] = useState(true); // Loading state for bank details
+  const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
 
+  // Fetch countries
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -47,43 +62,67 @@ const ViewBank = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data?.data && Array.isArray(response.data.data)) {
-          setCountries(response.data.data);  // Set countries list
+          setCountries(response.data.data);
         }
       } catch (error) {
-        console.error("Error fetching countries:", error.response ? error.response.data : error.message);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-          logoutUser(); // Call logoutUser if 404 or 401 status code
+        console.error(
+          "Error fetching countries:",
+          error.response ? error.response.data : error.message
+        );
+        setNotification({
+          open: true,
+          message: "Failed to load countries. Please try again.",
+          severity: "error"
+        });
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser();
         }
       }
     };
     fetchCountries();
   }, []);
 
+  // Fetch bank details
   useEffect(() => {
-    // Fetch bank details from API
     const fetchBankDetails = async () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
           `${BASE_URL}/api/banks/admin?id=${id}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setBank({
-          bankName: response.data.data.name,
-          country: response.data.data.country._id, // Use country._id here instead of country.name
-          status: response.data.data.isActive ? "Active" : "Inactive",
-        });
-        setEditedBank(response.data);
-        setIsLoading(false); // Set loading to false once data is fetched
-      } catch (error) {
-        console.error("Error fetching bank details", error);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-          logoutUser(); // Call logoutUser if 404 or 401 status code
+        if (response.data?.data) {
+          const bankData = {
+            bankName: response.data.data.name,
+            country: response.data.data.country._id,
+            status: response.data.data.isActive ? "Active" : "Inactive",
+          };
+          setBank(bankData);
+          setEditedBank(bankData);
         }
+      } catch (error) {
+        console.error(
+          "Error fetching bank details:",
+          error.response ? error.response.data : error.message
+        );
+        setNotification({
+          open: true,
+          message: "Failed to load bank details. Please try again.",
+          severity: "error"
+        });
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser();
+        }
+      } finally {
+        setLoading(false);
       }
     };
     fetchBankDetails();
@@ -115,14 +154,12 @@ const ViewBank = () => {
     if (!isValid) return;
 
     setIsSaving(true);
-
     try {
       const updatedBankData = {
-        name: editedBank.bankName,  // Map bankName to name
-        country: editedBank.country,  // Ensure this is the Country ObjectId (not name)
-        isActive: editedBank.status === 'Active',  // Convert status to boolean isActive
+        name: editedBank.bankName,
+        country: editedBank.country,
+        isActive: editedBank.status === "Active",
       };
-
       const token = localStorage.getItem("token");
       const response = await axios.put(
         `${BASE_URL}/api/banks/update/${id}`,
@@ -134,22 +171,33 @@ const ViewBank = () => {
         }
       );
 
-      console.log('Response:', response);  // Log the full response to inspect it
-
-      // Ensure the correct condition is used to check success
       if (response.data?.success || response.status === 200) {
-        setBank({ ...editedBank }); // Update state with the new bank details
+        setBank({ ...editedBank });
         setIsEditing(false);
-        setIsSaving(false);
-      } else {
-        throw new Error("Failed to update bank details.");
+        setNotification({
+          open: true,
+          message: "Bank updated successfully",
+          severity: "success"
+        });
       }
     } catch (error) {
-      console.error("Error updating bank details:", error.response ? error.response.data : error.message);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+      console.error(
+        "Error updating bank details:",
+        error.response ? error.response.data : error.message
+      );
+      setNotification({
+        open: true,
+        message: "Failed to update bank. Please try again.",
+        severity: "error"
+      });
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser();
       }
-      setIsSaving(false); // Stop saving state if error occurs
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -173,186 +221,265 @@ const ViewBank = () => {
     }
   };
 
-  return (
-    <Box padding={4} maxWidth={800} margin="auto">
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
+
+  if (loading) {
+    return (
       <Box
         display="flex"
-        justifyContent="space-between"
+        justifyContent="center"
         alignItems="center"
-        mb={3}
+        minHeight="100vh"
+        bgcolor="#f5f5f5"
       >
-        <Typography variant="h4" fontWeight="bold">
-          View Bank Details
-        </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          sx={{
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
+        <CircularProgress size={40} />
+      </Box>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          borderRadius: 2,
+          overflow: "hidden"
+        }}
+      >
+        <Box 
+          py={2} 
+          px={3} 
+          bgcolor={theme.palette.primary.main} 
+          color="white"
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
         >
-          <ArrowBackIcon />
-          Back
-        </Button>
-      </Box>
-      <Divider sx={{ mb: 3 }} />
-
-      <Box display="flex" flexDirection="column" gap={3}>
-        <Box sx={{ padding: 2 }}>
-          <Typography
-            variant="subtitle1"
-            color="textSecondary"
-            sx={{ fontWeight: "bold", mb: 1 }}
-          >
-            Bank Name:
+          <Typography variant="h5" fontWeight="500">
+            {isEditing ? "Edit Bank" : "View Bank"}
           </Typography>
-          {isEditing ? (
-            <>
-              <CustomInput
-                value={editedBank.bankName}
-                name="bankName"
-                onChange={handleInputChange}
-              />
-              {errors.bankName && (
-                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                  {errors.bankName}
-                </Typography>
-              )}
-            </>
-          ) : (
-            <Typography variant="body1">{bank.bankName}</Typography>
-          )}
-        </Box>
-
-        <Box sx={{ padding: 2 }}>
-          <Typography
-            variant="subtitle1"
-            color="textSecondary"
-            sx={{ fontWeight: "bold", mb: 1 }}
+          <CustomButton
+            onClick={() => navigate(-1)}
+            variant="contained"
+            color="inherit"
+            size="small"
+            sx={{ 
+              bgcolor: "rgba(255,255,255,0.2)",
+              '&:hover': { bgcolor: "rgba(255,255,255,0.3)" }
+            }}
           >
-            Country:
-          </Typography>
-          {isLoading ? (
-            <CircularProgress size={20} />
-          ) : isEditing ? (
-            <>
-              {countries.length > 0 ? (
-                <CustomSelect
-                  id="country"
-                  name="country"
-                  value={editedBank.country} // This will be the country ID
-                  onChange={handleInputChange}
-                  label="Country"
-                  MenuItems={countries.map((country) => ({
-                    value: country._id, // The unique identifier for the country
-                    label: country.name, // The country name to display in the dropdown
-                  }))}
-                />
-              ) : (
-                <CircularProgress size={20} />
-              )}
-              {errors.country && (
-                <div style={{ color: "red", fontSize: "12px" }}>
-                  {errors.country}
-                </div>
-              )}
-            </>
-          ) : (
-            <Typography variant="body1">
-              {countries.find((country) => country._id === bank.country)?.name || bank.country}
-            </Typography>
-          )}
+            <ArrowBackIcon sx={{ fontSize: 20 }} />
+          </CustomButton>
         </Box>
+        
+        <Divider />
 
-        <Box sx={{ padding: 2 }}>
-          <Typography
-            variant="subtitle1"
-            color="textSecondary"
-            sx={{ fontWeight: "bold", mb: 1 }}
-          >
-            Status:
-          </Typography>
-          {isEditing ? (
-            <>
-              <CustomSelect
-                id="status"
-                name="status"
-                value={editedBank.status}
-                onChange={handleInputChange}
-                label="Status"
-                MenuItems={[
-                  { value: "Active", label: "Active" },
-                  { value: "Inactive", label: "Inactive" },
-                ]}
-                sx={{ width: "100%" }}
-              />
-              {errors.status && (
-                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                  {errors.status}
-                </Typography>
-              )}
-            </>
-          ) : (
-            <Typography variant="body1">{bank.status}</Typography>
-          )}
-        </Box>
+        <Box px={4} py={4}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Grid container spacing={3}>
+                {/* Bank Name */}
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="textSecondary" 
+                      gutterBottom
+                      fontWeight="500"
+                    >
+                      Bank Name {isEditing && "*"}
+                    </Typography>
+                    {isEditing ? (
+                      <>
+                        <CustomInput
+                          id="bank-name"
+                          name="bankName"
+                          placeholder="Enter bank name"
+                          value={editedBank.bankName}
+                          onChange={handleInputChange}
+                          fullWidth
+                        />
+                        {errors.bankName && (
+                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                            {errors.bankName}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {bank.bankName}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+                
+                {/* Country */}
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="textSecondary" 
+                      gutterBottom
+                      fontWeight="500"
+                    >
+                      Country {isEditing && "*"}
+                    </Typography>
+                    {isEditing ? (
+                      <>
+                        {countries.length > 0 ? (
+                          <CustomSelect
+                            id="country"
+                            name="country"
+                            value={editedBank.country}
+                            onChange={handleInputChange}
+                            placeholder="Select country"
+                            MenuItems={countries.map((country) => ({
+                              value: country._id,
+                              label: country.name,
+                            }))}
+                            fullWidth
+                          />
+                        ) : (
+                          <CircularProgress size={20} />
+                        )}
+                        {errors.country && (
+                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                            {errors.country}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {countries.find((country) => country._id === bank.country)
+                          ?.name ||
+                          "Not available"}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+                
+                {/* Status */}
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="textSecondary" 
+                      gutterBottom
+                      fontWeight="500"
+                    >
+                      Status {isEditing && "*"}
+                    </Typography>
+                    {isEditing ? (
+                      <>
+                        <CustomSelect
+                          id="status"
+                          name="status"
+                          value={editedBank.status}
+                          onChange={handleInputChange}
+                          MenuItems={[
+                            { value: "Active", label: "Active" },
+                            { value: "Inactive", label: "Inactive" },
+                          ]}
+                          fullWidth
+                        />
+                        {errors.status && (
+                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                            {errors.status}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          fontWeight: 500,
+                          color: bank.status === "Active" ? "success.main" : "text.secondary"
+                        }}
+                      >
+                        {bank.status}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
 
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-          {isEditing ? (
-            <>
-              <Button
+          <Box display="flex" justifyContent="center" mt={6}>
+            {isEditing ? (
+              <>
+                <CustomButton
+                  onClick={handleSaveClick}
+                  disabled={isSaving}
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                  sx={{ 
+                    px: 4, 
+                    py: 1.5,
+                    borderRadius: 1,
+                    fontWeight: 500,
+                    mr: 2
+                  }}
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </CustomButton>
+                <CustomButton
+                  onClick={handleCancelClick}
+                  disabled={isSaving}
+                  variant="outlined"
+                  size="large"
+                  startIcon={<CancelIcon />}
+                  sx={{ 
+                    px: 4, 
+                    py: 1.5,
+                    borderRadius: 1,
+                    fontWeight: 500
+                  }}
+                >
+                  Cancel
+                </CustomButton>
+              </>
+            ) : (
+              <CustomButton 
+                onClick={handleEditClick} 
                 variant="contained"
-                color="success"
-                onClick={handleSaveClick}
-                disabled={isSaving}
-                endIcon={
-                  isSaving ? (
-                    <CircularProgress size={20} color="inherit" />
-                  ) : (
-                    <SaveIcon />
-                  )
-                }
-                sx={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                  minWidth: "100px",
+                color="primary"
+                size="large"
+                startIcon={<EditIcon />}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  borderRadius: 1,
+                  fontWeight: 500
                 }}
               >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleCancelClick}
-                endIcon={<CancelIcon />}
-                sx={{
-                  color: "#f44336",
-                  minWidth: "100px",
-                }}
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={handleEditClick}
-              endIcon={<EditIcon />}
-              sx={{
-                background: "linear-gradient(45deg, #556cd6, #19857b)",
-                color: "#fff",
-                minWidth: "100px",
-              }}
-            >
-              Edit
-            </Button>
-          )}
+                Edit
+              </CustomButton>
+            )}
+          </Box>
         </Box>
-      </Box>
-    </Box>
+      </Paper>
+      
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 };
 

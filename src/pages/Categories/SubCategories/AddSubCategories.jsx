@@ -10,6 +10,7 @@ import {
   FormControl,
   CircularProgress,
 } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Save } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ import axios from "axios";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function AddSubCategory() {
   const navigate = useNavigate();
@@ -167,18 +169,9 @@ function AddSubCategory() {
         <Typography variant="h4" fontWeight="bold">
           Add New Subcategory
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          style={{
-            marginRight: "80px",
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
-          Back
-        </Button>
+        <CustomButton onClick={() => navigate(-1)}>
+          <ArrowBackIcon />
+        </CustomButton>
       </Box>
 
       {alertVisible && (
@@ -378,10 +371,8 @@ function AddSubCategory() {
             </Grid>
 
             <Box display="flex" justifyContent="center" mt={3}>
-              <Button
+              <CustomButton
                 type="submit"
-                variant="contained"
-                color="primary"
                 startIcon={
                   loading ? (
                     <CircularProgress size={20} color="inherit" />
@@ -390,13 +381,10 @@ function AddSubCategory() {
                   )
                 }
                 disabled={isSubmitting || loading}
-                style={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
+               
               >
                 {loading ? "Saving..." : "Save"}
-              </Button>
+              </CustomButton>
             </Box>
           </Form>
         )}

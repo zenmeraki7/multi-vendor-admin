@@ -22,6 +22,7 @@ import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function AddCategory() {
   const navigate = useNavigate();
@@ -55,7 +56,10 @@ function AddCategory() {
       setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error("Error fetching category types:", error);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser(); // Call logoutUser if 404 or 401 status code
       }
       setCategoryTypes([]);
@@ -126,7 +130,10 @@ function AddCategory() {
       }
     } catch (error) {
       console.error("Error during category creation:", error);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser(); // Call logoutUser if 404 or 401 status code
       }
       setErrorAlertVisible(true);
@@ -173,30 +180,21 @@ function AddCategory() {
         <Typography variant="h4" fontWeight="bold">
           Add New Category
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          style={{
-            marginRight: "80px",
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
+        <CustomButton onClick={() => navigate(-1)}>
           <ArrowBackIcon />
-        </Button>
+        </CustomButton>
       </Box>
 
       {alertVisible && (
         <Alert
           variant="filled"
           severity="success"
-          sx={{ 
+          sx={{
             width: "350px",
             position: "fixed",
             top: 16,
             right: 16,
-            zIndex: 9999
+            zIndex: 9999,
           }}
         >
           Category successfully added!
@@ -207,12 +205,12 @@ function AddCategory() {
         <Alert
           variant="filled"
           severity="error"
-          sx={{ 
+          sx={{
             width: "350px",
             position: "fixed",
             top: 16,
             right: 16,
-            zIndex: 9999
+            zIndex: 9999,
           }}
         >
           There was an error adding the category.
@@ -266,7 +264,7 @@ function AddCategory() {
                       const file = e.target.files[0];
                       if (file) {
                         setFieldValue("image", file);
-                        setCategory(prev => ({ ...prev, image: file }));
+                        setCategory((prev) => ({ ...prev, image: file }));
                         setPreviewImage(URL.createObjectURL(file));
                       }
                     }}
@@ -365,19 +363,19 @@ function AddCategory() {
               </Grid>
             </Grid>
             <Box display="flex" justifyContent="center" mb={3}>
-              <Button
-                variant="contained"
-                color="primary"
+              <CustomButton
                 type="submit"
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                style={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <Save />
+                  )
+                }
                 disabled={loading}
               >
-                {loading ? 'Saving...' : 'Save'}
-              </Button>
+                {loading ? "Saving..." : "Save"}
+              </CustomButton>
             </Box>
           </Form>
         )}

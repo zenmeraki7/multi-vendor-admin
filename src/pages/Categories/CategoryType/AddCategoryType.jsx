@@ -19,6 +19,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import * as yup from "yup";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
@@ -145,9 +146,12 @@ function AddCategoryType() {
     } catch (error) {
       if (error.response) {
         console.error("API Error Response:", error.response.data);
-          if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-                logoutUser(); // Call logoutUser if 404 or 401 status code
-              }
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
         alert(`Error: ${error.response.data.message}`);
       } else {
         console.error("Error creating category type:", error);
@@ -168,7 +172,7 @@ function AddCategoryType() {
           size={60}
           thickness={4}
           sx={{
-            color: '#1976d2',
+            color: "#1976d2",
           }}
         />
       </Box>
@@ -186,30 +190,21 @@ function AddCategoryType() {
         <Typography variant="h4" fontWeight="bold">
           Add New Category Type
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          style={{
-            marginRight: "80px",
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
+        <CustomButton onClick={() => navigate(-1)}>
           <ArrowBackIcon />
-        </Button>
+        </CustomButton>
       </Box>
 
       {alertVisible && (
         <Alert
           variant="filled"
           severity="success"
-          sx={{ 
+          sx={{
             width: "350px",
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            zIndex: 1000
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            zIndex: 1000,
           }}
         >
           Category Type successfully added!
@@ -297,18 +292,9 @@ function AddCategoryType() {
       </Grid>
 
       <Box display="flex" justifyContent="center" mt={3}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          startIcon={<Save />}
-          style={{
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
+        <CustomButton onClick={handleSave} startIcon={<Save />}>
           Save
-        </Button>
+        </CustomButton>
       </Box>
     </Box>
   );

@@ -16,6 +16,7 @@ import {
   Pagination,
   Chip,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
@@ -187,71 +188,70 @@ const StateManagement = () => {
       </Box>
 
       {/* Search Bar and Filters */}
-      <Box display="flex" alignItems="center" gap={2} mb={2}>
-        {/* Search by State Name */}
-        <TableInput
-          id="search-category"
-          name="search"
-          placeholder="Search Category Type"
-          value={searchTerm}
-          onChange={handleSearch}
-          label="Search"
-          type="text"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: "300px" }}
-        />
-        <TableSelect
-          id="status-filter"
-          name="statusFilter"
-          value={statusFilter}
-          onChange={handleStatusFilterChange}
-          label="Status"
-          MenuItems={[
-            { value: "All", label: "All" },
-            { value: "Active", label: "Active" },
-            { value: "Inactive", label: "Inactive" },
-          ]}
-        />
-        <TableSelect
-          id="country-filter"
-          name="countryFilter"
-          value={countryFilter}
-          onChange={handleCountryFilterChange}
-          label="Country"
-          MenuItems={[
-            { value: "All", label: "All" },
-            ...countries.map((country) => ({
-              value: country._id,
-              label: country.name,
-            })),
-          ]}
-          disabled={countriesLoading}
-        />
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+  {/* Left side: Filters */}
+  <Box display="flex" alignItems="center" gap={2}>
+    <TableInput
+      id="search-category"
+      name="search"
+      placeholder="Search Category Type"
+      value={searchTerm}
+      onChange={handleSearch}
+      label="Search"
+      type="text"
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <Search />
+          </InputAdornment>
+        ),
+      }}
+      sx={{ width: "300px" }}
+    />
+    <TableSelect
+      id="status-filter"
+      name="statusFilter"
+      value={statusFilter}
+      onChange={handleStatusFilterChange}
+      label="Status"
+      MenuItems={[
+        { value: "All", label: "All" },
+        { value: "Active", label: "Active" },
+        { value: "Inactive", label: "Inactive" },
+      ]}
+    />
+    <TableSelect
+      id="country-filter"
+      name="countryFilter"
+      value={countryFilter}
+      onChange={handleCountryFilterChange}
+      label="Country"
+      MenuItems={[
+        { value: "All", label: "All" },
+        ...countries.map((country) => ({
+          value: country._id,
+          label: country.name,
+        })),
+      ]}
+      disabled={countriesLoading}
+    />
+    <CustomButton variant="outlined" onClick={clearFilters} style={{ height: "55px" }}>
+      Clear
+    </CustomButton>
+  </Box>
 
-        {/* Clear Filters Button */}
-        <CustomButton
-          variant="outlined"
-          onClick={clearFilters}
-          style={{ height: "55px" }}
-        >
-          Clear
-        </CustomButton>
-        <CustomButton
-          variant="contained"
-          color="primary"
-          style={{ marginLeft: "400px", height: "50px" }}
-          onClick={() => navigate("/add-state")}
-          icon={AddIcon}
-        >
-          Add
-        </CustomButton>
-      </Box>
+  {/* Right side: Add button */}
+  <CustomButton
+    variant="contained"
+    color="primary"
+    style={{ height: "50px" }}
+    onClick={() => navigate("/add-state")}
+    icon={AddIcon}
+  >
+    Add
+  </CustomButton>
+</Box>
+
 
       {/* Loading Spinner */}
       {loading ? (
@@ -265,6 +265,22 @@ const StateManagement = () => {
         </Box>
       ) : (
         <>
+          {/* Total count and showing information above the table */}
+          <Box 
+            display="flex" 
+            alignItems="center" 
+            mb={1} 
+            ml={1}
+          >
+            <Typography variant="body1" fontWeight="medium">
+              Total States: {totalCount}
+            </Typography>
+            <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+            <Typography variant="body1" fontWeight="medium">
+              Showing: {states.length} states
+            </Typography>
+          </Box>
+
           {/* State Table */}
           <TableContainer component={Paper} elevation={3}>
             <Table>

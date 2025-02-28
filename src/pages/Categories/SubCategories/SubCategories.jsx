@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Box,
@@ -17,6 +17,7 @@ import {
   Pagination,
   Chip,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -28,8 +29,12 @@ import TableSelect from "../../../components/SharedComponents/TableSelect";
 import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function SubCategories() {
+  // Navigation hook for changing pages
   const navigate = useNavigate();
+  
+  // State variables
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [categories, setCategories] = useState([]);
@@ -37,55 +42,62 @@ function SubCategories() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [debouncedStatusFilter, setDebouncedStatusFilter] = useState("All");
-  const [debouncedCategoryFilter, setDebouncedCategoryFilter] = useState("All");
+  const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
-
-  // Apply debounce to search and filter inputs
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setDebouncedStatusFilter(statusFilter);
-      setDebouncedCategoryFilter(categoryFilter);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, statusFilter, categoryFilter]);
-
-  // Fetch subcategories and categories from API
-  const fetchSubCategories = useCallback(async () => {
+  
+  // This function fetches subcategories from the server
+  const fetchSubCategories = async (page = 1, filters = null) => {
     try {
-      const token = localStorage.getItem("token");
+      // Show loading spinner
       setLoading(true);
+      
+      // Get authentication token
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No authentication token found. Please log in.");
+        navigate("/login");
+        return;
+      }
 
-      // Build query parameters for filtering
+      // Use provided filters or current state
+      const search = filters?.searchTerm !== undefined
+        ? filters.searchTerm
+        : debouncedSearchTerm;
+      const status = filters?.statusFilter !== undefined
+        ? filters.statusFilter
+        : statusFilter;
+      const category = filters?.categoryFilter !== undefined
+        ? filters.categoryFilter
+        : categoryFilter;
+
+      // Create an object for our query filters
       const params = {
-        page: currentPage,
+        page: page,
         limit: itemsPerPage,
       };
 
-      // Add search parameter if exists
-      if (debouncedSearchTerm) {
-        params.search = debouncedSearchTerm;
+      // Only add search parameter if user typed something
+      if (search) {
+        params.search = search;
       }
 
-      // Add status filter if not "All"
-      if (debouncedStatusFilter !== "All") {
-        params.isActive = debouncedStatusFilter === "Active" ? "true" : "false";
+      // Only add status filter if not "All"
+      if (status !== "All") {
+        params.isActive = status === "Active" ? "true" : "false";
       }
 
-      // Add category filter if not "All"
-      if (debouncedCategoryFilter !== "All") {
+      // Only add category filter if not "All"
+      if (category !== "All") {
         // Find the category ID that matches the selected category name
         const selectedCategory = categories.find(
-          (cat) => cat.name === debouncedCategoryFilter
+          (cat) => cat.name === category
         );
         if (selectedCategory && selectedCategory._id) {
           params.category = selectedCategory._id;
         }
       }
 
+      // Make API request to get subcategories
       const response = await axios.get(
         `${BASE_URL}/api/subcategory/all-admin`,
         {
@@ -96,14 +108,15 @@ function SubCategories() {
         }
       );
 
+      // Store the received data
       const data = response.data;
       setSubCategories(data.data || []);
       setTotalPages(data.totalPages || 1);
+      setTotalCount(data.totalCount || 0);
 
-      // If this is the first load, get the categories for the filter dropdown
-      if (categories.length === 0) {
-        // Fetch all categories from a separate endpoint or extract from results
-        // For now, we'll extract unique categories from the results
+      // If this is the first time loading or explicit refresh, get the categories for the filter dropdown
+      if (filters === null && categories.length === 0) {
+        // Extract unique categories from the results
         const uniqueCategories = Array.from(
           new Set(data.data.map((subcategory) => subcategory.category.name))
         ).map((name, index) => ({
@@ -116,73 +129,115 @@ function SubCategories() {
         setCategories(uniqueCategories);
       }
 
+      // Hide loading spinner
       setLoading(false);
     } catch (error) {
       console.error("Error fetching subcategories:", error);
+      
+      // If unauthorized, log the user out
       if (
         error.response &&
         (error.response.status === 404 || error.response.status === 401)
       ) {
         logoutUser();
       }
+      
+      // Hide loading spinner
       setLoading(false);
     }
-  }, [
-    currentPage,
-    debouncedSearchTerm,
-    debouncedStatusFilter,
-    debouncedCategoryFilter,
-    categories,
-  ]);
+  };
 
-  // Reset to page 1 when filters change
+  // Set up debounce effect for search term
   useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    } else {
-      fetchSubCategories();
-    }
-  }, [
-    debouncedSearchTerm,
-    debouncedStatusFilter,
-    debouncedCategoryFilter,
-    fetchSubCategories,
-  ]);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms delay
 
-  // Fetch data when page changes
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch subcategories when debounced search term changes
+  useEffect(() => {
+    if (debouncedSearchTerm !== undefined) {
+      setCurrentPage(1);
+      fetchSubCategories(1, { ...getFilters(), searchTerm: debouncedSearchTerm });
+    }
+  }, [debouncedSearchTerm]);
+
+  // Initial data load when component first renders
   useEffect(() => {
     fetchSubCategories();
-  }, [currentPage, fetchSubCategories]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Helper function to get current filters
+  const getFilters = () => {
+    return {
+      searchTerm: debouncedSearchTerm,
+      statusFilter,
+      categoryFilter,
+    };
+  };
+
+  // Handler functions for user interactions
   const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+    setSearchTerm(e.target.value); // Update search term when user types
+    // Actual search will be triggered by the debounce effect
   };
 
   const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
+    const value = e.target.value;
+    setStatusFilter(value);
+    // Apply filter immediately
+    setCurrentPage(1);
+    fetchSubCategories(1, { ...getFilters(), statusFilter: value });
   };
 
   const handleCategoryFilterChange = (e) => {
-    setCategoryFilter(e.target.value);
+    const value = e.target.value;
+    setCategoryFilter(value);
+    // Apply filter immediately
+    setCurrentPage(1);
+    fetchSubCategories(1, { ...getFilters(), categoryFilter: value });
   };
 
   const clearFilters = () => {
+    // Update state and immediately fetch with cleared filters
+    const clearedFilters = {
+      searchTerm: "",
+      statusFilter: "All",
+      categoryFilter: "All",
+    };
+
+    // Reset all filters to default
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setStatusFilter("All");
     setCategoryFilter("All");
+    setCurrentPage(1);
+    
+    // Fetch with cleared filters immediately
+    fetchSubCategories(1, clearedFilters);
   };
 
   const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+    setCurrentPage(value); // Update current page when user clicks pagination
+    fetchSubCategories(value);
   };
 
   const handleRefresh = () => {
-    fetchSubCategories();
+    // Reload data with current filters
+    fetchSubCategories(currentPage);
   };
 
+  // Calculate displayed items range
+  const startItem = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalCount);
+
+  // The component's UI
   return (
     <Box padding={2}>
-      {/* Header Section */}
+      {/* Header Section - Title and current time */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -202,6 +257,82 @@ function SubCategories() {
         </Box>
       </Box>
 
+      {/* Search Bar and Filters Section - Always visible */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} mt={5}>
+        {/* Left side filters group */}
+        <Box display="flex" alignItems="center" gap={2}>
+          {/* Search input */}
+          <TableInput
+            id="search-category"
+            name="search"
+            placeholder="Search SubCategory"
+            value={searchTerm}
+            onChange={handleSearch}
+            label="Search"
+            type="text"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+          />
+          
+          {/* Status filter dropdown */}
+          <TableSelect
+            id="status-filter"
+            name="statusFilter"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            label="Status"
+            MenuItems={[
+              { value: "All", label: "All" },
+              { value: "Active", label: "Active" },
+              { value: "Inactive", label: "Inactive" },
+            ]}
+          />
+
+          {/* Category filter dropdown */}
+          <TableSelect
+            id="category-filter"
+            name="categoryFilter"
+            value={categoryFilter}
+            onChange={handleCategoryFilterChange}
+            label="Category"
+            MenuItems={[
+              { value: "All", label: "All" },
+              ...categories.map((category) => ({
+                value: category.name,
+                label: category.name,
+              })),
+            ]}
+          />
+          
+          {/* Clear filters button */}
+          <CustomButton
+            variant="outlined"
+            onClick={clearFilters}
+            style={{ height: "55px" }}
+          >
+            Clear
+          </CustomButton>
+        </Box>
+        
+        {/* Right side - Add button */}
+        <CustomButton
+          variant="contained"
+          color="primary"
+          style={{ height: "55px" }}
+          onClick={() => navigate("/add-subcategory")}
+          icon={AddIcon}
+        >
+          Add
+        </CustomButton>
+      </Box>
+
+      {/* Loading indicator or table content */}
       {loading ? (
         <Box
           display="flex"
@@ -213,81 +344,36 @@ function SubCategories() {
         </Box>
       ) : (
         <>
-          {/* Search Bar and Filters */}
-          <Box display="flex" alignItems="center" gap={2} mb={2} mt={5}>
-            <TableInput
-              id="search-category"
-              name="search"
-              placeholder="Search SubCategory"
-              value={searchTerm}
-              onChange={handleSearch}
-              label="Search"
-              type="text"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: "300px" }}
-            />
-            <TableSelect
-              id="status-filter"
-              name="statusFilter"
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              label="Status"
-              MenuItems={[
-                { value: "All", label: "All" },
-                { value: "Active", label: "Active" },
-                { value: "Inactive", label: "Inactive" },
-              ]}
-            />
-
-            <TableSelect
-              id="category-filter"
-              name="categoryFilter"
-              value={categoryFilter}
-              onChange={handleCategoryFilterChange}
-              label="Category"
-              MenuItems={[
-                { value: "All", label: "All" },
-                ...categories.map((category) => ({
-                  value: category.name,
-                  label: category.name,
-                })),
-              ]}
-            />
-            <CustomButton
-              variant="outlined"
-              onClick={clearFilters}
-              style={{ height: "55px" }}
-            >
-              Clear
-            </CustomButton>
-            <CustomButton
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: "400px", height: "50px" }}
-              onClick={() => navigate("/add-subcategory")}
-              icon={AddIcon} // Pass the icon
-            >
-              Add
-            </CustomButton>
+          {/* Results count display */}
+          <Box
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
+            mb={2}
+            mt={3}
+          >
+            <Typography variant="subtitle1" fontWeight="medium">
+              Total SubCategories: {totalCount}
+            </Typography>
+            <Divider orientation="vertical" flexItem sx={{ mx: 2, height: '20px' }} />
+            <Typography variant="subtitle1" fontWeight="medium">
+              Showing {startItem} to{" "}
+              {endItem} of {totalCount}
+            </Typography>
           </Box>
 
-          {/* SubCategory Table */}
+          {/* Table of SubCategories */}
           <TableContainer
             component={Paper}
             elevation={3}
             sx={{
               borderRadius: 3,
               boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-              marginTop: "55px",
+              marginTop: "20px",
             }}
           >
             <Table>
+              {/* Table Header */}
               <TableHead>
                 <TableRow sx={{ backgroundColor: "primary.main" }}>
                   <TableCell sx={{ color: "white", fontWeight: "bold" }}>
@@ -313,6 +399,8 @@ function SubCategories() {
                   </TableCell>
                 </TableRow>
               </TableHead>
+              
+              {/* Table Body - Subcategory rows */}
               <TableBody>
                 {subCategories.length > 0 ? (
                   subCategories.map((subcategory, index) => (
@@ -340,7 +428,6 @@ function SubCategories() {
                         )}
                       </TableCell>
                       <TableCell>
-                        
                         <CustomButton
                           variant="contained"
                           isSmall
@@ -365,15 +452,17 @@ function SubCategories() {
             </Table>
           </TableContainer>
 
-          {/* Pagination */}
-          <Box display="flex" justifyContent="center" marginTop={3}>
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-            />
-          </Box>
+          {/* Pagination controls */}
+          {totalPages > 0 && (
+            <Box display="flex" justifyContent="center" marginTop={3}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
         </>
       )}
     </Box>
