@@ -3,8 +3,13 @@ import {
   Box,
   Typography,
   Divider,
-  Button,
   CircularProgress,
+  Paper,
+  Alert,
+  Snackbar,
+  Grid,
+  Container,
+  useTheme
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
@@ -18,6 +23,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
 import CustomButton from "../../../components/SharedComponents/CustomButton";
+
 // Validation schema
 const validationSchema = yup.object().shape({
   countryName: yup.string().required("Country Name is required"),
@@ -28,6 +34,8 @@ const validationSchema = yup.object().shape({
 const ViewCountry = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const theme = useTheme();
+  
   const [country, setCountry] = useState({
     id: "",
     countryName: "",
@@ -38,7 +46,12 @@ const ViewCountry = () => {
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [editedCountry, setEditedCountry] = useState({ ...country });
-  const [isLoading, setIsLoading] = useState(true); // Loading state for API request
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
 
   useEffect(() => {
     const fetchCountryData = async () => {
@@ -61,15 +74,23 @@ const ViewCountry = () => {
         setCountry(fetchedCountry);
         setEditedCountry(fetchedCountry);
       } catch (error) {
-        console.error("Error fetching country data:", error);
+        console.error(
+          "Error fetching country data:", 
+          error.response ? error.response.data : error.message
+        );
+        setNotification({
+          open: true,
+          message: "Failed to load country details. Please try again.",
+          severity: "error"
+        });
         if (
           error.response &&
           (error.response.status === 404 || error.response.status === 401)
         ) {
-          logoutUser(); // Call logoutUser if 404 or 401 status code
+          logoutUser();
         }
       } finally {
-        setIsLoading(false); // Stop loading once the data is fetched
+        setLoading(false);
       }
     };
 
@@ -78,6 +99,7 @@ const ViewCountry = () => {
 
   const handleEditClick = () => {
     setIsEditing(true);
+    setEditedCountry({ ...country });
     setErrors({});
   };
 
@@ -119,16 +141,29 @@ const ViewCountry = () => {
       if (response.status === 200) {
         setCountry({ ...editedCountry });
         setIsEditing(false);
-        setIsSaving(false);
+        setNotification({
+          open: true,
+          message: "Country updated successfully",
+          severity: "success"
+        });
       }
     } catch (error) {
-      console.error("Error updating country:", error);
+      console.error(
+        "Error updating country:", 
+        error.response ? error.response.data : error.message
+      );
+      setNotification({
+        open: true,
+        message: "Failed to update country. Please try again.",
+        severity: "error"
+      });
       if (
         error.response &&
         (error.response.status === 404 || error.response.status === 401)
       ) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+        logoutUser();
       }
+    } finally {
       setIsSaving(false);
     }
   };
@@ -153,148 +188,254 @@ const ViewCountry = () => {
     }
   };
 
-  return (
-    <Box padding={4} maxWidth={800} margin="auto">
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
+
+  if (loading) {
+    return (
       <Box
         display="flex"
-        justifyContent="space-between"
+        justifyContent="center"
         alignItems="center"
-        mb={3}
+        minHeight="100vh"
+        bgcolor="#f5f5f5"
       >
-        <Typography variant="h4" fontWeight="bold">
-          View Country Details
-        </Typography>
-        <CustomButton onClick={() => navigate(-1)}>
-          <ArrowBackIcon />
-        </CustomButton>
+        <CircularProgress size={40} />
       </Box>
-      <Divider sx={{ mb: 3 }} />
+    );
+  }
 
-      {isLoading ? ( // Display loading spinner while data is being fetched
-        <Box display="flex" justifyContent="center" alignItems="center">
-          <CircularProgress size={50} color="primary" />
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          borderRadius: 2,
+          overflow: "hidden"
+        }}
+      >
+        <Box 
+          py={2} 
+          px={3} 
+          bgcolor={theme.palette.primary.main} 
+          color="white"
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="h5" fontWeight="500">
+            {isEditing ? "Edit Country" : "View Country"}
+          </Typography>
+          <CustomButton
+            onClick={() => navigate(-1)}
+            variant="contained"
+            color="inherit"
+            size="small"
+            sx={{ 
+              bgcolor: "rgba(255,255,255,0.2)",
+              '&:hover': { bgcolor: "rgba(255,255,255,0.3)" }
+            }}
+          >
+            <ArrowBackIcon sx={{ fontSize: 20 }} />
+          </CustomButton>
         </Box>
-      ) : (
-        <Box display="flex" flexDirection="column" gap={3}>
-          <Box sx={{ padding: 2 }}>
-            <Typography
-              variant="subtitle1"
-              color="textSecondary"
-              sx={{ fontWeight: "bold", mb: 1 }}
-            >
-              Country Name:
-            </Typography>
-            {isEditing ? (
-              <>
-                <CustomInput
-                  value={editedCountry.countryName}
-                  name="countryName"
-                  onChange={handleInputChange}
-                />
-                {errors.countryName && (
-                  <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                    {errors.countryName}
-                  </Typography>
-                )}
-              </>
-            ) : (
-              <Typography variant="body1">{country.countryName}</Typography>
-            )}
-          </Box>
+        
+        <Divider />
 
-          <Box sx={{ padding: 2 }}>
-            <Typography
-              variant="subtitle1"
-              color="textSecondary"
-              sx={{ fontWeight: "bold", mb: 1 }}
-            >
-              Country Code:
-            </Typography>
-            {isEditing ? (
-              <>
-                <CustomInput
-                  value={editedCountry.countryCode}
-                  name="countryCode"
-                  onChange={handleInputChange}
-                />
-                {errors.countryCode && (
-                  <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                    {errors.countryCode}
-                  </Typography>
-                )}
-              </>
-            ) : (
-              <Typography variant="body1">{country.countryCode}</Typography>
-            )}
-          </Box>
+        <Box px={4} py={4}>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Grid container spacing={3}>
+                {/* First Row: Country Name and Country Code */}
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="textSecondary" 
+                      gutterBottom
+                      fontWeight="500"
+                    >
+                      Country Name {isEditing && "*"}
+                    </Typography>
+                    {isEditing ? (
+                      <>
+                        <CustomInput
+                          id="country-name"
+                          name="countryName"
+                          placeholder="Enter country name"
+                          value={editedCountry.countryName}
+                          onChange={handleInputChange}
+                          fullWidth
+                        />
+                        {errors.countryName && (
+                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                            {errors.countryName}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {country.countryName}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="textSecondary" 
+                      gutterBottom
+                      fontWeight="500"
+                    >
+                      Country Code {isEditing && "*"}
+                    </Typography>
+                    {isEditing ? (
+                      <>
+                        <CustomInput
+                          id="country-code"
+                          name="countryCode"
+                          placeholder="Enter country code"
+                          value={editedCountry.countryCode}
+                          onChange={handleInputChange}
+                          fullWidth
+                        />
+                        {errors.countryCode && (
+                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                            {errors.countryCode}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {country.countryCode}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+                
+                {/* Second Row: Status */}
+                <Grid item xs={12} md={6}>
+                  <Box>
+                    <Typography 
+                      variant="subtitle2" 
+                      color="textSecondary" 
+                      gutterBottom
+                      fontWeight="500"
+                    >
+                      Status {isEditing && "*"}
+                    </Typography>
+                    {isEditing ? (
+                      <>
+                        <CustomSelect
+                          id="status"
+                          name="status"
+                          value={editedCountry.status}
+                          onChange={handleInputChange}
+                          MenuItems={[
+                            { value: "Active", label: "Active" },
+                            { value: "Inactive", label: "Inactive" },
+                          ]}
+                          fullWidth
+                        />
+                        {errors.status && (
+                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                            {errors.status}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          fontWeight: 500,
+                          color: country.status === "Active" ? "success.main" : "text.secondary"
+                        }}
+                      >
+                        {country.status}
+                      </Typography>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
 
-          <Box sx={{ padding: 2 }}>
-            <Typography
-              variant="subtitle1"
-              color="textSecondary"
-              sx={{ fontWeight: "bold", mb: 1 }}
-            >
-              Status:
-            </Typography>
-            {isEditing ? (
-              <>
-                <CustomSelect
-                  id="status"
-                  name="status"
-                  value={editedCountry.status}
-                  onChange={handleInputChange}
-                  label="Status"
-                  MenuItems={[
-                    { value: "Active", label: "Active" },
-                    { value: "Inactive", label: "Inactive" },
-                  ]}
-                  sx={{ width: "100%" }}
-                />
-                {errors.status && (
-                  <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                    {errors.status}
-                  </Typography>
-                )}
-              </>
-            ) : (
-              <Typography variant="body1">{country.status}</Typography>
-            )}
-          </Box>
-
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+          <Box display="flex" justifyContent="center" mt={6}>
             {isEditing ? (
               <>
                 <CustomButton
                   onClick={handleSaveClick}
                   disabled={isSaving}
-                  endIcon={
-                    isSaving ? (
-                      <CircularProgress size={20} color="inherit" />
-                    ) : (
-                      <SaveIcon />
-                    )
-                  }
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                  sx={{ 
+                    px: 4, 
+                    py: 1.5,
+                    borderRadius: 1,
+                    fontWeight: 500,
+                    mr: 2
+                  }}
                 >
                   {isSaving ? "Saving..." : "Save"}
                 </CustomButton>
                 <CustomButton
-                  variant="outlined"
                   onClick={handleCancelClick}
                   disabled={isSaving}
-                  endIcon={<CancelIcon />}
+                  variant="outlined"
+                  size="large"
+                  startIcon={<CancelIcon />}
+                  sx={{ 
+                    px: 4, 
+                    py: 1.5,
+                    borderRadius: 1,
+                    fontWeight: 500
+                  }}
                 >
                   Cancel
                 </CustomButton>
               </>
             ) : (
-              <CustomButton onClick={handleEditClick} endIcon={<EditIcon />}>
+              <CustomButton 
+                onClick={handleEditClick} 
+                variant="contained"
+                color="primary"
+                size="large"
+                startIcon={<EditIcon />}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  borderRadius: 1,
+                  fontWeight: 500
+                }}
+              >
                 Edit
               </CustomButton>
             )}
           </Box>
         </Box>
-      )}
-    </Box>
+      </Paper>
+      
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 };
 
