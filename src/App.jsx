@@ -95,28 +95,31 @@ function App() {
             path="/seller-profile"
             element={<PrivateRoute component={<SellerPro />} />}
           />
-          <Route path="/Commision" element={< PrivateRoute component={<Commision/>} /> } />
+          <Route path="/Commision" element={< PrivateRoute component={<Commision />} />} />
           <Route
             path="/transaction"
             element={<PrivateRoute component={<TransactionPage />} />}
           />
-           <Route
+          <Route
             path="/configuration"
             element={<PrivateRoute component={<Configuration />} />}
           />
-        </Route>
+          <Route path="add-seller" element={<AddSeller />} />
 
-        <Route path="add-variant" element={<AddVariant />} />
-        
-        <Route path="/add-seller" element={<AddSeller />} />
-        
+          <Route path="add-variant" element={<AddVariant />} />
+
+
           <Route path="/seller-profile" element={<SellerPro />} />
           <Route path="/Commision" element={<Commision />} />
-          <Route path="/add-seller" element={<AddSeller />} />
-       
 
-        <Route path="add-variant" element={<AddVariant />} />
-        <Route path="seller-analytics" element={<SellerAnalytics />} />
+
+
+          <Route path="add-variant" element={<AddVariant />} />
+          <Route path="seller-analytics" element={<SellerAnalytics />} />
+
+        </Route>
+
+
       </Routes>
     </>
   );
