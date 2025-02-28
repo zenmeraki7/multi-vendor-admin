@@ -14,10 +14,8 @@ function CustomInput({ id, name, label, placeholder, value, onChange,type="text"
       onChange={onChange}
       type={type}
       sx={{
-        backgroundColor: "#f5f5f5",
         borderRadius: "8px",
         "& .MuiOutlinedInput-root": {
-          backgroundColor: "#f5f5f5", // Light background when readonly
           borderRadius: "8px",
           "& fieldset": {
             borderColor: "#1976d2", // Blue border by default

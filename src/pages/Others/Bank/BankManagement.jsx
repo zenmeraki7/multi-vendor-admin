@@ -16,6 +16,7 @@ import {
   Chip,
   Pagination,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
@@ -175,70 +176,81 @@ const BankManagement = () => {
         </Box>
       </Box>
 
-      {/* Search Bar and Filters */}
-      <Box display="flex" alignItems="center" gap={2} mb={2}>
-        <TableInput
-          id="search-category"
-          name="search"
-          placeholder="Search Category "
-          value={searchTerm}
-          onChange={handleSearch}
-          label="Search"
-          type="text"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: "300px" }}
-        />
+      {/* Search Bar and Filters Section */}
+      <Box 
+        display="flex" 
+        flexWrap="wrap"
+        justifyContent="space-between"
+        alignItems="center" 
+        mb={2}
+      >
+        {/* Search and Filters Group */}
+        <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
+          <TableInput
+            id="search-category"
+            name="search"
+            placeholder="Search Category "
+            value={searchTerm}
+            onChange={handleSearch}
+            label="Search"
+            type="text"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+          />
 
-        <TableSelect
-          id="status-filter"
-          name="statusFilter"
-          value={statusFilter}
-          onChange={handleStatusFilterChange}
-          label="Status"
-          MenuItems={[
-            { value: "All", label: "All" },
-            { value: "Active", label: "Active" },
-            { value: "Inactive", label: "Inactive" },
-          ]}
-        />
+          <TableSelect
+            id="status-filter"
+            name="statusFilter"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            label="Status"
+            MenuItems={[
+              { value: "All", label: "All" },
+              { value: "Active", label: "Active" },
+              { value: "Inactive", label: "Inactive" },
+            ]}
+          />
 
-        <TableSelect
-          id="country-filter"
-          name="country"
-          value={filters.country}
-          onChange={handleCountryFilterChange}
-          label="Country"
-          MenuItems={[
-            { value: "all", label: "All" },
-            ...countries.map((country) => ({
-              value: country._id,
-              label: country.name,
-            })),
-          ]}
-        />
+          <TableSelect
+            id="country-filter"
+            name="country"
+            value={filters.country}
+            onChange={handleCountryFilterChange}
+            label="Country"
+            MenuItems={[
+              { value: "all", label: "All" },
+              ...countries.map((country) => ({
+                value: country._id,
+                label: country.name,
+              })),
+            ]}
+          />
 
+          <CustomButton
+            variant="outlined"
+            onClick={clearFilters}
+            style={{ height: "55px" }}
+          >
+            Clear
+          </CustomButton>
+        </Box>
+
+        {/* Add Button */}
         <CustomButton
-          variant="outlined"
-          onClick={clearFilters}
-          style={{ height: "55px" }}
+          variant="contained"
+          color="primary"
+          style={{ height: "50px" }}
+          onClick={() => navigate("/add-bank")}
+          icon={AddIcon}
         >
-          Clear
+          Add
         </CustomButton>
-        <CustomButton
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: "400px", height: "50px" }}
-              onClick={() => navigate("/add-bank")}
-              icon={AddIcon} 
-            >
-              Add
-            </CustomButton>
       </Box>
 
       {/* Loading Indicator */}
@@ -253,6 +265,24 @@ const BankManagement = () => {
         </Box>
       ) : (
         <>
+          {/* Total Products and Showing Info */}
+          <Box 
+            display="flex" 
+            justifyContent="flex-start" 
+            alignItems="center" 
+            mb={2}
+            mt={3}
+          >
+            <Typography variant="subtitle1" fontWeight="medium">
+              Total Banks: {totalCount}
+            </Typography>
+            <Divider orientation="vertical" flexItem sx={{ mx: 2, height: '20px' }} />
+            <Typography variant="subtitle1" fontWeight="medium">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+              {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} banks
+            </Typography>
+          </Box>
+
           {/* Bank Table */}
           <TableContainer component={Paper} elevation={3}>
             <Table>
@@ -281,7 +311,7 @@ const BankManagement = () => {
                         />
                       </TableCell>
                       <TableCell>
-                      <CustomButton
+                        <CustomButton
                           variant="contained"
                           isSmall
                           color="primary"
@@ -289,7 +319,6 @@ const BankManagement = () => {
                         >
                           View
                         </CustomButton>
-                      
                       </TableCell>
                     </TableRow>
                   ))
@@ -313,15 +342,6 @@ const BankManagement = () => {
                 onChange={handlePageChange}
                 color="primary"
               />
-            </Box>
-          )}
-
-          {/* Total count display */}
-          {totalCount > 0 && (
-            <Box mt={1} display="flex" justifyContent="center">
-              <Typography variant="body2" color="textSecondary">
-                Showing {banks.length} of {totalCount} banks
-              </Typography>
             </Box>
           )}
         </>

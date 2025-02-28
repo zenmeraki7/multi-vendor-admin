@@ -17,6 +17,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 // Validation schema
 const validationSchema = yup.object().shape({
   countryName: yup.string().required("Country Name is required"),
@@ -37,15 +38,18 @@ const ViewCountry = () => {
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [editedCountry, setEditedCountry] = useState({ ...country });
-  const [isLoading, setIsLoading] = useState(true);  // Loading state for API request
+  const [isLoading, setIsLoading] = useState(true); // Loading state for API request
 
   useEffect(() => {
     const fetchCountryData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${BASE_URL}/api/countries/admin?id=${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${BASE_URL}/api/countries/admin?id=${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const fetchedCountry = {
           id: response.data._id,
@@ -58,7 +62,10 @@ const ViewCountry = () => {
         setEditedCountry(fetchedCountry);
       } catch (error) {
         console.error("Error fetching country data:", error);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
           logoutUser(); // Call logoutUser if 404 or 401 status code
         }
       } finally {
@@ -116,7 +123,10 @@ const ViewCountry = () => {
       }
     } catch (error) {
       console.error("Error updating country:", error);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser(); // Call logoutUser if 404 or 401 status code
       }
       setIsSaving(false);
@@ -154,22 +164,13 @@ const ViewCountry = () => {
         <Typography variant="h4" fontWeight="bold">
           View Country Details
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          sx={{
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
+        <CustomButton onClick={() => navigate(-1)}>
           <ArrowBackIcon />
-          Back
-        </Button>
+        </CustomButton>
       </Box>
       <Divider sx={{ mb: 3 }} />
 
-      {isLoading ? (  // Display loading spinner while data is being fetched
+      {isLoading ? ( // Display loading spinner while data is being fetched
         <Box display="flex" justifyContent="center" alignItems="center">
           <CircularProgress size={50} color="primary" />
         </Box>
@@ -263,47 +264,32 @@ const ViewCountry = () => {
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
             {isEditing ? (
               <>
-                <Button
-                  variant="contained"
-                  color="success"
+                <CustomButton
                   onClick={handleSaveClick}
                   disabled={isSaving}
-                  endIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
-                  sx={{
-                    background: "linear-gradient(45deg, #556cd6, #19857b)",
-                    color: "#fff",
-                    minWidth: "100px",
-                  }}
+                  endIcon={
+                    isSaving ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <SaveIcon />
+                    )
+                  }
                 >
                   {isSaving ? "Saving..." : "Save"}
-                </Button>
-                <Button
+                </CustomButton>
+                <CustomButton
                   variant="outlined"
-                  color="error"
                   onClick={handleCancelClick}
                   disabled={isSaving}
                   endIcon={<CancelIcon />}
-                  sx={{
-                    background: "linear-gradient(45deg, #FF0000, #FF7878)",
-                    color: "#fff",
-                  }}
                 >
                   Cancel
-                </Button>
+                </CustomButton>
               </>
             ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleEditClick}
-                endIcon={<EditIcon />}
-                sx={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                }}
-              >
+              <CustomButton onClick={handleEditClick} endIcon={<EditIcon />}>
                 Edit
-              </Button>
+              </CustomButton>
             )}
           </Box>
         </Box>

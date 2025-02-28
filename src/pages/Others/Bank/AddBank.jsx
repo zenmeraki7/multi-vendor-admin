@@ -17,6 +17,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 function AddBank() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -145,18 +146,11 @@ function AddBank() {
         <Typography variant="h4" fontWeight="bold">
           Add New Bank
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
+        <CustomButton
           onClick={() => navigate(-1)}
-          style={{
-            marginRight: "80px",
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
         >
           <ArrowBackIcon />
-        </Button>
+        </CustomButton>
       </Box>
 
       {alertVisible && (
@@ -274,9 +268,7 @@ function AddBank() {
                 </Grid>
               </Grid>
               <Box display="flex" justifyContent="center" mb={3}>
-                <Button
-                  variant="contained"
-                  color="primary"
+                <CustomButton
                   type="submit"
                   startIcon={
                     loading ? (
@@ -285,14 +277,11 @@ function AddBank() {
                       <Save />
                     )
                   }
-                  style={{
-                    background: "linear-gradient(45deg, #556cd6, #19857b)",
-                    color: "#fff",
-                  }}
+                
                   disabled={loading}
                 >
                   {loading ? "Saving..." : "Save"}
-                </Button>
+                </CustomButton>
               </Box>
             </Form>
           )}

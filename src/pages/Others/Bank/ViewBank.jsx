@@ -16,7 +16,8 @@ import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
-import {logoutUser} from "../../../utils/authUtils"
+import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 // Validation schema
 const validationSchema = yup.object().shape({
   bankName: yup.string().required("Bank Name is required"),
@@ -47,11 +48,17 @@ const ViewBank = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (response.data?.data && Array.isArray(response.data.data)) {
-          setCountries(response.data.data);  // Set countries list
+          setCountries(response.data.data); // Set countries list
         }
       } catch (error) {
-        console.error("Error fetching countries:", error.response ? error.response.data : error.message);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        console.error(
+          "Error fetching countries:",
+          error.response ? error.response.data : error.message
+        );
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
           logoutUser(); // Call logoutUser if 404 or 401 status code
         }
       }
@@ -81,7 +88,10 @@ const ViewBank = () => {
         setIsLoading(false); // Set loading to false once data is fetched
       } catch (error) {
         console.error("Error fetching bank details", error);
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
           logoutUser(); // Call logoutUser if 404 or 401 status code
         }
       }
@@ -118,9 +128,9 @@ const ViewBank = () => {
 
     try {
       const updatedBankData = {
-        name: editedBank.bankName,  // Map bankName to name
-        country: editedBank.country,  // Ensure this is the Country ObjectId (not name)
-        isActive: editedBank.status === 'Active',  // Convert status to boolean isActive
+        name: editedBank.bankName, // Map bankName to name
+        country: editedBank.country, // Ensure this is the Country ObjectId (not name)
+        isActive: editedBank.status === "Active", // Convert status to boolean isActive
       };
 
       const token = localStorage.getItem("token");
@@ -134,7 +144,7 @@ const ViewBank = () => {
         }
       );
 
-      console.log('Response:', response);  // Log the full response to inspect it
+      console.log("Response:", response); // Log the full response to inspect it
 
       // Ensure the correct condition is used to check success
       if (response.data?.success || response.status === 200) {
@@ -145,8 +155,14 @@ const ViewBank = () => {
         throw new Error("Failed to update bank details.");
       }
     } catch (error) {
-      console.error("Error updating bank details:", error.response ? error.response.data : error.message);
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
+      console.error(
+        "Error updating bank details:",
+        error.response ? error.response.data : error.message
+      );
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
         logoutUser(); // Call logoutUser if 404 or 401 status code
       }
       setIsSaving(false); // Stop saving state if error occurs
@@ -184,18 +200,10 @@ const ViewBank = () => {
         <Typography variant="h4" fontWeight="bold">
           View Bank Details
         </Typography>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => navigate(-1)}
-          sx={{
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
-        >
+        <CustomButton 
+        onClick={() => navigate(-1)}>
           <ArrowBackIcon />
-          Back
-        </Button>
+        </CustomButton>
       </Box>
       <Divider sx={{ mb: 3 }} />
 
@@ -261,7 +269,8 @@ const ViewBank = () => {
             </>
           ) : (
             <Typography variant="body1">
-              {countries.find((country) => country._id === bank.country)?.name || bank.country}
+              {countries.find((country) => country._id === bank.country)
+                ?.name || bank.country}
             </Typography>
           )}
         </Box>
@@ -302,9 +311,7 @@ const ViewBank = () => {
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           {isEditing ? (
             <>
-              <Button
-                variant="contained"
-                color="success"
+              <CustomButton
                 onClick={handleSaveClick}
                 disabled={isSaving}
                 endIcon={
@@ -314,41 +321,21 @@ const ViewBank = () => {
                     <SaveIcon />
                   )
                 }
-                sx={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                  minWidth: "100px",
-                }}
               >
                 {isSaving ? "Saving..." : "Save"}
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 variant="outlined"
-                color="error"
                 onClick={handleCancelClick}
                 endIcon={<CancelIcon />}
-                sx={{
-                  color: "#f44336",
-                  minWidth: "100px",
-                }}
               >
                 Cancel
-              </Button>
+              </CustomButton>
             </>
           ) : (
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={handleEditClick}
-              endIcon={<EditIcon />}
-              sx={{
-                background: "linear-gradient(45deg, #556cd6, #19857b)",
-                color: "#fff",
-                minWidth: "100px",
-              }}
-            >
+            <CustomButton onClick={handleEditClick} endIcon={<EditIcon />}>
               Edit
-            </Button>
+            </CustomButton>
           )}
         </Box>
       </Box>
