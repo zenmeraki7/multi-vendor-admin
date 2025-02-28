@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Typography,
-  TextField,
   InputAdornment,
   IconButton,
   Table,
@@ -17,10 +16,6 @@ import {
   Avatar,
   Pagination,
   Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   CircularProgress,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
@@ -28,6 +23,9 @@ import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import TableInput from "../../../components/SharedComponents/TableInput";
+import TableSelect from "../../../components/SharedComponents/TableSelect";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 function SubCategories() {
   const navigate = useNavigate();
@@ -80,7 +78,9 @@ function SubCategories() {
       // Add category filter if not "All"
       if (debouncedCategoryFilter !== "All") {
         // Find the category ID that matches the selected category name
-        const selectedCategory = categories.find(cat => cat.name === debouncedCategoryFilter);
+        const selectedCategory = categories.find(
+          (cat) => cat.name === debouncedCategoryFilter
+        );
         if (selectedCategory && selectedCategory._id) {
           params.category = selectedCategory._id;
         }
@@ -108,12 +108,14 @@ function SubCategories() {
           new Set(data.data.map((subcategory) => subcategory.category.name))
         ).map((name, index) => ({
           name,
-          _id: data.data.find(sub => sub.category.name === name)?.category?._id || index,
+          _id:
+            data.data.find((sub) => sub.category.name === name)?.category
+              ?._id || index,
         }));
 
         setCategories(uniqueCategories);
       }
-      
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching subcategories:", error);
@@ -125,7 +127,13 @@ function SubCategories() {
       }
       setLoading(false);
     }
-  }, [currentPage, debouncedSearchTerm, debouncedStatusFilter, debouncedCategoryFilter, categories]);
+  }, [
+    currentPage,
+    debouncedSearchTerm,
+    debouncedStatusFilter,
+    debouncedCategoryFilter,
+    categories,
+  ]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -134,7 +142,12 @@ function SubCategories() {
     } else {
       fetchSubCategories();
     }
-  }, [debouncedSearchTerm, debouncedStatusFilter, debouncedCategoryFilter, fetchSubCategories]);
+  }, [
+    debouncedSearchTerm,
+    debouncedStatusFilter,
+    debouncedCategoryFilter,
+    fetchSubCategories,
+  ]);
 
   // Fetch data when page changes
   useEffect(() => {
@@ -180,7 +193,6 @@ function SubCategories() {
           SubCategory Management
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography color="primary">DATA REFRESH</Typography>
           <IconButton color="primary" onClick={handleRefresh}>
             <Refresh />
           </IconButton>
@@ -203,59 +215,66 @@ function SubCategories() {
         <>
           {/* Search Bar and Filters */}
           <Box display="flex" alignItems="center" gap={2} mb={2} mt={5}>
-            <TextField
-              label="Search by Subcategory Name"
-              variant="outlined"
-              fullWidth
+            <TableInput
+              id="search-category"
+              name="search"
+              placeholder="Search SubCategory"
               value={searchTerm}
               onChange={handleSearch}
+              label="Search"
+              type="text"
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
+                endAdornment: (
+                  <InputAdornment position="end">
                     <Search />
                   </InputAdornment>
                 ),
               }}
+              sx={{ width: "300px" }}
             />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                onChange={handleStatusFilterChange}
-                label="Status"
-              >
-                <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={categoryFilter}
-                onChange={handleCategoryFilterChange}
-                label="Category"
-              >
-                <MenuItem value="All">All</MenuItem>
-                {categories.map((category) => (
-                  <MenuItem key={category.name} value={category.name}>
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TableSelect
+              id="status-filter"
+              name="statusFilter"
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              label="Status"
+              MenuItems={[
+                { value: "All", label: "All" },
+                { value: "Active", label: "Active" },
+                { value: "Inactive", label: "Inactive" },
+              ]}
+            />
 
-            <Button variant="outlined" onClick={clearFilters}>
+            <TableSelect
+              id="category-filter"
+              name="categoryFilter"
+              value={categoryFilter}
+              onChange={handleCategoryFilterChange}
+              label="Category"
+              MenuItems={[
+                { value: "All", label: "All" },
+                ...categories.map((category) => ({
+                  value: category.name,
+                  label: category.name,
+                })),
+              ]}
+            />
+            <CustomButton
+              variant="outlined"
+              onClick={clearFilters}
+              style={{ height: "55px" }}
+            >
               Clear
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="contained"
               color="primary"
-              style={{ marginLeft: "400px" }}
+              style={{ marginLeft: "400px", height: "50px" }}
               onClick={() => navigate("/add-subcategory")}
+              icon={AddIcon} // Pass the icon
             >
-              <AddIcon /> Add
-            </Button>
+              Add
+            </CustomButton>
           </Box>
 
           {/* SubCategory Table */}
@@ -304,7 +323,9 @@ function SubCategories() {
                           index % 2 === 0 ? "white" : "background.default",
                       }}
                     >
-                      <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                      <TableCell>
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </TableCell>
                       <TableCell>{subcategory.category.name}</TableCell>
                       <TableCell>{subcategory.name}</TableCell>
                       <TableCell>{subcategory.description}</TableCell>
@@ -319,16 +340,17 @@ function SubCategories() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
+                        
+                        <CustomButton
                           variant="contained"
-                          size="small"
+                          isSmall
                           color="primary"
                           onClick={() =>
                             navigate(`/view-subcategory/${subcategory._id}`)
                           }
                         >
                           View
-                        </Button>
+                        </CustomButton>
                       </TableCell>
                     </TableRow>
                   ))

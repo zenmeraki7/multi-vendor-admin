@@ -23,6 +23,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import TableSelect from "../../../components/SharedComponents/TableSelect";
+import TableInput from "../../../components/SharedComponents/TableInput";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 const StateManagement = () => {
   const navigate = useNavigate();
@@ -36,36 +39,74 @@ const StateManagement = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const [states, setStates] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [countriesLoading, setCountriesLoading] = useState(false);
+
+  useEffect(() => {
+    fetchCountries();
+  }, []);
 
   useEffect(() => {
     fetchStates();
   }, [currentPage, searchTerm, statusFilter, countryFilter]);
 
+  const fetchCountries = async () => {
+    setCountriesLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(`${BASE_URL}/api/countries/admin`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && Array.isArray(response.data.data)) {
+        setCountries(response.data.data);
+      } else {
+        console.error(
+          "Error: API response data for countries is not in the expected format."
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser();
+      }
+    } finally {
+      setCountriesLoading(false);
+    }
+  };
+
   const fetchStates = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      
+
       // Build query params based on filters
       let queryParams = new URLSearchParams();
-      queryParams.append('page', currentPage);
-      queryParams.append('limit', itemsPerPage);
-      
+      queryParams.append("page", currentPage);
+      queryParams.append("limit", itemsPerPage);
+
       if (searchTerm) {
-        queryParams.append('search', searchTerm);
+        queryParams.append("search", searchTerm);
       }
-      
+
       if (statusFilter !== "All") {
-        queryParams.append('isActive', statusFilter === "Active" ? "true" : "false");
+        queryParams.append(
+          "isActive",
+          statusFilter === "Active" ? "true" : "false"
+        );
       }
-      
+
       if (countryFilter !== "All") {
-        // Assuming the country filter requires the country ID
-        // You might need to adjust this based on your API requirements
-        queryParams.append('country', countryFilter);
+        queryParams.append("country", countryFilter);
       }
-      
+
       const response = await axios.get(
         `${BASE_URL}/api/states/admin?${queryParams.toString()}`,
         {
@@ -106,7 +147,7 @@ const StateManagement = () => {
     setStatusFilter(e.target.value);
     setCurrentPage(1); // Reset to first page when filter changes
   };
-  
+
   const handleCountryFilterChange = (e) => {
     setCountryFilter(e.target.value);
     setCurrentPage(1); // Reset to first page when filter changes
@@ -136,7 +177,6 @@ const StateManagement = () => {
           <b>State Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography color="primary">DATA REFRESH</Typography>
           <IconButton color="primary" onClick={fetchStates}>
             <Refresh />
           </IconButton>
@@ -149,11 +189,14 @@ const StateManagement = () => {
       {/* Search Bar and Filters */}
       <Box display="flex" alignItems="center" gap={2} mb={2}>
         {/* Search by State Name */}
-        <TextField
-          placeholder="Search States "
-          size="small"
+        <TableInput
+          id="search-category"
+          name="search"
+          placeholder="Search Category Type"
           value={searchTerm}
           onChange={handleSearch}
+          label="Search"
+          type="text"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -161,54 +204,53 @@ const StateManagement = () => {
               </InputAdornment>
             ),
           }}
-          sx={{ width: "250px" }}
+          sx={{ width: "300px" }}
         />
-
-        {/* Status Filter Dropdown */}
-        <TextField
-          select
-          label="Status"
-          size="small"
+        <TableSelect
+          id="status-filter"
+          name="statusFilter"
           value={statusFilter}
           onChange={handleStatusFilterChange}
-          SelectProps={{
-            native: true,
-          }}
-          sx={{ width: "150px" }}
-        >
-          <option value="All">All</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </TextField>
-        <TextField
-          select
-          label="Country"
-          size="small"
+          label="Status"
+          MenuItems={[
+            { value: "All", label: "All" },
+            { value: "Active", label: "Active" },
+            { value: "Inactive", label: "Inactive" },
+          ]}
+        />
+        <TableSelect
+          id="country-filter"
+          name="countryFilter"
           value={countryFilter}
           onChange={handleCountryFilterChange}
-          SelectProps={{
-            native: true,
-          }}
-          sx={{ width: "150px" }}
-        >
-          <option value="All">All</option>
-          <option value="India">India</option>
-          <option value="Australia">Australia</option>
-          <option value="Canada">Canada</option>
-        </TextField>
+          label="Country"
+          MenuItems={[
+            { value: "All", label: "All" },
+            ...countries.map((country) => ({
+              value: country._id,
+              label: country.name,
+            })),
+          ]}
+          disabled={countriesLoading}
+        />
 
         {/* Clear Filters Button */}
-        <Button variant="outlined" onClick={clearFilters}>
+        <CustomButton
+          variant="outlined"
+          onClick={clearFilters}
+          style={{ height: "55px" }}
+        >
           Clear
-        </Button>
-        <Button
+        </CustomButton>
+        <CustomButton
           variant="contained"
           color="primary"
-          style={{ marginLeft: "400px" }}
+          style={{ marginLeft: "400px", height: "50px" }}
           onClick={() => navigate("/add-state")}
+          icon={AddIcon}
         >
-          <AddIcon /> Add
-        </Button>
+          Add
+        </CustomButton>
       </Box>
 
       {/* Loading Spinner */}
@@ -254,13 +296,13 @@ const StateManagement = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
+                      <CustomButton
                         variant="contained"
-                        size="small"
+                        isSmall
                         onClick={() => navigate(`/view-state/${state._id}`)}
                       >
                         View
-                      </Button>
+                      </CustomButton>
                     </TableCell>
                   </TableRow>
                 ))}
