@@ -73,12 +73,13 @@ const ProductList = () => {
     } catch (err) {
       console.log(err);
 
-      if (
-        error.response &&
-        (error.response.status === 404 || error.response.status === 401)
-      ) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
-      }
+     // Corrected code
+if (
+  err.response &&
+  (err.response.status === 404 || err.response.status === 401)
+) {
+  logoutUser(); // Call logoutUser if 404 or 401 status code
+}
       setError(err.response?.data?.message || "Error fetching products");
       setLoading(false);
     }
