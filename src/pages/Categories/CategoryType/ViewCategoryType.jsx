@@ -28,7 +28,7 @@ import CustomButton from "../../../components/SharedComponents/CustomButton";
 
 // Validation schema
 const validationSchema = yup.object().shape({
-  name: yup.string().required("Category Name is required"),
+  name: yup.string().required("Category Type is required"),
   description: yup.string().required("Description is required"),
   status: yup
     .string()
@@ -342,14 +342,14 @@ const ViewCategoryType = () => {
                       gutterBottom
                       fontWeight="500"
                     >
-                      Category Name {isEditing && "*"}
+                      Category Type {isEditing && "*"}
                     </Typography>
                     {isEditing ? (
                       <>
                         <CustomInput
                           id="name"
                           name="name"
-                          placeholder="Enter category name"
+                          placeholder="Enter category Type"
                           value={editedCategory.name}
                           onChange={handleInputChange}
                           fullWidth

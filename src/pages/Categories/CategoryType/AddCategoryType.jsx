@@ -1,380 +1,302 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
+  Button,
   Typography,
+  Avatar,
+  IconButton,
   Grid,
   Alert,
   CircularProgress,
-  Paper,
-  Container,
-  Snackbar,
-  Divider,
-  useTheme,
-  Avatar
 } from "@mui/material";
-import { Save, Upload as UploadIcon } from "@mui/icons-material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Save } from "@mui/icons-material";
+import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from "axios";
 import { BASE_URL } from "../../../utils/baseUrl";
+import * as yup from "yup";
 import { logoutUser } from "../../../utils/authUtils";
 import CustomButton from "../../../components/SharedComponents/CustomButton";
 
+const validationSchema = yup.object().shape({
+  name: yup.string().required("CategoryType  is required"),
+  description: yup.string().required("Description is required"),
+  isActive: yup.string().required("Status is required"),
+  image: yup.mixed().required("Icon is required"),
+});
+
 function AddCategoryType() {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [notification, setNotification] = useState({
-    open: false,
-    message: "",
-    severity: "success"
+  const [loading, setLoading] = useState(true);
+  const [categoryType, setCategoryType] = useState({
+    name: "",
+    description: "",
+    image: null,
+    isActive: true,
   });
+
+  const [errors, setErrors] = useState({});
+  const [alertVisible, setAlertVisible] = useState(false);
 
   useEffect(() => {
     // Simulate initial loading
     setTimeout(() => {
-      setPageLoading(false);
+      setLoading(false);
     }, 1000);
   }, []);
 
-  const handleSave = async (values) => {
-    setLoading(true);
-    const token = localStorage.getItem("token");
-    
-    if (!token) {
-      setNotification({
-        open: true,
-        message: "Authentication token is missing. Please log in again.",
-        severity: "error"
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    console.log("Change detected", name, value);
+
+    if (name === "isActive") {
+      const newIsActive = value === "Active";
+      console.log("New isActive value:", newIsActive);
+      setCategoryType((prev) => ({
+        ...prev,
+        isActive: newIsActive,
+      }));
+    } else {
+      setCategoryType((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCategoryType((prev) => ({
+          ...prev,
+          image: {
+            file: file,
+            preview: reader.result,
+          },
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const validateForm = async () => {
+    try {
+      await validationSchema.validate(categoryType, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (validationErrors) {
+      const newErrors = {};
+      validationErrors.inner.forEach((error) => {
+        newErrors[error.path] = error.message;
       });
-      setTimeout(() => logoutUser(), 3000);
-      setLoading(false);
+      setErrors(newErrors);
+      return false;
+    }
+  };
+
+  const handleSave = async () => {
+    const isValid = await validateForm();
+    if (!isValid) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Authentication token is missing. Please log in again.");
+      navigate("/login");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", values.name);
-    formData.append("description", values.description);
-    formData.append("isActive", values.status === "Active" ? "true" : "false");
-    
-    if (values.image) {
-      formData.append("image", values.image);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append("name", categoryType.name);
+      formData.append("description", categoryType.description);
+      formData.append("isActive", categoryType.isActive ? "true" : "false");
+      if (categoryType.image && categoryType.image.file) {
+        formData.append("image", categoryType.image.file);
+      }
+
       const response = await axios.post(
         `${BASE_URL}/api/category-type/create`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
+            authorization: `Bearer ${token}`,
           },
         }
       );
 
-      if (response.status === 200) {
-        setNotification({
-          open: true,
-          message: "Category Type successfully added!",
-          severity: "success"
-        });
-        setTimeout(() => {
-          navigate(-1);
-        }, 2000);
-      } else {
-        setNotification({
-          open: true,
-          message: "There was an error adding the category type.",
-          severity: "error"
-        });
-      }
+      console.log("Category Type Created Successfully:", response.data);
+      setAlertVisible(true);
+
+      setTimeout(() => {
+        setAlertVisible(false);
+      }, 3000);
+
+      setCategoryType({
+        name: "",
+        description: "",
+        image: null,
+        isActive: null,
+      });
     } catch (error) {
-      console.error("Error during category type creation:", error);
-      if (
-        error.response &&
-        (error.response.status === 404 || error.response.status === 401)
-      ) {
-        setNotification({
-          open: true,
-          message: "Authentication error. Please log in again.",
-          severity: "error"
-        });
-        setTimeout(() => logoutUser(), 3000);
+      if (error.response) {
+        console.error("API Error Response:", error.response.data);
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
+        alert(`Error: ${error.response.data.message}`);
       } else {
-        setNotification({
-          open: true,
-          message: error.response?.data?.message || "Failed to add category type. Please try again.",
-          severity: "error"
-        });
+        console.error("Error creating category type:", error);
+        alert("An unexpected error occurred.");
       }
-    } finally {
-      setLoading(false);
     }
   };
 
-  const validationSchema = Yup.object({
-    name: Yup.string()
-      .required("Category Name is required")
-      .min(3, "Category name must be at least 3 characters"),
-    description: Yup.string()
-      .required("Description is required")
-      .min(10, "Description must be at least 10 characters"),
-    status: Yup.string().required("Status is required"),
-    image: Yup.mixed().required("Icon is required"),
-  });
-
-  const handleCloseNotification = () => {
-    setNotification({ ...notification, open: false });
-  };
-
-  if (pageLoading) {
+  if (loading) {
     return (
       <Box
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
-        bgcolor="#f5f5f5"
+        height="100vh"
       >
-        <CircularProgress size={40} />
+        <CircularProgress
+          size={60}
+          thickness={4}
+          sx={{
+            color: "#1976d2",
+          }}
+        />
       </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          borderRadius: 2,
-          overflow: "hidden"
-        }}
+    <Box padding={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
       >
-        <Box 
-          py={2} 
-          px={3} 
-          bgcolor={theme.palette.primary.main} 
-          color="white"
+        <Typography variant="h4" fontWeight="bold">
+          Add New Category Type
+        </Typography>
+        <CustomButton onClick={() => navigate(-1)}>
+          <ArrowBackIcon />
+        </CustomButton>
+      </Box>
+
+      {alertVisible && (
+        <Alert
+          variant="filled"
+          severity="success"
+          sx={{
+            width: "350px",
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            zIndex: 1000,
+          }}
+        >
+          Category Type successfully added!
+        </Alert>
+      )}
+
+      <Grid container spacing={2} mb={3} mt={8} p={7}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
           display="flex"
-          justifyContent="space-between"
+          flexDirection="column"
           alignItems="center"
         >
-          <Typography variant="h5" fontWeight="500">
-            Add New Category Type
+          <Typography variant="body1" mb={1}>
+            <b>Upload Icon</b>
           </Typography>
-          <CustomButton
-            onClick={() => navigate(-1)}
-            variant="contained"
-            color="inherit"
-            size="small"
-            sx={{ 
-              bgcolor: "rgba(255,255,255,0.2)",
-              '&:hover': { bgcolor: "rgba(255,255,255,0.3)" }
-            }}
-          >
-            <ArrowBackIcon sx={{ fontSize: 20 }} />
-          </CustomButton>
-        </Box>
-        
-        <Divider />
+          <Avatar
+            variant="rounded"
+            src={
+              categoryType.image && categoryType.image.preview
+                ? categoryType.image.preview
+                : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTR0ydDiYMYriRcJDdqE8NZxnRisT4XZmc7AQ&s"
+            }
+            sx={{ width: 100, height: 150, borderRadius: "8px" }}
+          />
+          <IconButton color="primary" component="label">
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleImageUpload}
+            />
+            <UploadIcon style={{ fontSize: "40px" }} />
+          </IconButton>
+          {errors.image && (
+            <Typography color="error">{errors.image}</Typography>
+          )}
+        </Grid>
 
-        <Box px={4} py={4}>
-          <Formik
-            initialValues={{
-              name: "",
-              description: "",
-              status: "Active",
-              image: null,
-            }}
-            validationSchema={validationSchema}
-            onSubmit={handleSave}
-          >
-            {({ setFieldValue, touched, errors, values }) => (
-              <Form>
-                <Grid container spacing={3} justifyContent="center">
-                  <Grid item xs={12}>
-                    <Grid container spacing={3}>
-                      {/* First Row: Image Upload */}
-                      <Grid item xs={12} display="flex" justifyContent="center" mb={2}>
-                        <Box display="flex" flexDirection="column" alignItems="center">
-                          <Typography 
-                            variant="subtitle2" 
-                            color="textSecondary" 
-                            gutterBottom
-                            fontWeight="500"
-                            mb={1}
-                          >
-                            Upload Icon *
-                          </Typography>
-                          <Avatar
-                            variant="rounded"
-                            src={values.image ? URL.createObjectURL(values.image) : ""}
-                            sx={{ 
-                              width: 100, 
-                              height: 100, 
-                              borderRadius: 2,
-                              mb: 1,
-                              bgcolor: theme.palette.grey[200]
-                            }}
-                          />
-                          <CustomButton
-                            component="label"
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<UploadIcon />}
-                            sx={{ mt: 1 }}
-                          >
-                            Upload Image
-                            <input
-                              type="file"
-                              accept="image/*"
-                              hidden
-                              onChange={(e) => setFieldValue("image", e.target.files[0])}
-                            />
-                          </CustomButton>
-                          {touched.image && errors.image && (
-                            <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
-                              {errors.image}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Grid>
-
-                      {/* Second Row: Category Name and Description */}
-                      <Grid item xs={12} md={6}>
-                        <Box>
-                          <Typography 
-                            variant="subtitle2" 
-                            color="textSecondary" 
-                            gutterBottom
-                            fontWeight="500"
-                          >
-                            Category Name *
-                          </Typography>
-                          <CustomInput
-                            id="name"
-                            name="name"
-                            placeholder="Enter category name"
-                            value={values.name}
-                            onChange={(e) => setFieldValue("name", e.target.value)}
-                            fullWidth
-                          />
-                          {touched.name && errors.name && (
-                            <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
-                              {errors.name}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Grid>
-                      
-                      <Grid item xs={12} md={6}>
-                        <Box>
-                          <Typography 
-                            variant="subtitle2" 
-                            color="textSecondary" 
-                            gutterBottom
-                            fontWeight="500"
-                          >
-                            Status *
-                          </Typography>
-                          <CustomSelect
-                            id="status"
-                            name="status"
-                            value={values.status}
-                            onChange={(e) => setFieldValue("status", e.target.value)}
-                            MenuItems={[
-                              { value: "Active", label: "Active" },
-                              { value: "Inactive", label: "Inactive" },
-                            ]}
-                            fullWidth
-                          />
-                          {touched.status && errors.status && (
-                            <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
-                              {errors.status}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Grid>
-                      
-                      {/* Third Row: Description */}
-                      <Grid item xs={12}>
-                        <Box>
-                          <Typography 
-                            variant="subtitle2" 
-                            color="textSecondary" 
-                            gutterBottom
-                            fontWeight="500"
-                          >
-                            Description *
-                          </Typography>
-                          <CustomInput
-                            id="description"
-                            name="description"
-                            placeholder="Enter category description"
-                            value={values.description}
-                            onChange={(e) => setFieldValue("description", e.target.value)}
-                            multiline
-                            rows={4}
-                            fullWidth
-                          />
-                          {touched.description && errors.description && (
-                            <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
-                              {errors.description}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </Grid>
-
-                <Box display="flex" justifyContent="center" mt={6}>
-                  <CustomButton
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                    disabled={loading}
-                    sx={{ 
-                      px: 4, 
-                      py: 1.5,
-                      borderRadius: 1,
-                      fontWeight: 500
-                    }}
-                  >
-                    {loading ? "Saving..." : "Save"}
-                  </CustomButton>
-                </Box>
-              </Form>
+        <Grid item xs={12} sm={6}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <CustomInput
+              id="category-name"
+              name="name"
+              label="Category Type"
+              placeholder="Enter categoryType "
+              value={categoryType.name}
+              onChange={handleInputChange}
+              sx={{ width: "100%" }}
+            />
+            {errors.name && (
+              <Typography color="error">{errors.name}</Typography>
             )}
-          </Formik>
-        </Box>
-      </Paper>
+            <CustomInput
+              id="category-description"
+              name="description"
+              label="Category Description"
+              placeholder="Enter category description"
+              value={categoryType.description}
+              onChange={handleInputChange}
+              type="text"
+              sx={{ width: "100%" }}
+            />
+            {errors.description && (
+              <Typography color="error">{errors.description}</Typography>
+            )}
+            <CustomSelect
+              id="status"
+              name="isActive"
+              value={categoryType.isActive ? "Active" : "Inactive"}
+              onChange={handleInputChange}
+              label="Status"
+              MenuItems={[
+                { value: "Active", label: "Active" },
+                { value: "Inactive", label: "Inactive" },
+              ]}
+            />
+            {errors.isActive && (
+              <Typography color="error">{errors.isActive}</Typography>
+            )}
+          </Box>
+        </Grid>
+      </Grid>
 
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={6000}
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseNotification}
-          severity={notification.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+      <Box display="flex" justifyContent="center" mt={3}>
+        <CustomButton onClick={handleSave} startIcon={<Save />}>
+          Save
+        </CustomButton>
+      </Box>
+    </Box>
   );
 }
 

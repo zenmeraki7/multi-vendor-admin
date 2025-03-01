@@ -73,13 +73,12 @@ const ProductList = () => {
     } catch (err) {
       console.log(err);
 
-     // Corrected code
-if (
-  err.response &&
-  (err.response.status === 404 || err.response.status === 401)
-) {
-  logoutUser(); // Call logoutUser if 404 or 401 status code
-}
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser(); // Call logoutUser if 404 or 401 status code
+      }
       setError(err.response?.data?.message || "Error fetching products");
       setLoading(false);
     }
@@ -279,8 +278,8 @@ if (
             label="Status"
             MenuItems={[
               { value: "all", label: "All" },
-              { value: "false", label: "Inactive" },
-              { value: "true", label: "Active" },
+              { value: "false", label: "Pending" },
+              { value: "true", label: "Approved" },
             ]}
           />
 
