@@ -11,20 +11,21 @@ function CustomSelect({ id, name, value, onChange, label, MenuItems = [] }) {
     <FormControl
       fullWidth
       variant="outlined"
-      style={{ marginTop: "5px" }}
       sx={{
+        height: "56px", // Match CustomInput height
         borderRadius: "8px",
         "& .MuiOutlinedInput-root": {
+          height: "56px", // Ensure same height
           borderRadius: "8px",
           "& fieldset": {
-            borderColor: "#1976d2", // Blue border by default
+            borderColor: "#1976d2",
             borderRadius: "8px",
           },
           "&:hover fieldset": {
-            borderColor: "#1976d2", // Blue border on hover as well
+            borderColor: "#1976d2",
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#1976d2", // Blue border when focused
+            borderColor: "#1976d2",
           },
         },
       }}

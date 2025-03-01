@@ -10,7 +10,7 @@ import {
   Grid,
   Container,
   useTheme,
-  Avatar
+  Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
@@ -40,7 +40,7 @@ const ViewCategoryType = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const theme = useTheme();
-  
+
   const [category, setCategory] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -55,7 +55,7 @@ const ViewCategoryType = () => {
   const [notification, setNotification] = useState({
     open: false,
     message: "",
-    severity: "success"
+    severity: "success",
   });
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const ViewCategoryType = () => {
       navigate("/login");
       return;
     }
-    
+
     setLoading(true);
 
     axios
@@ -86,7 +86,7 @@ const ViewCategoryType = () => {
           setNotification({
             open: true,
             message: "No category found with the provided ID.",
-            severity: "error"
+            severity: "error",
           });
         }
         if (data) {
@@ -109,7 +109,7 @@ const ViewCategoryType = () => {
         setNotification({
           open: true,
           message: "Failed to load category details. Please try again.",
-          severity: "error"
+          severity: "error",
         });
         if (
           error.response &&
@@ -182,9 +182,9 @@ const ViewCategoryType = () => {
   const handleSaveClick = async () => {
     const isValid = await validateForm();
     if (!isValid) return;
-    
+
     setIsSaving(true);
-    
+
     const isActive = editedCategory.status === "Active";
     const updatedData = new FormData();
     updatedData.append("name", editedCategory.name);
@@ -194,10 +194,7 @@ const ViewCategoryType = () => {
     // Append icon (File)
     if (editedCategory.icon instanceof File) {
       updatedData.append("image", editedCategory.icon);
-    } else if (
-      editedCategory.icon &&
-      typeof editedCategory.icon === "string"
-    ) {
+    } else if (editedCategory.icon && typeof editedCategory.icon === "string") {
       updatedData.append("iconUrl", editedCategory.icon);
     }
 
@@ -218,7 +215,7 @@ const ViewCategoryType = () => {
       setNotification({
         open: true,
         message: "Category updated successfully",
-        severity: "success"
+        severity: "success",
       });
     } catch (error) {
       console.error(
@@ -228,7 +225,7 @@ const ViewCategoryType = () => {
       setNotification({
         open: true,
         message: "Failed to update category. Please try again.",
-        severity: "error"
+        severity: "error",
       });
       if (
         error.response &&
@@ -261,17 +258,17 @@ const ViewCategoryType = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper 
-        elevation={3} 
-        sx={{ 
+      <Paper
+        elevation={3}
+        sx={{
           borderRadius: 2,
-          overflow: "hidden"
+          overflow: "hidden",
         }}
       >
-        <Box 
-          py={2} 
-          px={3} 
-          bgcolor={theme.palette.primary.main} 
+        <Box
+          py={2}
+          px={3}
+          bgcolor={theme.palette.primary.main}
           color="white"
           display="flex"
           justifyContent="space-between"
@@ -285,22 +282,27 @@ const ViewCategoryType = () => {
             variant="contained"
             color="inherit"
             size="small"
-            sx={{ 
+            sx={{
               bgcolor: "rgba(255,255,255,0.2)",
-              '&:hover': { bgcolor: "rgba(255,255,255,0.3)" }
+              "&:hover": { bgcolor: "rgba(255,255,255,0.3)" },
             }}
           >
             <ArrowBackIcon sx={{ fontSize: 20 }} />
           </CustomButton>
         </Box>
-        
+
         <Divider />
 
         <Box px={4} py={4}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               {/* Image Upload/Display Section */}
-              <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                mb={4}
+              >
                 <Avatar
                   src={imageUrl || ""}
                   variant="rounded"
@@ -309,10 +311,10 @@ const ViewCategoryType = () => {
                     height: 200,
                     mb: 2,
                     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                    borderRadius: 2
+                    borderRadius: 2,
                   }}
                 />
-                
+
                 {isEditing && (
                   <CustomButton
                     component="label"
@@ -322,23 +324,27 @@ const ViewCategoryType = () => {
                     sx={{ mt: 1 }}
                   >
                     Upload Image
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      hidden 
-                      onChange={handleImageUpload} 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handleImageUpload}
                     />
                   </CustomButton>
                 )}
               </Box>
-              
-              <Grid container spacing={3}>
-                {/* First Row: Category Name and Status */}
+
+              <Grid
+                container
+                spacing={3}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                {/* First Row: Category Name and Status (Aligned on the same line) */}
                 <Grid item xs={12} md={6}>
                   <Box>
-                    <Typography 
-                      variant="subtitle2" 
-                      color="textSecondary" 
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
                       gutterBottom
                       fontWeight="500"
                     >
@@ -355,7 +361,11 @@ const ViewCategoryType = () => {
                           fullWidth
                         />
                         {errors.name && (
-                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                          <Typography
+                            color="error"
+                            variant="caption"
+                            sx={{ mt: 0.5, display: "block" }}
+                          >
                             {errors.name}
                           </Typography>
                         )}
@@ -367,12 +377,12 @@ const ViewCategoryType = () => {
                     )}
                   </Box>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Box>
-                    <Typography 
-                      variant="subtitle2" 
-                      color="textSecondary" 
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
                       gutterBottom
                       fontWeight="500"
                     >
@@ -392,17 +402,23 @@ const ViewCategoryType = () => {
                           fullWidth
                         />
                         {errors.status && (
-                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                          <Typography
+                            color="error"
+                            variant="caption"
+                            sx={{ mt: 0.5, display: "block" }}
+                          >
                             {errors.status}
                           </Typography>
                         )}
                       </>
                     ) : (
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
+                      <Typography
+                        variant="body1"
+                        sx={{
                           fontWeight: 500,
-                          color: category.isActive ? "success.main" : "text.secondary"
+                          color: category.isActive
+                            ? "success.main"
+                            : "text.secondary",
                         }}
                       >
                         {category.isActive ? "Active" : "Inactive"}
@@ -410,13 +426,13 @@ const ViewCategoryType = () => {
                     )}
                   </Box>
                 </Grid>
-                
+
                 {/* Second Row: Description */}
                 <Grid item xs={12}>
                   <Box>
-                    <Typography 
-                      variant="subtitle2" 
-                      color="textSecondary" 
+                    <Typography
+                      variant="subtitle2"
+                      color="textSecondary"
                       gutterBottom
                       fontWeight="500"
                     >
@@ -435,7 +451,11 @@ const ViewCategoryType = () => {
                           rows={4}
                         />
                         {errors.description && (
-                          <Typography color="error" variant="caption" sx={{ mt: 0.5, display: "block" }}>
+                          <Typography
+                            color="error"
+                            variant="caption"
+                            sx={{ mt: 0.5, display: "block" }}
+                          >
                             {errors.description}
                           </Typography>
                         )}
@@ -460,13 +480,19 @@ const ViewCategoryType = () => {
                   variant="contained"
                   color="primary"
                   size="large"
-                  startIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
-                  sx={{ 
-                    px: 4, 
+                  startIcon={
+                    isSaving ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <SaveIcon />
+                    )
+                  }
+                  sx={{
+                    px: 4,
                     py: 1.5,
                     borderRadius: 1,
                     fontWeight: 500,
-                    mr: 2
+                    mr: 2,
                   }}
                 >
                   {isSaving ? "Saving..." : "Save"}
@@ -477,28 +503,28 @@ const ViewCategoryType = () => {
                   variant="outlined"
                   size="large"
                   startIcon={<CancelIcon />}
-                  sx={{ 
-                    px: 4, 
+                  sx={{
+                    px: 4,
                     py: 1.5,
                     borderRadius: 1,
-                    fontWeight: 500
+                    fontWeight: 500,
                   }}
                 >
                   Cancel
                 </CustomButton>
               </>
             ) : (
-              <CustomButton 
-                onClick={handleEditClick} 
+              <CustomButton
+                onClick={handleEditClick}
                 variant="contained"
                 color="primary"
                 size="large"
                 startIcon={<EditIcon />}
-                sx={{ 
-                  px: 4, 
+                sx={{
+                  px: 4,
                   py: 1.5,
                   borderRadius: 1,
-                  fontWeight: 500
+                  fontWeight: 500,
                 }}
               >
                 Edit
@@ -507,7 +533,7 @@ const ViewCategoryType = () => {
           </Box>
         </Box>
       </Paper>
-      
+
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}

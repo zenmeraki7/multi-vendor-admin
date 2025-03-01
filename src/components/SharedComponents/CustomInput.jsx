@@ -14,18 +14,19 @@ function CustomInput({ id, name, label, placeholder, value, onChange,type="text"
       onChange={onChange}
       type={type}
       sx={{
-        borderRadius: "8px",
+        height: "56px", // Ensure same height as Select
         "& .MuiOutlinedInput-root": {
+          height: "56px", // Match Select height
           borderRadius: "8px",
           "& fieldset": {
-            borderColor: "#1976d2", // Blue border by default
+            borderColor: "#1976d2",
             borderRadius: "8px",
           },
           "&:hover fieldset": {
-            borderColor: "#1976d2", // Blue border on hover as well
+            borderColor: "#1976d2",
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#1976d2", // Blue border when focused
+            borderColor: "#1976d2",
           },
         },
       }}
