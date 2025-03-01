@@ -21,6 +21,7 @@ import CustomInput from "../../../components/SharedComponents/CustomInput";
 import CustomSelect from "../../../components/SharedComponents/CustomSelect";
 import { BASE_URL } from "../../../utils/baseUrl";
 import { logoutUser } from "../../../utils/authUtils";
+import CustomButton from "../../../components/SharedComponents/CustomButton";
 // Validation schema
 const validationSchema = yup.object().shape({
   name: yup.string().required("Category Name is required"),
@@ -250,18 +251,14 @@ function ViewCategories() {
         <Typography variant="h4" fontWeight="bold">
           View Category Details
         </Typography>
-        <Button
-          variant="outlined"
+        <CustomButton
           color="primary"
           onClick={() => navigate(-1)}
-          sx={{
-            background: "linear-gradient(45deg, #556cd6, #19857b)",
-            color: "#fff",
-          }}
+          
         >
           <ArrowBackIcon />
-          Back
-        </Button>
+          {/* Back */}
+        </CustomButton>
       </Box>
       <Divider sx={{ mb: 3 }} />
 
@@ -284,22 +281,27 @@ function ViewCategories() {
             }}
           />
           {isEditing && (
-            <IconButton
-              color="primary"
-              component="label"
-              sx={{
-                background: "linear-gradient(45deg, #556cd6, #19857b)",
-                color: "#fff",
-              }}
-            >
-              <UploadIcon sx={{ fontSize: 40 }} />
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleImageUpload}
-              />
-            </IconButton>
+        <IconButton
+        component="label"
+        sx={{
+          backgroundColor: "#2563EB",
+          color: "#ffffff",
+          borderRadius: "10px",
+          padding: "10px",
+          minWidth: "50px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          transition: "all 0.2s ease",
+          "&:hover": {
+            backgroundColor: "#1E40AF",
+          },
+        }}
+      >
+        <UploadIcon sx={{ fontSize: "24px" }} />
+        <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+      </IconButton>
+      
           )}
         </Box>
 
@@ -393,47 +395,37 @@ function ViewCategories() {
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           {isEditing ? (
             <>
-              <Button
+              <CustomButton
                 variant="contained"
                 color="success"
                 onClick={handleSaveClick}
                 disabled={isSaving}
                 endIcon={isSaving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
-                sx={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                  minWidth: "100px",
-                }}
+                
               >
                 {isSaving ? 'Saving...' : 'Save'}
-              </Button>
-              <Button
+              </CustomButton>
+              <CustomButton
                 variant="outlined"
-                color="error"
+               
                 onClick={handleCancelClick}
                 disabled={isSaving}
                 endIcon={<CancelIcon />}
-                sx={{
-                  background: "linear-gradient(45deg, #FF0000, #FF7878)",
-                  color: "#fff",
-                }}
+              
               >
                 Cancel
-              </Button>
+              </CustomButton>
             </>
           ) : (
-            <Button
+            <CustomButton
               variant="contained"
               color="primary"
               onClick={handleEditClick}
               endIcon={<EditIcon />}
-              sx={{
-                background: "linear-gradient(45deg, #556cd6, #19857b)",
-                color: "#fff",
-              }}
+            
             >
               Edit
-            </Button>
+            </CustomButton>
           )}
         </Box>
       </Box>

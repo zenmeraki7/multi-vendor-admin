@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
-  Button,
   Typography,
-  TextField,
   InputAdornment,
   IconButton,
   Table,
@@ -16,11 +14,8 @@ import {
   Avatar,
   Pagination,
   Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -44,6 +39,7 @@ function Category() {
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [categoryTypes, setCategoryTypes] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   const itemsPerPage = 10;
 
@@ -107,6 +103,7 @@ function Category() {
       setTotalPages(
         response.data.totalPages || Math.ceil(data.length / itemsPerPage)
       );
+      setTotalCount(response.data.totalCount || data.length);
 
       // Extract unique category types for the filter dropdown
       if (filters === null) {
@@ -119,8 +116,6 @@ function Category() {
           );
         setCategoryTypes(uniqueTypes);
       }
-
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching categories:", error);
       if (
@@ -131,6 +126,7 @@ function Category() {
       }
       setCategories([]);
       setFilteredCategories([]);
+    } finally {
       setLoading(false);
     }
   };
@@ -210,6 +206,10 @@ function Category() {
     fetchCategories(value);
   };
 
+  // Calculate displayed items range
+  const startItem = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalCount);
+
   return (
     <Box padding={2}>
       {/* Header Section */}
@@ -223,7 +223,6 @@ function Category() {
           <b>Category Management</b>
         </Typography>
         <Box display="flex" alignItems="center" gap={1}>
-
           <IconButton
             color="primary"
             onClick={() => fetchCategories(currentPage)}
@@ -235,85 +234,112 @@ function Category() {
           </Typography>
         </Box>
       </Box>
+
+      {/* Search Bar and Filters - Always visible */}
+      <Box 
+        display="flex" 
+        flexWrap="wrap"
+        justifyContent="space-between" 
+        alignItems="center" 
+        mb={2}
+      >
+        <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
+          <TableInput
+            id="search-category"
+            name="search"
+            placeholder="Search Category "
+            value={searchTerm}
+            onChange={handleSearch}
+            label="Search"
+            type="text"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+          />
+          <TableSelect
+            id="status-filter"
+            name="statusFilter"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            label="Status"
+            MenuItems={[
+              { value: "All", label: "All" },
+              { value: "Active", label: "Active" },
+              { value: "Inactive", label: "Inactive" },
+            ]}
+          />
+
+          <TableSelect
+            id="category-filter"
+            name="categoryFilter"
+            value={categoryFilter}
+            onChange={handleCategoryFilterChange}
+            label="CategoryType"
+            MenuItems={[
+              { value: "All", label: "All" },
+              ...categoryTypes
+                .filter((type) => type && type.name)
+                .map((type) => ({ value: type.name, label: type.name })),
+            ]}
+          />
+
+          <CustomButton 
+            variant="outlined" 
+            onClick={clearFilters} 
+            style={{ height: "55px" }}
+          >
+            Clear
+          </CustomButton>
+        </Box>
+
+        <CustomButton 
+          variant="contained" 
+          color="primary" 
+          style={{ height: "50px" }} 
+          onClick={() => navigate("/add-category")}
+          icon={AddIcon}
+        >
+          Add
+        </CustomButton>
+      </Box>
+      
+      {/* Total Products and Showing Info - Always visible */}
+      <Box 
+        display="flex" 
+        justifyContent="flex-start" 
+        alignItems="center" 
+        mb={2}
+        mt={3}
+      >
+        <Typography variant="subtitle1" fontWeight="medium">
+          Total Categories: {totalCount}
+        </Typography>
+        <Divider orientation="vertical" flexItem sx={{ mx: 2, height: '20px' }} />
+        <Typography variant="subtitle1" fontWeight="medium">
+          Showing {startItem} to {endItem} of {totalCount}
+        </Typography>
+      </Box>
+
+      {/* Only show loading spinner where the table would be */}
       {loading ? (
         <Box
           display="flex"
           justifyContent="center"
           alignItems="center"
           height="50vh"
+          mt={2}
         >
           <CircularProgress color="primary" />
         </Box>
       ) : (
         <>
-          {/* Search Bar and Filters */}
-          <Box display="flex" alignItems="center" gap={2} mb={2}>
-            <TableInput
-              id="search-category"
-              name="search"
-              placeholder="Search Category "
-              value={searchTerm}
-              onChange={handleSearch}
-              label="Search"
-              type="text"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: "300px" }}
-            />
-            <TableSelect
-              id="status-filter"
-              name="statusFilter"
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              label="Status"
-              MenuItems={[
-                { value: "All", label: "All" },
-                { value: "Active", label: "Active" },
-                { value: "Inactive", label: "Inactive" },
-              ]}
-            />
-
-            <TableSelect
-              id="category-filter"
-              name="categoryFilter"
-              value={categoryFilter}
-              onChange={handleCategoryFilterChange}
-              label="CategoryType"
-              MenuItems={[
-                { value: "All", label: "All" },
-                ...categoryTypes
-                  .filter((type) => type && type.name)
-                  .map((type) => ({ value: type.name, label: type.name })),
-              ]}
-            />
-
-<CustomButton 
-  variant="outlined" 
-  onClick={clearFilters} 
-  style={{ height: "55px" }}
->
-  Clear
-</CustomButton>
-
-<CustomButton 
-  variant="contained" 
-  color="primary" 
-  style={{ marginLeft: "400px", height: "50px" }} 
-  onClick={() => navigate("/add-category")}
-  icon={AddIcon} // Pass the icon
->
-  Add
-</CustomButton>
-
-          </Box>
-
           {/* Category Table */}
-          <TableContainer component={Paper} elevation={3}>
+          <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 3, boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
             <Table>
               <TableHead>
                 <TableRow
@@ -321,59 +347,69 @@ function Category() {
                     backgroundColor: "primary.main",
                   }}
                 >
-                  <TableCell>#</TableCell>
-                  <TableCell>Category Type</TableCell>
-                  <TableCell>Category</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Icon</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>#</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Category Type</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Category</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Description</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Icon</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Status</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredCategories.map((category, index) => (
-                  <TableRow key={category._id}>
-                    <TableCell>
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </TableCell>
-                    <TableCell>{category?.categoryType?.name}</TableCell>
-                    <TableCell>{category.name}</TableCell>
-                    <TableCell>{category.description}</TableCell>
-                    <TableCell>
-                      <Avatar src={category.icon} alt={category.name} />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={category.isActive ? "Active" : "Inactive"}
-                        color={category.isActive ? "success" : "error"}
-                      />
-                    </TableCell>
-                    <TableCell>
-                    <CustomButton
-                        isSmall
+                {filteredCategories.length > 0 ? (
+                  filteredCategories.map((category, index) => (
+                    <TableRow key={category._id}>
+                      <TableCell>
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </TableCell>
+                      <TableCell>{category?.categoryType?.name}</TableCell>
+                      <TableCell>{category.name}</TableCell>
+                      <TableCell>{category.description}</TableCell>
+                      <TableCell>
+                        <Avatar src={category.icon} alt={category.name} />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={category.isActive ? "Active" : "Inactive"}
+                          color={category.isActive ? "success" : "error"}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <CustomButton
+                          isSmall
                           variant="contained"
                           onClick={() =>
-                            navigate(`/view-category/${category._id}`)                          }
+                            navigate(`/view-category/${category._id}`)
+                          }
                         >
                           View
                         </CustomButton>
-
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      No categories found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TableContainer>
 
           {/* Pagination */}
-          <Box mt={2} display="flex" justifyContent="center">
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-            />
-          </Box>
+          {totalPages > 0 && (
+            <Box mt={2} display="flex" justifyContent="center">
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
         </>
       )}
     </Box>

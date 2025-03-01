@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   Box,
-  Button,
   Typography,
   InputAdornment,
   IconButton,
@@ -17,6 +16,7 @@ import {
   Pagination,
   Chip,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { Search, Refresh } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -144,6 +144,10 @@ function CategoryType() {
     fetchCategoryTypes();
   };
 
+  // Calculate the range of items being displayed
+  const startItem = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalCount);
+
   return (
     <Box padding={2}>
       {/* Header Section */}
@@ -166,67 +170,94 @@ function CategoryType() {
         </Box>
       </Box>
 
-      {/* Loader */}
+      {/* Search Bar and Filters - Always visible */}
+      <Box 
+        display="flex" 
+        flexWrap="wrap"
+        justifyContent="space-between" 
+        alignItems="center" 
+        mb={2}
+      >
+        <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
+          <TableInput
+            id="search-category"
+            name="search"
+            placeholder="Search Category Type"
+            value={searchTerm}
+            onChange={handleSearch}
+            label="Search"
+            type="text"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+          />
+          <TableSelect
+            id="status-filter"
+            name="statusFilter"
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            label="Status"
+            MenuItems={[
+              { value: "All", label: "All" },
+              { value: "Active", label: "Active" },
+              { value: "Inactive", label: "Inactive" },
+            ]}
+          />
+          <CustomButton
+            variant="outlined"
+            onClick={clearFilters}
+            style={{ height: "55px" }}
+          >
+            Clear
+          </CustomButton>
+        </Box>
+
+        <CustomButton
+          variant="contained"
+          color="primary"
+          style={{ height: "50px" }}
+          onClick={() => navigate("/add-Categorytype")}
+          icon={AddIcon}
+        >
+          Add
+        </CustomButton>
+      </Box>
+
+      {/* Total Products and Showing Info - Always visible */}
+      <Box 
+        display="flex" 
+        justifyContent="flex-start" 
+        alignItems="center" 
+        mb={2}
+        mt={3}
+      >
+        <Typography variant="subtitle1" fontWeight="medium">
+          Total: {totalCount} categories
+        </Typography>
+        <Divider orientation="vertical" flexItem sx={{ mx: 2, height: '20px' }} />
+        <Typography variant="subtitle1" fontWeight="medium">
+          Showing {startItem} to {endItem} of {totalCount}
+        </Typography>
+      </Box>
+
+      {/* Only show loading spinner where the table would be */}
       {loading ? (
         <Box
           display="flex"
           justifyContent="center"
           alignItems="center"
           height="50vh"
+          mt={2}
         >
           <CircularProgress color="primary" />
         </Box>
       ) : (
         <>
-          {/* Search Bar and Filters */}
-          <Box display="flex" alignItems="center" gap={2} mb={2}>
-            <TableInput
-              id="search-category"
-              name="search"
-              placeholder="Search Category Type"
-              value={searchTerm}
-              onChange={handleSearch}
-              label="Search"
-              type="text"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: "300px" }}
-            />
-            <TableSelect
-              id="status-filter"
-              name="statusFilter"
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-              label="Status"
-              MenuItems={[
-                { value: "All", label: "All" },
-                { value: "Active", label: "Active" },
-                { value: "Inactive", label: "Inactive" },
-              ]}
-            />
-            <CustomButton
-              variant="outlined"
-              onClick={clearFilters}
-              style={{ height: "55px" }}
-            >
-              Clear
-            </CustomButton>
-
-            <CustomButton
-              variant="contained"
-              color="primary"
-              style={{ marginLeft: "400px", height: "50px" }}
-              onClick={() => navigate("/add-Categorytype")}
-              icon={AddIcon} // Pass the icon
-            >
-              Add
-            </CustomButton>
-          </Box>
           {/* Category Type Table */}
           <TableContainer
             component={Paper}
@@ -260,25 +291,26 @@ function CategoryType() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {categoryTypes.map((categoryType, index) => (
-                  <TableRow key={categoryType._id}>
-                    <TableCell>
-                      {(currentPage - 1) * itemsPerPage + index + 1}
-                    </TableCell>
-                    <TableCell>{categoryType.name}</TableCell>
-                    <TableCell>{categoryType.description}</TableCell>
-                    <TableCell>
-                      <Avatar src={categoryType.icon || "path/to/default/icon.jpg"} alt={categoryType.name} />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={categoryType.isActive ? "Active" : "Inactive"}
-                        color={categoryType.isActive ? "success" : "error"}
-                      />
-                    </TableCell>
-                    <TableCell>
-                    <CustomButton
-                        isSmall
+                {categoryTypes.length > 0 ? (
+                  categoryTypes.map((categoryType, index) => (
+                    <TableRow key={categoryType._id}>
+                      <TableCell>
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </TableCell>
+                      <TableCell>{categoryType.name}</TableCell>
+                      <TableCell>{categoryType.description}</TableCell>
+                      <TableCell>
+                        <Avatar src={categoryType.icon || "path/to/default/icon.jpg"} alt={categoryType.name} />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={categoryType.isActive ? "Active" : "Inactive"}
+                          color={categoryType.isActive ? "success" : "error"}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <CustomButton
+                          isSmall
                           variant="contained"
                           onClick={() =>
                             navigate(`/viewcategorytype/${categoryType._id}`)
@@ -286,27 +318,35 @@ function CategoryType() {
                         >
                           View
                         </CustomButton>
-                   
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      No category types found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TableContainer>
 
           {/* Pagination */}
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-            />
-          </Box>
+          {totalPages > 0 && (
+            <Box display="flex" justifyContent="center" mt={2}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
         </>
       )}
     </Box>
   );
 }
 
-export default CategoryType; 
+export default CategoryType;
