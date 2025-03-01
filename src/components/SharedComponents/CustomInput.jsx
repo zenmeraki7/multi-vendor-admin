@@ -27,8 +27,9 @@ function CustomInput({ id, name, label, placeholder, value, onChange, type = "te
         ),
       }}
       sx={{
-        borderRadius: "8px",
+        height: "56px", // Ensure same height as Select
         "& .MuiOutlinedInput-root": {
+          height: "56px", // Match Select height
           borderRadius: "8px",
           "& fieldset": {
             borderColor: "#1976d2",
