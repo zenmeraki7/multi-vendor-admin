@@ -1,6 +1,10 @@
 import React from "react";
 import TextField from "@mui/material/TextField";
-function CustomInput({ id, name, label, placeholder, value, onChange,type="text" ,readOnly}) {
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+function CustomInput({ id, name, label, placeholder, value, onChange, type = "text", readOnly, icon, onIconClick }) {
   return (
     <TextField
       id={id}
@@ -13,19 +17,28 @@ function CustomInput({ id, name, label, placeholder, value, onChange,type="text"
       value={value}
       onChange={onChange}
       type={type}
+      InputProps={{
+        endAdornment: icon && (
+          <InputAdornment position="end">
+            <IconButton onClick={onIconClick} edge="end">
+              {icon === "eye" ? <FaEye /> : <FaEyeSlash />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
       sx={{
         borderRadius: "8px",
         "& .MuiOutlinedInput-root": {
           borderRadius: "8px",
           "& fieldset": {
-            borderColor: "#1976d2", // Blue border by default
+            borderColor: "#1976d2",
             borderRadius: "8px",
           },
           "&:hover fieldset": {
-            borderColor: "#1976d2", // Blue border on hover as well
+            borderColor: "#1976d2",
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#1976d2", // Blue border when focused
+            borderColor: "#1976d2",
           },
         },
       }}
