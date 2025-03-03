@@ -32,18 +32,26 @@ const ProductList = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [filters, setFilters] = useState({
-    inStock: "all",
-    categoryType: "all",
-    category: "all",
-    subcategory: "all",
-    isActive: "all"
+    inStock: "",
+    categoryType: "",
+    category: "",
+    subcategory: "",
+    isActive: "",
+    price: "",
   });
+
+  // const [filterOptions, setFilterOptions] = useState({
+  //   categoryTypes: [],
+  //   categories: [],
+  //   subcategories: [],
+  // });
 
   const itemsPerPage = 10; // Adjust items per page as needed
 
@@ -86,7 +94,7 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage]);
+  }, [currentPage,, filters, searchQuery]);
 
   // Handle Search
   useEffect(() => {
@@ -222,7 +230,9 @@ const ProductList = () => {
             id="stock-filter"
             name="inStock"
             value={filters.inStock}
-            onChange={handleFilterChange}
+            onChange={(e) =>
+              setFilters({ ...filters, inStock: e.target.value })
+            }
             label="Stock"
             MenuItems={[
               { value: "all", label: "All" },
@@ -235,13 +245,16 @@ const ProductList = () => {
             id="product-category-filter"
             name="categoryType"
             value={filters.categoryType}
-            onChange={handleFilterChange}
+            onChange={(e) =>
+              setFilters({ ...filters, categoryType: e.target.value })
+            }
             label="CategoryType"
             MenuItems={[
               { value: "all", label: "All" },
               { value: "Fashion", label: "Fashion" },
               { value: "Electronics", label: "Electronics" },
             ]}
+            
           />
 
           <TableSelect
