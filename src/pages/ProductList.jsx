@@ -278,8 +278,8 @@ const ProductList = () => {
             label="Status"
             MenuItems={[
               { value: "all", label: "All" },
-              { value: "false", label: "Inactive" },
-              { value: "true", label: "Active" },
+              { value: "false", label: "Pending" },
+              { value: "true", label: "Approved" },
             ]}
           />
 

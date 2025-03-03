@@ -13,6 +13,14 @@ import {
   Paper,
   Stack,
   TextField,
+  Container,
+  CircularProgress,
+  Alert,
+  IconButton,
+  Rating,
+  Skeleton,
+  Breadcrumbs,
+  Link as MuiLink,
 } from "@mui/material";
 import {
   Dialog,
@@ -21,19 +29,23 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import Star from "@mui/icons-material/Star";
-import StarBorder from "@mui/icons-material/StarBorder";
-import { useParams } from "react-router-dom";
+import StarIcon from "@mui/icons-material/Star";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import BlockIcon from "@mui/icons-material/Block";
+import { useParams, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../utils/baseUrl";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { logoutUser } from "../../utils/authUtils";
 
 function removeHtmlTags(str) {
-  return str.replace(/<[^>]*>/g, "");
+  return str?.replace(/<[^>]*>/g, "") || "";
 }
 
 const ViewProduct = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -42,14 +54,18 @@ const ViewProduct = () => {
   const [action, setAction] = useState("");
   const [blockReason, setBlockReason] = useState("");
   const [validationError, setValidationError] = useState("");
+  const [tabValue, setTabValue] = useState(0);
 
   const handleOpen = (act) => {
     setAction(act);
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
     setAction("");
+    setValidationError("");
+    setBlockReason("");
   };
 
   const handleApproveProduct = async () => {
@@ -65,65 +81,77 @@ const ViewProduct = () => {
         }
       );
       fetchProductData();
-      toast.success(response.data.message); // Success message
+      toast.success(response.data.message);
     } catch (error) {
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser();
+      } else {
+        toast.error("Failed to approve product");
       }
     } finally {
       setLoadingBtn(false);
-      handleClose(); // Close modal after API call
+      handleClose();
     }
   };
 
   const handleRejectProduct = async () => {
-    if (!blockReason) {
-      setValidationError("Provide a reason");
-    } else {
-      setValidationError("");
-      try {
-        setLoadingBtn(true);
-        const response = await axios.put(
-          `${BASE_URL}/api/product/reject/${id}`,
-          { verificationRemarks: blockReason },
-          {
-            headers: {
-              authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        fetchProductData();
-        toast.success(response.data.message); // Success message
-        setBlockReason("");
-      } catch (error) {
-        if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-          logoutUser(); // Call logoutUser if 404 or 401 status code
+    if (!blockReason.trim()) {
+      setValidationError("Please provide a reason for rejection");
+      return;
+    }
+
+    try {
+      setLoadingBtn(true);
+      const response = await axios.put(
+        `${BASE_URL}/api/product/reject/${id}`,
+        { verificationRemarks: blockReason },
+        {
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } finally {
-        setLoadingBtn(false);
-        handleClose(); // Close modal after API call
+      );
+      fetchProductData();
+      toast.success(response.data.message);
+    } catch (error) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 401)
+      ) {
+        logoutUser();
+      } else {
+        toast.error("Failed to reject product");
       }
+    } finally {
+      setLoadingBtn(false);
+      handleClose();
     }
   };
 
   const fetchProductData = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         `${BASE_URL}/api/product/get-one/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming the token is stored in localStorage
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      console.log(response);
       setProduct(response.data.data);
-      setLoading(false);
     } catch (err) {
-      setError("Error fetching product data");
-      if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
+      if (
+        err.response &&
+        (err.response.status === 404 || err.response.status === 401)
+      ) {
+        logoutUser();
       }
+      setError("Error fetching product data. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -132,313 +160,715 @@ const ViewProduct = () => {
     fetchProductData();
   }, [id]);
 
-  const renderRating = (rating) => {
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-      stars.push(
-        i < rating.average ? <Star key={i} /> : <StarBorder key={i} />
-      );
-    }
-    return stars;
-  };
-
-  if (loading) return <Typography variant="h6">Loading...</Typography>;
-  if (error)
+  if (loading) {
     return (
-      <Typography variant="h6" color="error">
-        {error}
-      </Typography>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Skeleton variant="rectangular" height={300} />
+          <Skeleton variant="text" height={60} />
+          <Skeleton variant="text" height={40} width="60%" />
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Skeleton variant="rectangular" height={200} />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Skeleton variant="rectangular" height={200} />
+            </Grid>
+          </Grid>
+        </Box>
+      </Container>
     );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+        >
+          Go Back
+        </Button>
+      </Container>
+    );
+  }
+
+  // Tab data for the custom implementation
+  const tabs = [
+    { label: "Overview", id: "tab-0" },
+    { label: "Specifications", id: "tab-1" },
+    { label: "Variants", id: "tab-2" },
+    { label: "Images", id: "tab-3" },
+    { label: "Seller Info", id: "tab-4" },
+  ];
 
   return (
-    <Box sx={{ padding: 4 }}>
-      <Grid container spacing={4}>
-        {/* Left Side - Product Info */}
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined">
-            <CardMedia
-              component="img"
-              alt={product.thumbnail.altText}
-              height="300"
-              image={product.thumbnail.url}
-              sx={{ objectFit: "contain" }}
-            />
-            <CardContent>
-              <Typography variant="h5">{product.title}</Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
-                {removeHtmlTags(product.description)}
-              </Typography>
-              <Divider sx={{ marginBottom: 1 }} />
-              <Typography variant="h6">
-                Price: ₹{product.discountedPrice || product.price}
-              </Typography>
+    <Container maxWidth="lg" sx={{ mt: 3, mb: 4 }}>
+      {/* Product status banner */}
+      {!product.isApproved && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 3 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => handleOpen("approve")}
+            >
+              Review Now
+            </Button>
+          }
+        >
+          This product is awaiting approval. Please review the details below.
+        </Alert>
+      )}
+
+      {/* Header section with basic info and actions */}
+      <Paper elevation={0} variant="outlined" sx={{ p: 3, mb: 3 }}>
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs={12} md={8}>
+            <Typography
+              variant="h5"
+              component="h1"
+              gutterBottom
+              fontWeight="bold"
+            >
+              {product.title}
+            </Typography>
+            <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+              <Chip
+                size="small"
+                icon={<VerifiedIcon />}
+                label={product.isApproved ? "Approved" : "Pending Approval"}
+                color={product.isApproved ? "success" : "warning"}
+                variant={product.isApproved ? "filled" : "outlined"}
+              />
+              <Chip
+                size="small"
+                label={
+                  product.inStock
+                    ? `In Stock (${product.stock})`
+                    : "Out of Stock"
+                }
+                color={product.inStock ? "primary" : "error"}
+                variant="outlined"
+              />
+              <Chip
+                size="small"
+                label={product.isActive ? "Active" : "Inactive"}
+                color={product.isActive ? "success" : "default"}
+                variant="outlined"
+              />
+            </Stack>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ mb: 2 }}
+            >
+              <Rating
+                value={product.rating.average || 0}
+                precision={0.5}
+                readOnly
+                size="small"
+              />
               <Typography variant="body2" color="text.secondary">
-                Brand: {product.brand}
+                ({product.rating.count} Reviews)
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Category: {product.category?.name || "Not available"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Sub-category: {product.subcategory?.name || "Not available"}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Main Category Type:{" "}
-                {product.categoryType?.name || "Not available"}
-              </Typography>
-              <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
-              <Typography variant="h6">Stock: {product.stock}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Sold: {product.productSold} units
-              </Typography>
-              <Stack sx={{ marginTop: 2 }} direction={"row"} spacing={2}>
-                <Chip
-                  label={product.inStock ? "In Stock" : "Out of Stock"}
-                  color={product.inStock ? "success" : "error"}
-                />
-                {/* Chip for isActive */}
-                <Chip
-                  label={product.isActive ? "Active" : "Inactive"}
-                  color={product.isActive ? "success" : "default"}
-                />
-                {/* Chip for isApproved */}
-                <Chip
-                  label={product.isApproved ? "Approved" : "Not Approved"}
-                  color={product.isApproved ? "success" : "error"}
-                />
-              </Stack>
-            </CardContent>
-          </Card>
-          {/* Offers */}
-          <Grid mt={2} item xs={12}>
-            <Paper sx={{ padding: 2 }}>
-              <Typography variant="h6">Special Offers</Typography>
-              <Divider sx={{ marginBottom: 2 }} />
-              {product.offers && product.offers.length > 0 ? (
-                product.offers.map((offer, index) => (
-                  <Box key={index} sx={{ marginBottom: 2 }}>
-                    <Typography variant="body2">
-                      <strong>{offer.title}</strong>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {offer.description}
-                    </Typography>
-                    <Typography variant="body2">
-                      Discount: {offer.discountPercentage}% | Valid until:{" "}
-                      {new Date(offer.validUntil).toLocaleDateString()}
-                    </Typography>
-                  </Box>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  No special offers provided yet.
+            </Stack>
+
+            <Typography variant="h6" color="primary" gutterBottom>
+              ₹{product.discountedPrice || product.price}
+              {product.discountedPrice && (
+                <Typography
+                  component="span"
+                  sx={{ textDecoration: "line-through", ml: 1 }}
+                  color="text.secondary"
+                >
+                  ₹{product.price}
                 </Typography>
               )}
-            </Paper>
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Stack
+              direction="row"
+              spacing={2}
+              justifyContent={{ xs: "flex-start", md: "flex-end" }}
+            >
+              <Button
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </Button>
+              {!product.isApproved ? (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleOpen("approve")}
+                >
+                  Approve
+                </Button>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<BlockIcon />}
+                  onClick={() => handleOpen("reject")}
+                >
+                  Reject
+                </Button>
+              )}
+            </Stack>
           </Grid>
         </Grid>
+      </Paper>
 
-        {/* Right Side - Additional Information */}
-        <Grid item xs={12} md={6}>
-          <Grid container spacing={2}>
-            {/* Specifications */}
-            <Grid item xs={12}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Specifications</Typography>
-                <Divider sx={{ marginBottom: 2 }} />
-                {product.specifications &&
-                product.specifications.length > 0 &&
-                product.specifications[0].key ? (
-                  product.specifications.map((spec, index) => (
-                    <Typography key={index} variant="body2">
-                      <strong>{spec.key}:</strong> {spec.value}
-                    </Typography>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Specifications not provided.
-                  </Typography>
-                )}
-              </Paper>
-            </Grid>
+      {/* Custom tabs implementation using Buttons instead of MUI Tabs */}
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: "divider",
+          mb: 3,
+          display: "flex",
+          overflowX: "auto",
+          "&::-webkit-scrollbar": {
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(0,0,0,0.1)",
+            borderRadius: "4px",
+          },
+        }}
+      >
+        {tabs.map((tab, index) => (
+          <Button
+            key={index}
+            disableRipple // Disable ripple effect to prevent visual jitter
+            onClick={() => setTabValue(index)}
+            sx={{
+              minWidth: "120px",
+              height: "48px",
+              borderRadius: 0,
+              borderBottom: tabValue === index ? "2px solid" : "none",
+              borderColor: "primary.main",
+              color: tabValue === index ? "primary.main" : "text.primary",
+              fontWeight: tabValue === index ? "medium" : "normal",
+              textTransform: "none",
+              px: 2,
+              transition: "none",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+                transition: "none",
+              },
+            }}
+          >
+            {tab.label}
+          </Button>
+        ))}
+      </Box>
 
-            {/* Product Variants */}
-            <Grid item xs={12}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Variants</Typography>
-                <Divider sx={{ marginBottom: 2 }} />
-                {product.variants && product.variants.length > 0 ? (
-                  product.variants.map((variant, index) => (
-                    <Box key={index} sx={{ marginBottom: 2 }}>
-                      <Typography variant="body2">
-                        <strong>{variant.attribute}:</strong> {variant.value} |
-                        Additional Price: ${variant.additionalPrice}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Stock: {variant.stock}
-                      </Typography>
-                    </Box>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Variants not provided.
-                  </Typography>
-                )}
-              </Paper>
-            </Grid>
-
-            {/* Return Policy */}
-            <Grid item xs={12}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Return Policy</Typography>
-                <Divider sx={{ marginBottom: 2 }} />
-                <Typography variant="body2">
-                  <strong>Returnable:</strong>{" "}
-                  {product.returnPolicy.isReturnable ? "Yes" : "No"}
-                </Typography>
-                {product.returnPolicy.isReturnable && (
-                  <Typography variant="body2">
-                    <strong>Return Window:</strong>{" "}
-                    {product.returnPolicy.returnWindow} days
-                  </Typography>
-                )}
-              </Paper>
-            </Grid>
-
-            {/* Metadata - Meta Title and Description */}
-            <Grid item xs={12}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Metadata</Typography>
-                <Divider sx={{ marginBottom: 2 }} />
-                <Typography variant="body2">
-                  <strong>SEO Meta Title:</strong>{" "}
-                  {product.meta.title || "Not available"}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>SEO Meta Description:</strong>{" "}
-                  {product.meta.description || "Not available"}
-                </Typography>
-              </Paper>
-            </Grid>
-
-            {/* Seller Info */}
-            <Grid item xs={12}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Seller Information</Typography>
-                <Divider sx={{ marginBottom: 2 }} />
-                <Typography variant="body2">
-                  <strong>Seller :</strong>{" "}
-                  {product.seller?.companyName || "Not available"}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Contact Info:</strong>{" "}
-                  {product.seller?.email || "Not available"}
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-
-      {/* Product Images Gallery */}
-      <Box sx={{ marginTop: 4 }}>
-        <Typography variant="h6">Product Images</Typography>
-        <Grid container spacing={2}>
-          {product.images.map((image, index) => (
-            <Grid item xs={12} sm={4} key={index}>
-              <Card variant="outlined">
+      {/* Tab Panel Contents */}
+      <Box role="tabpanel" hidden={tabValue !== 0}>
+        {tabValue === 0 && (
+          <Grid container spacing={3}>
+            {/* Product main image and description */}
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={0}
+                variant="outlined"
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
                 <CardMedia
                   component="img"
-                  alt={image.altText}
-                  height="200"
-                  image={image.url}
-                  sx={{ objectFit: "contain" }}
+                  alt={product.thumbnail?.altText || product.title}
+                  height="400"
+                  image={product.thumbnail?.url}
+                  sx={{
+                    objectFit: "contain",
+                    backgroundColor: "#f5f5f5",
+                    p: 2,
+                  }}
                 />
-              </Card>
+              </Paper>
             </Grid>
-          ))}
-        </Grid>
-      </Box>
-      {/* Footer Section - Rating and Action Buttons */}
-      <Box sx={{ marginTop: 4 }}>
-        <Divider sx={{ marginBottom: 2 }} />
-        <Typography variant="h6">Product Rating</Typography>
-        <Stack
-          direction={"row"}
-          justifyContent={"space-between"}
-          alignItems={"center"}
-        >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="body1">
-              Average Rating: {product.rating.average}
-            </Typography>
-            <Typography variant="body2" sx={{ marginLeft: 2 }}>
-              ({product.rating.count} Reviews)
-            </Typography>
-          </Box>
-          <Box sx={{ marginTop: 2, display: "flex", gap: "5px" }}>
-            <Button
-              variant="contained"
-              onClick={() => handleOpen("reject")}
-              color="error"
-            >
-              Reject
-            </Button>
-            {!product.isApproved && (
-              <Button
-                variant="contained"
-                onClick={() => handleOpen("approve")}
-                color="primary"
+
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={0}
+                variant="outlined"
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
               >
-                Approve
-              </Button>
-            )}
-          </Box>
-        </Stack>
+                <Typography variant="h6" gutterBottom>
+                  Product Details
+                </Typography>
+                <Typography variant="body2" paragraph>
+                  {removeHtmlTags(product.description)}
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Brand
+                    </Typography>
+                    <Typography variant="body1">
+                      {product.brand || "Not specified"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Category
+                    </Typography>
+                    <Typography variant="body1">
+                      {product.category?.name || "Not categorized"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sub-category
+                    </Typography>
+                    <Typography variant="body1">
+                      {product.subcategory?.name || "Not specified"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Type
+                    </Typography>
+                    <Typography variant="body1">
+                      {product.categoryType?.name || "Not specified"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Stock
+                    </Typography>
+                    <Typography variant="body1">
+                      {product.stock} units
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sold
+                    </Typography>
+                    <Typography variant="body1">
+                      {product.productSold} units
+                    </Typography>
+                  </Grid>
+                </Grid>
+
+                <Box sx={{ flexGrow: 1 }} />
+
+                {/* Return policy section */}
+                <Box sx={{ mt: 3, p: 2, bgcolor: "#f8f9fa", borderRadius: 1 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Return Policy
+                  </Typography>
+                  <Typography variant="body2">
+                    {product.returnPolicy.isReturnable
+                      ? `Returnable within ${product.returnPolicy.returnWindow} days`
+                      : "Not returnable"}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* Special offers section */}
+            <Grid item xs={12}>
+              <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Special Offers
+                </Typography>
+                {product.offers && product.offers.length > 0 ? (
+                  <Grid container spacing={2}>
+                    {product.offers.map((offer, index) => (
+                      <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 2,
+                            border: "1px solid",
+                            borderColor: "primary.light",
+                            bgcolor: "primary.lightest",
+                            height: "100%",
+                          }}
+                        >
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {offer.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            {offer.description}
+                          </Typography>
+                          <Chip
+                            size="small"
+                            label={`${offer.discountPercentage}% OFF`}
+                            color="primary"
+                          />
+                          <Typography
+                            variant="caption"
+                            display="block"
+                            sx={{ mt: 1 }}
+                          >
+                            Valid until:{" "}
+                            {new Date(offer.validUntil).toLocaleDateString()}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No special offers available for this product.
+                  </Typography>
+                )}
+              </Paper>
+            </Grid>
+
+            {/* SEO metadata */}
+            <Grid item xs={12}>
+              <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  SEO Metadata
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Meta Title
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ wordBreak: "break-word" }}
+                    >
+                      {product.meta?.title || "Not provided"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="text.secondary">
+                      Meta Description
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ wordBreak: "break-word" }}
+                    >
+                      {product.meta?.description || "Not provided"}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
+        )}
       </Box>
-      {/* Confirmation Modal */}
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="confirm-approve-title"
-        aria-describedby="confirm-approve-description"
-      >
-        <DialogTitle id="confirm-approve-title">
-          Confirm {action == "approve" ? "Approval" : "Rejection"}
+
+      {/* Specifications Tab */}
+      <Box role="tabpanel" hidden={tabValue !== 1}>
+        {tabValue === 1 && (
+          <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Technical Specifications
+            </Typography>
+            {product.specifications &&
+            product.specifications.length > 0 &&
+            product.specifications[0].key ? (
+              <Grid container spacing={2}>
+                {product.specifications.map((spec, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        bgcolor: index % 2 === 0 ? "#f8f9fa" : "transparent",
+                        height: "100%",
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        {spec.key}
+                      </Typography>
+                      <Typography variant="body1">{spec.value}</Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Alert severity="info">
+                No specifications have been provided for this product.
+              </Alert>
+            )}
+          </Paper>
+        )}
+      </Box>
+
+      {/* Variants Tab */}
+      <Box role="tabpanel" hidden={tabValue !== 2}>
+        {tabValue === 2 && (
+          <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Product Variants
+            </Typography>
+            {product.variants && product.variants.length > 0 ? (
+              <Grid container spacing={2}>
+                {product.variants.map((variant, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Paper
+                      elevation={0}
+                      variant="outlined"
+                      sx={{ p: 2, height: "100%" }}
+                    >
+                      <Typography variant="subtitle1" fontWeight="medium">
+                        {variant.attribute}
+                      </Typography>
+                      <Chip label={variant.value} size="small" sx={{ my: 1 }} />
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        sx={{ mt: 1 }}
+                      >
+                        <Typography variant="body2">
+                          +₹{variant.additionalPrice}
+                        </Typography>
+                        <Typography variant="body2">
+                          Stock: {variant.stock}
+                        </Typography>
+                      </Stack>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Alert severity="info">
+                This product doesn't have any variants.
+              </Alert>
+            )}
+          </Paper>
+        )}
+      </Box>
+
+      {/* Images Tab */}
+      <Box role="tabpanel" hidden={tabValue !== 3}>
+        {tabValue === 3 && (
+          <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Product Gallery
+            </Typography>
+            <Grid container spacing={2}>
+              {product.images && product.images.length > 0 ? (
+                product.images.map((image, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Paper
+                      elevation={0}
+                      variant="outlined"
+                      sx={{
+                        p: 1,
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <CardMedia
+                        component="img"
+                        image={image.url}
+                        alt={image.altText || `Product image ${index + 1}`}
+                        sx={{
+                          height: 200,
+                          objectFit: "contain",
+                          bgcolor: "#f5f5f5",
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        align="center"
+                        sx={{ mt: 1 }}
+                      >
+                        {image.altText || `Image ${index + 1}`}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))
+              ) : (
+                <Grid item xs={12}>
+                  <Alert severity="info">
+                    No additional images available for this product.
+                  </Alert>
+                </Grid>
+              )}
+              {product.thumbnail && (
+                <Grid item xs={12} sm={6} md={4}>
+                  <Paper
+                    elevation={0}
+                    variant="outlined"
+                    sx={{
+                      p: 1,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      borderColor: "primary.main",
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={product.thumbnail.url}
+                      alt={product.thumbnail.altText || "Product thumbnail"}
+                      sx={{
+                        height: 200,
+                        objectFit: "contain",
+                        bgcolor: "#f5f5f5",
+                      }}
+                    />
+                    <Chip
+                      label="Thumbnail"
+                      color="primary"
+                      size="small"
+                      sx={{ alignSelf: "center", mt: 1 }}
+                    />
+                  </Paper>
+                </Grid>
+              )}
+            </Grid>
+          </Paper>
+        )}
+      </Box>
+
+      {/* Seller Info Tab */}
+      <Box role="tabpanel" hidden={tabValue !== 4}>
+        {tabValue === 4 && (
+          <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Seller Information
+            </Typography>
+            {product.seller ? (
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Paper elevation={0} sx={{ p: 2, bgcolor: "#f8f9fa" }}>
+                    <Typography variant="subtitle1" gutterBottom>
+                      Company Details
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Company Name
+                        </Typography>
+                        <Typography variant="body1">
+                          {product.seller.companyName || "Not provided"}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Email
+                        </Typography>
+                        <Typography variant="body1">
+                          {product.seller.email || "Not provided"}
+                        </Typography>
+                      </Grid>
+                      {/* Add more seller fields as needed */}
+                    </Grid>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Paper elevation={0} sx={{ p: 2, bgcolor: "#f8f9fa" }}>
+                    <Typography variant="subtitle1" gutterBottom>
+                      Product Statistics
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Products
+                        </Typography>
+                        <Typography variant="body1">
+                          {product.seller.totalProducts || "N/A"}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          Joined On
+                        </Typography>
+                        <Typography variant="body1">
+                          {product.seller.createdAt
+                            ? new Date(
+                                product.seller.createdAt
+                              ).toLocaleDateString()
+                            : "N/A"}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                </Grid>
+              </Grid>
+            ) : (
+              <Alert severity="warning">
+                Seller information is not available for this product.
+              </Alert>
+            )}
+          </Paper>
+        )}
+      </Box>
+
+      {/* Approval/rejection dialog */}
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          {action === "approve" ? "Approve Product" : "Reject Product"}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="confirm-approve-description">
-            Are you sure you want to{" "}
-            {action == "approve" ? "approve" : "reject"} this product?
+          <DialogContentText sx={{ mb: 2 }}>
+            {action === "approve"
+              ? "Are you sure you want to approve this product? It will be visible to customers."
+              : "Please provide a reason for rejecting this product. This will be shared with the seller."}
           </DialogContentText>
-          {action == "reject" && (
+          {action === "reject" && (
             <TextField
+              error={!!validationError}
               helperText={validationError}
               autoFocus
               margin="dense"
               id="block-reason"
-              label="Block Reason"
+              label="Rejection Reason"
+              placeholder="Explain why this product is being rejected..."
               type="text"
               fullWidth
               multiline
-              rows={3}
+              rows={4}
               value={blockReason}
               onChange={(e) => setBlockReason(e.target.value)}
               variant="outlined"
             />
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={handleClose} color="inherit" variant="outlined">
             Cancel
           </Button>
-          {action == "approve" ? (
+          {action === "approve" ? (
             <Button
               onClick={handleApproveProduct}
-              color="primary"
+              color="success"
               variant="contained"
               disabled={loadingBtn}
+              startIcon={
+                loadingBtn ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <VerifiedIcon />
+                )
+              }
             >
-              {loadingBtn ? "Approving..." : "Confirm"}
+              {loadingBtn ? "Processing..." : "Approve Product"}
             </Button>
           ) : (
             <Button
@@ -446,13 +876,20 @@ const ViewProduct = () => {
               color="error"
               variant="contained"
               disabled={loadingBtn}
+              startIcon={
+                loadingBtn ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <BlockIcon />
+                )
+              }
             >
-              {loadingBtn ? "Rejecting..." : "Reject"}
+              {loadingBtn ? "Processing..." : "Reject Product"}
             </Button>
           )}
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 
