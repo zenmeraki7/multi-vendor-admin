@@ -12,39 +12,63 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Paper,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/baseUrl";
 import { logoutUser } from "../utils/authUtils";
+import CustomInput from "../components/SharedComponents/CustomInput";
+import CustomButton from "../components/SharedComponents/CustomButton";
 
-// Styled components for custom stepper design
+// Styled components for custom stepper design with blue gradient
 const CustomStepIcon = styled(Box)(({ active }) => ({
   width: "40px",
   height: "40px",
   borderRadius: "50%",
-  background: active
-    ? "linear-gradient(90deg,rgb(188, 27, 237),rgb(115, 31, 210))"
-    : "#555555",
+  background: active ? "linear-gradient(90deg, #2196F3, #0D47A1)" : "#E0E0E0",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  color: "#fff",
-  boxShadow: active ? "0 0 8px rgba(66, 16, 165, 0.8)" : "none",
-  marginBottom:'30px',
+  color: active ? "#fff" : "#757575",
+  boxShadow: active ? "0 0 8px rgba(33, 150, 243, 0.5)" : "none",
+  marginBottom: "30px",
+  transition: "all 0.3s ease",
 }));
 
 const StepConnector = styled("div")(({ active }) => ({
   flex: 1,
   height: "2px",
-  background: active
-    ? "linear-gradient(90deg,rgb(222, 29, 225),rgb(166, 18, 174))"
-    : "#555555",
+  background: active ? "linear-gradient(90deg, #2196F3, #0D47A1)" : "#E0E0E0",
   margin: "0 8px",
-  marginBottom:'30px',
+  marginBottom: "30px",
+  transition: "all 0.3s ease",
+}));
+
+const StepLabel = styled(Typography)(({ active }) => ({
+  fontSize: "12px",
+  fontWeight: active ? 600 : 400,
+  color: active ? "#0D47A1" : "#757575",
+  textAlign: "center",
+  marginTop: "5px",
+}));
+
+const ContentPaper = styled(Paper)(({ theme }) => ({
+  padding: "24px",
+  margin: "16px 0 24px 0",
+  borderRadius: "8px",
+  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+}));
+
+const ActionButton = styled(Button)(({ color }) => ({
+  fontWeight: 500,
+  padding: "8px 24px",
+  borderRadius: "4px",
+  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+  margin: "0 8px",
 }));
 
 const steps = [
@@ -54,19 +78,22 @@ const steps = [
 ];
 
 const CustomStepper = ({ activeStep }) => (
-  <Box display="flex" alignItems="center" justifyContent="center">
-    {steps.map((step, index) => (
-      <React.Fragment key={step.label}>
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <CustomStepIcon active={index <= activeStep}>
-            {step.icon}
-          </CustomStepIcon>
-        </Box>
-        {index < steps.length - 1 && (
-          <StepConnector active={index < activeStep} />
-        )}
-      </React.Fragment>
-    ))}
+  <Box sx={{ mb: 4 }}>
+    <Box display="flex" alignItems="center" justifyContent="center">
+      {steps.map((step, index) => (
+        <React.Fragment key={step.label}>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <CustomStepIcon active={index <= activeStep}>
+              {step.icon}
+            </CustomStepIcon>
+            <StepLabel active={index <= activeStep}>{step.label}</StepLabel>
+          </Box>
+          {index < steps.length - 1 && (
+            <StepConnector active={index < activeStep} />
+          )}
+        </React.Fragment>
+      ))}
+    </Box>
   </Box>
 );
 
@@ -83,7 +110,7 @@ const VendorApprove = () => {
   const [rejectReason, setRejectReason] = useState("");
 
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
 
   const { vendorId } = useParams();
   const token = localStorage.getItem("token");
@@ -105,12 +132,15 @@ const VendorApprove = () => {
           }
         );
 
-        setVendorDetails(response.data.data);  
+        setVendorDetails(response.data.data);
       } catch (error) {
         console.error("Error fetching vendor data:", error);
-         if (error.response && (error.response.status === 404 || error.response.status === 401)) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
-      }
+        if (
+          error.response &&
+          (error.response.status === 404 || error.response.status === 401)
+        ) {
+          logoutUser(); // Call logoutUser if 404 or 401 status code
+        }
       }
     };
 
@@ -129,43 +159,43 @@ const VendorApprove = () => {
         gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))"
         gap={3}
       >
-        <TextField
+        <CustomInput
           label="Full Name"
           value={details.fullName}
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="Email"
           value={details.email}
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="Phone Number"
           value={details.phoneNum}
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="Address"
           value={details.address}
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="City"
           value={details.city}
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="State"
           value={details.state?.name || "N/A"}
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="Country"
           value={details.country?.name || "N/A"}
           InputProps={{ readOnly: true }}
@@ -192,9 +222,10 @@ const VendorApprove = () => {
         gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))"
         gap={3}
       >
-        <TextField
+        <CustomInput
           label="PAN Document Number"
-          value={PAN.documentNumber}
+          value={PAN.documentNumber || ""} // Ensure value is not undefined
+          variant="outlined" // Explicitly set variant
           InputProps={{ readOnly: true }}
           fullWidth
         />
@@ -205,12 +236,18 @@ const VendorApprove = () => {
           <img
             src={PAN.documentUrl}
             alt="PAN Document"
-            style={{ width: "300px", height: "350px", paddingRight: "15px" }}
+            style={{
+              width: "300px",
+              height: "350px",
+              paddingRight: "15px",
+              borderRadius: "4px",
+            }}
           />
         </Box>
-        <TextField
+        <CustomInput
           label="GSTIN"
-          value={GSTIN.documentNumber}
+          value={GSTIN.documentNumber || ""} // Ensure value is not undefined
+          variant="outlined" // Explicitly set variant
           InputProps={{ readOnly: true }}
           fullWidth
         />
@@ -221,7 +258,12 @@ const VendorApprove = () => {
           <img
             src={GSTIN.documentUrl}
             alt="GSTIN Document"
-            style={{ width: "300px", height: "350px", paddingRight: "15px" }}
+            style={{
+              width: "300px",
+              height: "350px",
+              paddingRight: "15px",
+              borderRadius: "4px",
+            }}
           />
         </Box>
       </Box>
@@ -235,27 +277,31 @@ const VendorApprove = () => {
         gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))"
         gap={3}
       >
-        <TextField
+        <CustomInput
           label="Account Holder Name"
-          value={bankDetails.accountHolderName}
+          value={bankDetails.accountHolderName || ""} // Ensure value is not undefined
+          variant="outlined" // Explicitly set variant
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="Account Number"
-          value={bankDetails.accountNumber}
+          value={bankDetails.accountNumber || ""} // Ensure value is not undefined
+          variant="outlined" // Explicitly set variant
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="IFSC Code"
-          value={bankDetails.ifscCode}
+          value={bankDetails.ifscCode || ""} // Ensure value is not undefined
+          variant="outlined" // Explicitly set variant
           InputProps={{ readOnly: true }}
           fullWidth
         />
-        <TextField
+        <CustomInput
           label="Bank Name"
           value={bankDetails.bankName?.name || "N/A"}
+          variant="outlined" // Explicitly set variant
           InputProps={{ readOnly: true }}
           fullWidth
         />
@@ -266,7 +312,7 @@ const VendorApprove = () => {
           <img
             src={bankDetails.documentUrl}
             alt="Bank Document"
-            style={{ width: "300px", height: "350px" }}
+            style={{ width: "300px", height: "350px", borderRadius: "4px" }}
           />
         </Box>
       </Box>
@@ -275,7 +321,16 @@ const VendorApprove = () => {
 
   const renderStepContent = (step) => {
     if (!vendorDetails) {
-      return <CircularProgress />;
+      return (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="300px"
+        >
+          <CircularProgress />
+        </Box>
+      );
     }
 
     switch (step) {
@@ -323,7 +378,6 @@ const VendorApprove = () => {
       setLoading(false); // Stop loading
     }
   };
-  
 
   const handleConfirmReject = async () => {
     setLoading(true); // Start loading
@@ -354,8 +408,6 @@ const VendorApprove = () => {
       setLoading(false); // Stop loading
     }
   };
-  
-  
 
   const handleNext = () => {
     if (activeStep < steps.length - 1) {
@@ -370,110 +422,169 @@ const VendorApprove = () => {
   };
 
   return (
-    <Box padding={3}>
-      <Typography variant="h5" align="center">
-        Vendor Details
-      </Typography>
+    <Box padding={3} maxWidth="1200px" margin="0 auto">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h4" color="black">
+          <b>Vendor Details Review</b>
+        </Typography>
+        <CustomButton
+          onClick={() => navigate(-1)}
+          variant="contained"
+          style={{
+            marginBottom: "20px",
+          }}
+          icon={ArrowBackIcon}
+        ></CustomButton>
+      </Box>
       <CustomStepper activeStep={activeStep} />
-      <Box>{renderStepContent(activeStep)}</Box>
-      <Box mt={3} display="flex" justifyContent="center">
-        {activeStep === 2 && ( // Only show Approve and Reject buttons on the third step
+      <ContentPaper elevation={1}>{renderStepContent(activeStep)}</ContentPaper>
+
+      {/* Action buttons for approval/rejection */}
+      <Box mt={3} mb={2} display="flex" justifyContent="center">
+        {activeStep === 2 && (
           <>
-            <Button
+            <ActionButton
               variant="contained"
               color="success"
               onClick={handleApprove}
-              style={{ marginRight: "10px" }}
             >
               Approve
-            </Button>
-            <Button
+            </ActionButton>
+            <ActionButton
               variant="contained"
               color="error"
               onClick={handleReject}
-              style={{ marginRight: "10px" }}
             >
               Reject
-            </Button>
+            </ActionButton>
           </>
         )}
       </Box>
 
       {/* Navigation buttons */}
-      <Box mt={3} display="flex" justifyContent="center">
-        <Button onClick={handleBack} disabled={activeStep === 0}>
+      <Box
+        mt={4}
+        display="flex"
+        justifyContent="space-between"
+        maxWidth="400px"
+        margin="0 auto"
+      >
+        <Button
+          onClick={handleBack}
+          disabled={activeStep === 0}
+          variant="outlined"
+          color="primary"
+          sx={{ minWidth: "100px" }}
+        >
           Back
         </Button>
-        <Button onClick={handleNext} disabled={activeStep === steps.length - 1}>
+        <Button
+          onClick={handleNext}
+          disabled={activeStep === steps.length - 1}
+          variant="outlined"
+          color="primary"
+          sx={{ minWidth: "100px" }}
+        >
           Next
         </Button>
       </Box>
 
       {/* Approve Modal */}
-      <Dialog open={openApproveModal} onClose={() => setOpenApproveModal(false)}>
-  <DialogTitle>Approve Vendor</DialogTitle>
-  <DialogContent>
-    <Typography>Are you sure you want to approve this vendor?</Typography>
-    {loading && (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        mt={2}
-        minHeight="50px"
+      <Dialog
+        open={openApproveModal}
+        onClose={() => setOpenApproveModal(false)}
+        PaperProps={{
+          sx: { borderRadius: "8px", padding: "8px" },
+        }}
       >
-        <CircularProgress size={24} />
-      </Box>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenApproveModal(false)} disabled={loading}>
-      Cancel
-    </Button>
-    <Button onClick={handleConfirmApprove} disabled={loading}>
-      Confirm
-    </Button>
-  </DialogActions>
-</Dialog>
-
-
+        <DialogTitle sx={{ color: "#1976D2" }}>Approve Vendor</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to approve this vendor?</Typography>
+          {loading && (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              mt={2}
+              minHeight="50px"
+            >
+              <CircularProgress size={24} color="primary" />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ padding: "16px 24px" }}>
+          <Button
+            onClick={() => setOpenApproveModal(false)}
+            disabled={loading}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmApprove}
+            disabled={loading}
+            variant="contained"
+            color="primary"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Reject Modal */}
-      <Dialog open={openRejectModal} onClose={() => setOpenRejectModal(false)}>
-  <DialogTitle>Reject Vendor</DialogTitle>
-  <DialogContent>
-    <Typography>Enter reason for rejection:</Typography>
-    <TextField
-      fullWidth
-      value={rejectReason}
-      onChange={(e) => setRejectReason(e.target.value)}
-      multiline
-      rows={4}
-      disabled={loading}
-    />
-    {loading && (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        mt={2}
-        minHeight="50px"
+      <Dialog
+        open={openRejectModal}
+        onClose={() => setOpenRejectModal(false)}
+        PaperProps={{
+          sx: { borderRadius: "8px", padding: "8px" },
+        }}
       >
-        <CircularProgress size={24} />
-      </Box>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenRejectModal(false)} disabled={loading}>
-      Cancel
-    </Button>
-    <Button onClick={handleConfirmReject} disabled={loading}>
-      Confirm
-    </Button>
-  </DialogActions>
-</Dialog>
-
-
+        <DialogTitle sx={{ color: "#d32f2f" }}>Reject Vendor</DialogTitle>
+        <DialogContent>
+          <Typography mb={2}>Please provide reason for rejection:</Typography>
+          <CustomInput
+            fullWidth
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            multiline
+            rows={4}
+            disabled={loading}
+          />
+          {loading && (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              mt={2}
+              minHeight="50px"
+            >
+              <CircularProgress size={24} color="error" />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ padding: "16px 24px" }}>
+          <Button
+            onClick={() => setOpenRejectModal(false)}
+            disabled={loading}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmReject}
+            disabled={loading}
+            variant="contained"
+            color="error"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar for alerts */}
       <Snackbar
@@ -485,7 +596,7 @@ const VendorApprove = () => {
         <Alert
           onClose={handleSnackbarClose}
           severity={snackbar.severity}
-          variant="filled" // Adding the 'filled' variant
+          variant="filled"
           sx={{ width: "100%" }}
         >
           {snackbar.message}
