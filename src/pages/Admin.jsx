@@ -2,42 +2,54 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SaveIcon from "@mui/icons-material/Save";
 import LogoutIcon from "@mui/icons-material/Logout";
-import BackupIcon from '@mui/icons-material/Backup';
+import BackupIcon from "@mui/icons-material/Backup";
 import { BASE_URL } from "../utils/baseUrl";
 import { Link } from "react-router-dom";
-import CustomInput from "../components/SharedComponents/CustomInput";  // Importing CustomInput
+import CustomInput from "../components/SharedComponents/CustomInput"; // Importing CustomInput
 import { logoutUser } from "../utils/authUtils";
+import CustomButton from "../components/SharedComponents/CustomButton";
 
 function Admin() {
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [profileImage, setProfileImage] = useState(null);  // New state for the profile image
+  const [profileImage, setProfileImage] = useState(null); // New state for the profile image
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
         const token = localStorage.getItem("token");
 
-        const response = await axios.get(`${BASE_URL}/api/admin/get-auth-admin`, {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get(
+          `${BASE_URL}/api/admin/get-auth-admin`,
+          {
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setAdminData((prevData) => {
+          if (JSON.stringify(prevData) !== JSON.stringify(response.data.data)) {
+            return response.data.data;
+          }
+          return prevData;
         });
 
-        setAdminData(response.data.data);
         setLoading(false);
       } catch (err) {
-        if (err.response && (err.response.status === 404 || err.response.status === 401)) {
+        if (
+          err.response &&
+          (err.response.status === 404 || err.response.status === 401)
+        ) {
           logoutUser(); // Call logoutUser if 404 or 401 status code
         }
-        // setError(err.message);
         setLoading(false);
       }
     };
 
     fetchAdminData();
-  }, []);
+  }, []); // ✅ Ensures it runs only once on mount
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -50,7 +62,7 @@ function Admin() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileImage(URL.createObjectURL(file));  // Update profile image preview
+      setProfileImage(URL.createObjectURL(file)); // Update profile image preview
     }
   };
 
@@ -63,7 +75,13 @@ function Admin() {
   }
 
   return (
-    <div style={{ padding: "30px", backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+    <div
+      style={{
+        padding: "30px",
+        backgroundColor: "#f9f9f9",
+        minHeight: "100vh",
+      }}
+    >
       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
         <div
           style={{
@@ -76,7 +94,10 @@ function Admin() {
           }}
         >
           <img
-            src={profileImage || "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTOYjBEK4eaJZnQcg651SM1OyzuzWXY9JZrqYM6fL0_BlEiZmSmDQst0lxjdKHDRRRTc2QdZCtF79H01fEb_u5eXQ"} // Show selected image or default
+            src={
+              profileImage ||
+              "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTOYjBEK4eaJZnQcg651SM1OyzuzWXY9JZrqYM6fL0_BlEiZmSmDQst0lxjdKHDRRRTc2QdZCtF79H01fEb_u5eXQ"
+            } // Show selected image or default
             alt="Admin"
             style={{
               width: "200px",
@@ -91,52 +112,46 @@ function Admin() {
           </p>
           <div className="row display-flex">
             <div className="col-6">
-              <Link to='/login'>
-                <button
-                  style={{
-                    background: "linear-gradient(45deg, #556cd6, #19857b)",
-                    color: "#fff",
-                    border: "none",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    marginTop: "20px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    marginLeft: "100px",
-                  }}
-                >
-                  <LogoutIcon />
-                </button>
+              <Link to="/login">
+                <CustomButton
+                  variant="contained"
+                  style={{ marginTop: "20px", marginLeft: "100px",width: "50px", height: "50px", minWidth: "50px" }}
+                  icon={LogoutIcon}
+                ></CustomButton>
               </Link>
             </div>
             <div className="col-6">
-              <label
-                htmlFor="image-upload"
-                style={{
-                  background: "linear-gradient(45deg, #556cd6, #19857b)",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px",
-                  borderRadius: "5px",
-                  marginTop: "20px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  marginRight: "110px",
-                  cursor: "pointer", // Makes it clickable
-                }}
-              >
-                <BackupIcon />
-              </label>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: "none" }} // Hide the actual file input
-              />
-            </div>
+  <label
+    htmlFor="image-upload"
+    style={{
+      backgroundColor: "#2563EB",
+      marginTop: "20px",
+      color: "#ffffff",
+      borderRadius: "10px",
+      width: "50px",
+      height: "50px",
+      minWidth: "50px",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: "8px",
+      cursor: "pointer",
+      transition: "all 0.2s ease-in-out",
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1E40AF")}
+    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2563EB")}
+  >
+    <BackupIcon style={{ fontSize: "18px" }} />
+  </label>
+  <input
+    id="image-upload"
+    type="file"
+    accept="image/*"
+    onChange={handleImageChange}
+    style={{ display: "none" }} // Hide the actual file input
+  />
+</div>
+
           </div>
 
           <div style={{ textAlign: "left", marginTop: "20px" }}>
@@ -218,21 +233,9 @@ function Admin() {
             />
           </div>
 
-          <button
-            className="btn btn-primary mt-3"
-            style={{
-              color: "#fff",
-              background: "linear-gradient(45deg, #556cd6, #19857b)",
-              border: "none",
-              padding: "10px 15px",
-              borderRadius: "5px",
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-            }}
-          >
-            <SaveIcon /> Save
-          </button>
+          <CustomButton variant="contained" icon={SaveIcon}   style={{ marginTop: "20px" }}>
+            Save
+          </CustomButton>
         </div>
       </div>
     </div>
