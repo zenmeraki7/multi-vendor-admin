@@ -18,6 +18,7 @@ import { styled } from "@mui/system";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useParams, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/baseUrl";
 import { logoutUser } from "../utils/authUtils";
