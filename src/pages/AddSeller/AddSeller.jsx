@@ -1,64 +1,190 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Container, Row, Col, InputGroup } from "react-bootstrap";
+import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import CustomInput from "../../components/SharedComponents/CustomInput";
-import TableSelect from "../../components/SharedComponents/TableSelect";
 import CustomSelect from "../../components/SharedComponents/CustomSelect";
 import CustomButton from "../../components/SharedComponents/CustomButton";
 
-const AddSeller = () => {
-    const [storeDescription, setStoreDescription] = React.useState("");
-    const [sellerDescription, setSellerDescription] = React.useState("");
-    const [sellerPolicy, setSellerPolicy] = React.useState("");
-    const [password, setPassword] = React.useState("");
-    const [confirmPassword, setConfirmPassword] = React.useState("");
-    const [showPassword, setShowPassword] = React.useState(false);
+const BASE_URL = "http://localhost:5000";
 
-    const [country, setCountry] = useState("all");
+const AddSeller = () => {
+    const [storeDescription, setStoreDescription] = useState("");
+    const [sellerDescription, setSellerDescription] = useState("");
+    const [sellerPolicy, setSellerPolicy] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [countries, setCountries] = useState([{ _id: "1", name: "Country1" }]);
+    const [states, setStates] = useState([{ _id: "1", name: "State1" }]);
+    const [businessTypes, setBusinessTypes] = useState([{ _id: "1", name: "Type1" }]);
+    const [formValues, setFormValues] = useState({
+        country: "",
+        sellerState: "",
+        businessType: "",
+    });
+
+    // Fetch data from backend
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const config = {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                };
+
+                // Fetch countries
+                const countriesRes = await axios.get(`${BASE_URL}/api/countries`, config);
+                setCountries(countriesRes.data);
+
+                // Fetch business types
+                const businessTypesRes = await axios.get(`${BASE_URL}/api/business-types`, config);
+                setBusinessTypes(businessTypesRes.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Fetch states when country changes
+    useEffect(() => {
+        const fetchStates = async () => {
+            if (formValues.country) {
+                try {
+                    const token = localStorage.getItem("token");
+                    const response = await axios.get(
+                        `${BASE_URL}/api/states?countryId=${formValues.country}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    setStates(response.data);
+                } catch (error) {
+                    console.error("Error fetching states:", error);
+                }
+            }
+        };
+
+        fetchStates();
+    }, [formValues.country]);
+
+    // API call to add seller
+    const addSeller = async (sellerData, token) => {
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/api/vendor/add-vendor`,
+                sellerData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Error adding seller:", error.response?.data || error.message);
+            throw new Error(error.response?.data?.message || "Failed to add seller.");
+        }
+    };
 
     const togglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormValues((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
-        if (!storeDescription || !sellerDescription || !sellerPolicy) {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        // Validate required fields
+        if (!storeDescription || !sellerDescription || !sellerPolicy || !formValues.country || 
+            !formValues.sellerState || !formValues.businessType) {
             alert("Please fill all required fields.");
+            setLoading(false);
             return;
         }
 
         if (password !== confirmPassword) {
             alert("Passwords do not match!");
+            setLoading(false);
             return;
         }
 
+        // Get authentication token
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Authentication token not found. Please log in.");
+            setLoading(false);
+            return;
+        }
+
+        // Prepare formData
         const formData = {
-            sellerName: e.target.sellerName.value,
-            sellerShopName: e.target.sellerShopName.value,
-            sellerEmail: e.target.sellerEmail.value,
-            storeAddress: e.target.storeAddress.value,
-            sellerCity: e.target.sellerCity.value,
-            sellerCountry: e.target.sellerCountry.value,
-            sellerZipcode: e.target.sellerZipcode.value,
-            sellerContact: e.target.sellerContact.value,
+            fullName: e.target.sellerName.value,
+            companyName: e.target.sellerShopName.value,
+            email: e.target.sellerEmail.value,
+            phoneNum: e.target.sellerContact.value,
+            address: e.target.storeAddress.value,
+            city: e.target.sellerCity.value,
+            zipCode: e.target.sellerZipcode.value,
+            country: formValues.country,
+            state: formValues.sellerState,
+            businessType: formValues.businessType,
+            password,
+            confirmPassword,
             storeDescription,
             sellerDescription,
             sellerPolicy,
-            password,
         };
 
-        console.log("Form Submitted:", formData);
-        alert("Seller added successfully!");
-    };
-    const handleFilterChange = (setter) => (event) => {
-        setter(event.target.value);
-        setPage(1); // Reset to first page on filter change
+        try {
+            const response = await axios.post(
+                `${BASE_URL}/api/vendor/add-vendor`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            alert("Seller added successfully!");
+
+            // Reset form
+            e.target.reset();
+            setStoreDescription("");
+            setSellerDescription("");
+            setSellerPolicy("");
+            setPassword("");
+            setConfirmPassword("");
+            setFormValues({ country: "", sellerState: "", businessType: "" });
+
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to add seller.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <Container className="mt-4 " >
+        <Container className="mt-4">
             <h2>Add Seller</h2>
             <p>Here you can add Sellers to your Store.</p>
             <Form onSubmit={handleSubmit}>
@@ -67,83 +193,143 @@ const AddSeller = () => {
                     <p>Enter Seller Details You Want To Add.</p>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerName">
-
                             <Form.Label>Seller Name *</Form.Label>
-                            <CustomInput type="text" name="sellerName" placeholder="Enter Seller Name Here" required />
-
-                            {/* <Form.Control type="text" placeholder="Enter Seller Name Here" required /> */}
+                            <CustomInput
+                                type="text"
+                                name="sellerName"
+                                placeholder="Enter Seller Name Here"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerShopName">
                             <Form.Label>Seller Shop Name *</Form.Label>
-                            <CustomInput type="text" name="sellershopName" placeholder="Enter Seller Shop Name Here" required />
-                            {/* <Form.Control type="text" placeholder="Enter Seller Shop Name Here" required /> */}
+                            <CustomInput
+                                type="text"
+                                name="sellerShopName"
+                                placeholder="Enter Seller Shop Name Here"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerEmail">
                             <Form.Label>Email *</Form.Label>
-                            <CustomInput type="email" name="sellerEmail" placeholder="Enter Seller's Email" required />
-                            {/* <Form.Control type="email" placeholder="Enter Seller's Email" required /> */}
+                            <CustomInput
+                                type="email"
+                                name="sellerEmail"
+                                placeholder="Enter Seller's Email"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="storeAddress">
                             <Form.Label>Store Address *</Form.Label>
-                            <CustomInput type="text" name="storeAddress" placeholder="Enter Seller's Store Address" required />
-                            {/* <Form.Control as="textarea" rows={3} placeholder="Enter Seller's Store Address" required /> */}
+                            <CustomInput
+                                type="text"
+                                name="storeAddress"
+                                placeholder="Enter Seller's Store Address"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerCity">
                             <Form.Label>City *</Form.Label>
-                            <CustomInput type="text" name="sellerCity" placeholder="Enter Seller's City" required />
-                            {/* <Form.Control type="text" placeholder="Enter Seller's City" required /> */}
+                            <CustomInput
+                                type="text"
+                                name="sellerCity"
+                                placeholder="Enter Seller's City"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerCountry">
-
                             <Form.Label>Country *</Form.Label>
                             <CustomSelect
-                                style={{ width: "100%" }}
-                                id="country-filter"
+                                label="Country"
                                 name="country"
-                                value={country}
-                                onChange={handleFilterChange(setCountry)}
-                                // label="Country"
-                                MenuItems={[
-                                    { value: "all", label: "All" },
-                                    { value: "USA", label: "USA" },
-                                    { value: "India", label: "India" },
-                                    { value: "Canada", label: "Canada" },
-                                    { value: "UK", label: "UK" },
-
-                                ]}
-                            />
-
+                                value={formValues.country}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Country</option>
+                                {countries.map((country) => (
+                                    <option key={country._id} value={country._id}>
+                                        {country.name}
+                                    </option>
+                                ))}
+                            </CustomSelect>
+                        </Form.Group>
+                    </Row>
+                    <Row className="mb-3">
+                        <Form.Group as={Col} controlId="sellerState">
+                            <Form.Label>State *</Form.Label>
+                            <CustomSelect
+                                label="State"
+                                name="sellerState"
+                                value={formValues.sellerState}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select State</option>
+                                {states.map((state) => (
+                                    <option key={state._id} value={state._id}>
+                                        {state.name}
+                                    </option>
+                                ))}
+                            </CustomSelect>
+                        </Form.Group>
+                    </Row>
+                    <Row className="mb-3">
+                        <Form.Group as={Col} controlId="businessType">
+                            <Form.Label>Business Type *</Form.Label>
+                            <CustomSelect
+                                label="Business Structure"
+                                name="businessType"
+                                value={formValues.businessType}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Business Type</option>
+                                {businessTypes.map((type) => (
+                                    <option key={type._id} value={type._id}>
+                                        {type.name}
+                                    </option>
+                                ))}
+                            </CustomSelect>
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerZipcode">
                             <Form.Label>Zipcode *</Form.Label>
-                            <CustomInput type="text" name="sellerZipcode" placeholder="Enter Seller's Zipcode" required />
-                            {/* <Form.Control type="text" placeholder="Enter Seller's Zipcode" required /> */}
+                            <CustomInput
+                                type="text"
+                                name="sellerZipcode"
+                                placeholder="Enter Seller's Zipcode"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-3">
                         <Form.Group as={Col} controlId="sellerContact">
                             <Form.Label>Contact *</Form.Label>
-                            <CustomInput type="text" name="sellerContact" placeholder="Enter Seller's Contact Number" required />
-                            {/* <Form.Control type="text" placeholder="Enter Seller's Contact Number" required /> */}
+                            <CustomInput
+                                type="text"
+                                name="sellerContact"
+                                placeholder="Enter Seller's Contact Number"
+                                required
+                            />
                         </Form.Group>
                     </Row>
                     <Row className="mb-5">
                         <Form.Group as={Col} controlId="storeDescription">
                             <Form.Label>Store Description *</Form.Label>
                             <ReactQuill
-                                style={{ height: "150px" }}
+                                style={{ height: "150px", marginBottom: "40px" }}
                                 theme="snow"
                                 value={storeDescription}
                                 onChange={setStoreDescription}
@@ -155,7 +341,7 @@ const AddSeller = () => {
                         <Form.Group as={Col} controlId="sellerDescription">
                             <Form.Label>Seller Description *</Form.Label>
                             <ReactQuill
-                                style={{ height: "150px" }}
+                                style={{ height: "150px", marginBottom: "40px" }}
                                 theme="snow"
                                 value={sellerDescription}
                                 onChange={setSellerDescription}
@@ -167,7 +353,7 @@ const AddSeller = () => {
                         <Form.Group as={Col} controlId="sellerPolicy">
                             <Form.Label>Seller Policy *</Form.Label>
                             <ReactQuill
-                                style={{ height: "150px" }}
+                                style={{ height: "150px", marginBottom: "40px" }}
                                 theme="snow"
                                 value={sellerPolicy}
                                 onChange={setSellerPolicy}
@@ -177,7 +363,6 @@ const AddSeller = () => {
                     </Row>
                 </fieldset>
 
-                {/* Security Section */}
                 <fieldset className="border p-4 mb-4">
                     <legend className="w-auto px-2">Security</legend>
                     <p>Set Password for Seller.</p>
@@ -203,22 +388,19 @@ const AddSeller = () => {
                                 type={showPassword ? "text" : "password"}
                                 icon={showPassword ? "eye" : "eye-slash"}
                                 onIconClick={togglePasswordVisibility}
-                                name="confirm-password"
+                                name="confirmPassword"
                                 value={confirmPassword}
                                 placeholder="Confirm Password"
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                             />
-
                         </Form.Group>
                     </Row>
                 </fieldset>
 
-                <CustomButton variant="contained" type="submit" >
-                    Submit
+                <CustomButton variant="contained" type="submit" disabled={loading}>
+                    {loading ? "Submitting..." : "Submit"}
                 </CustomButton>
-
-
             </Form>
         </Container>
     );

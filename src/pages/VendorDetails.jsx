@@ -25,7 +25,7 @@ import {
   Divider,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/baseUrl";
 import { logoutUser } from "../utils/authUtils";
 import TableInput from "../components/SharedComponents/TableInput";
@@ -238,12 +238,13 @@ function VendorDetails() {
               sx={{ display: "flex", justifyContent: "flex-end", pr: 2, pt: 2 }}
             >
               <CustomButton variant="contained" icon={AddIcon}>
-                <Link
+                {/* <Link
                   style={{ textDecoration: "none", color: "inherit" }}
                   to={"/add-seller"}
                 >
                   ADD
-                </Link>
+                </Link> */}
+                <NavLink to="/add-seller"  style={{ textDecoration: "none", color: "inherit" }}>ADD</NavLink>
               </CustomButton>
             </Box>
            
