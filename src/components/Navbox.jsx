@@ -50,8 +50,11 @@ function Navbox() {
     {
       text: "Settings",
       icon: "⚙️",
-      subItems: [{ text: "General Settings", icon: "🔧", path: "/" }],
-    },
+      subItems: [
+        { text: "General Settings", icon: "🔧", path: "/general-settings" },
+        { text: "Account", icon: "👤", path: "/admin" }, // ✅ Added Account
+        { text: "Privacy", icon: "🔒", path: "/privacy-settings" }, // ✅ Added Privacy
+      ],    },
   ];
 
   const MenuItem = ({ item, depth = 0 }) => {
