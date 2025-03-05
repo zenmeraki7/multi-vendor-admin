@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Button,
   Typography,
   InputAdornment,
   IconButton,
@@ -18,67 +17,120 @@ import {
   Pagination,
   Chip,
 } from "@mui/material";
-import { Search, Refresh, Edit } from "@mui/icons-material";
-import axios from "axios"; // Alternatively, use your axiosInstance
+import { Search, Refresh } from "@mui/icons-material";
+import axios from "axios";
 import { BASE_URL } from "../utils/baseUrl";
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../utils/authUtils";
 import TableSelect from "../components/SharedComponents/TableSelect";
 import TableInput from "../components/SharedComponents/TableInput";
 import CustomButton from "../components/SharedComponents/CustomButton";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
-  const navigate = useNavigate();
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+  const navigate = useNavigate();
+  const [priceRange, setPriceRange] = useState("all");
+
   const [filters, setFilters] = useState({
-    inStock: "all",
-    categoryType: "all",
-    category: "all",
-    subcategory: "all",
-    isActive: "all"
+    inStock: "",
+    categoryType: "",
+    category: "",
+    subcategory: "",
+    isActive: "",
+    price: "",
   });
 
-  const itemsPerPage = 10; // Adjust items per page as needed
+  const [filterOptions, setFilterOptions] = useState({
+    categoryTypes: [],
+    categories: [],
+    subcategories: [],
+  });
 
-  // Fetch products from the API
+  const itemsPerPage = 10;
+
+  const fetchFilterOptions = async () => {
+    try {
+      const [categoryTypesRes, categoriesRes, subcategoriesRes] = await Promise.all([
+        axios.get(`${BASE_URL}/api/category-type/all`, {
+          headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
+        }),
+        axios.get(`${BASE_URL}/api/category/all`, {
+          headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
+        }),
+        axios.get(`${BASE_URL}/api/subcategory/all`, {
+          headers: { authorization: `Bearer ${localStorage.getItem("token")}` },
+        }),
+      ]);
+
+      setFilterOptions({
+        categoryTypes: categoryTypesRes.data?.data || [],
+        categories: categoriesRes.data?.data || [],
+        subcategories: subcategoriesRes.data?.data || [],
+      });
+    } catch (err) {
+      console.error("Error fetching filter options:", err);
+    }
+  };
+
+  // Fixed price range parsing function
+  const getPriceRangeValues = (range) => {
+    if (range === "all" || !range) return { minPrice: undefined, maxPrice: undefined };
+    if (range === "10000+") return { minPrice: "10000", maxPrice: undefined };
+    
+    const [min, max] = range.split("-");
+    return { minPrice: min, maxPrice: max };
+  };
+
   const fetchProducts = async (page = 1) => {
     setLoading(true);
     setError(null);
     try {
+      const { minPrice, maxPrice } = getPriceRangeValues(priceRange);
+
+      const cleanFilters = {};
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== "" && value !== "all") {
+          cleanFilters[key] = value;
+        }
+      });
+
       const response = await axios.get(`${BASE_URL}/api/product/allproduct`, {
-        params: { 
-          page, 
+        params: {
+          page,
           limit: itemsPerPage,
-          ...filters
+          ...cleanFilters,
+          search: searchQuery,
+          minPrice,
+          maxPrice,
         },
         headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure the token is stored correctly
+          authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      const { data, totalPages, totalItems } = response.data;
+      // Adjust based on actual API response structure
+      const { data, totalPages: pages, totalItems } = response.data.success 
+        ? { 
+            data: response.data.data, 
+            totalPages: response.data.totalPages || 1, 
+            totalItems: response.data.totalItems || response.data.data.length 
+          } 
+        : { data: [], totalPages: 1, totalItems: 0 };
 
       setProducts(data);
       setFilteredProducts(data);
-      setTotalPages(totalPages);
+      setTotalPages(pages);
       setTotalProducts(totalItems);
       setLoading(false);
     } catch (err) {
-      console.log(err);
-
-      if (
-        error.response &&
-        (error.response.status === 404 || error.response.status === 401)
-      ) {
-        logoutUser(); // Call logoutUser if 404 or 401 status code
-      }
+      console.error("Fetch products error:", err);
       setError(err.response?.data?.message || "Error fetching products");
       setLoading(false);
     }
@@ -86,62 +138,72 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage]);
+  }, [currentPage, searchQuery, filters, priceRange]);
 
-  // Handle Search
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
+
   useEffect(() => {
     if (searchTerm === "") {
       setFilteredProducts(products);
     } else {
       const lowercasedTerm = searchTerm.toLowerCase();
       const filtered = products.filter((product) =>
-        product.title.toLowerCase().includes(lowercasedTerm)
+        product.title?.toLowerCase().includes(lowercasedTerm)
       );
       setFilteredProducts(filtered);
     }
   }, [searchTerm, products]);
 
-  // Handle filter changes
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    setSearchQuery(searchTerm);
+    setCurrentPage(1);
   };
 
-  // Apply filters
+  const handleFilterChange = (setter) => (event) => {
+    setter(event.target.value);
+    setCurrentPage(1);
+  };
+
   const applyFilters = () => {
-    setCurrentPage(1); // Reset to first page when applying filters
-    fetchProducts(1);
-  };
-
-  // Clear filters
-  const clearFilters = () => {
-    setFilters({
-      inStock: "all",
-      categoryType: "all",
-      category: "all",
-      subcategory: "all",
-      isActive: "all"
-    });
     setCurrentPage(1);
     fetchProducts(1);
   };
 
-  // Handle Page Change
+  const clearFilters = () => {
+    setFilters({
+      inStock: "",
+      categoryType: "",
+      category: "",
+      subcategory: "",
+      isActive: "",
+      price: "",
+    });
+    setPriceRange("all");
+    setSearchTerm("");
+    setSearchQuery("");
+    setCurrentPage(1);
+    fetchProducts(1);
+  };
+
+  const priceOptions = [
+    { value: "all", label: "All Prices" },
+    { value: "0-500", label: "0 - 500" },
+    { value: "500-1000", label: "500 - 1,000" },
+    { value: "1000-5000", label: "1,000 - 5,000" },
+    { value: "5000-10000", label: "5,000 - 10,000" },
+    { value: "10000+", label: "10,000+" },
+  ];
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="100vh"
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
         <CircularProgress />
       </Box>
     );
@@ -155,241 +217,182 @@ const ProductList = () => {
     );
   }
 
-  // Calculate the range of products currently being displayed
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalProducts);
 
   return (
     <Box padding={2}>
-      {/* Header Section */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">Products Management</Typography>
         <Box display="flex" alignItems="center" gap={1}>
           <IconButton color="primary" onClick={() => fetchProducts(currentPage)}>
             <Refresh />
           </IconButton>
-          <Typography fontWeight="bold">
-            {new Date().toLocaleString()}
-          </Typography>
+          <Typography fontWeight="bold">{new Date().toLocaleString()}</Typography>
         </Box>
       </Box>
 
-      {/* Search Bar */}
       <Box display="flex" justifyContent="flex-end" alignItems="center" mb={2}>
-        <TableInput
-          id="search-product"
-          name="searchTerm"
-          placeholder="Search Product"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          label="Search"
-          type="text"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: "300px" }}
-        />
+        <form onSubmit={handleSearchSubmit} style={{ width: "300px" }}>
+          <TableInput
+            id="search-product"
+            name="searchTerm"
+            placeholder="Search Product"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            label="Search"
+            type="text"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton type="submit">
+                    <Search />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "100%" }}
+          />
+        </form>
       </Box>
 
-      {/* Filters and Actions */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography>
-          Showing: <strong>{startItem}-{endItem}</strong> |{" "}
-          <Typography
-            component="span"
-            sx={{ fontWeight: "medium" }}
-          >
+          Showing: <strong>{totalProducts > 0 ? `${startItem}-${endItem}` : "0"}</strong>|{" "}
+          <Typography component="span" sx={{ fontWeight: "medium" }}>
             Total Products: <strong>{totalProducts}</strong>
           </Typography>
         </Typography>
         <Box display="flex" gap={1}>
-          {/* Example Filters - Implement actual filtering logic as needed */}
           <TableSelect
             id="stock-filter"
             name="inStock"
             value={filters.inStock}
-            onChange={handleFilterChange}
+            onChange={(e) => setFilters({ ...filters, inStock: e.target.value })}
             label="Stock"
             MenuItems={[
-              { value: "all", label: "All" },
+              { value: "", label: "All" },
               { value: "true", label: "In Stock" },
               { value: "false", label: "Out of Stock" },
             ]}
           />
-
           <TableSelect
             id="product-category-filter"
             name="categoryType"
             value={filters.categoryType}
-            onChange={handleFilterChange}
-            label="CategoryType"
+            onChange={(e) => setFilters({ ...filters, categoryType: e.target.value })}
+            label="Category-Type"
             MenuItems={[
-              { value: "all", label: "All" },
-              { value: "Fashion", label: "Fashion" },
-              { value: "Electronics", label: "Electronics" },
+              { value: "", label: "All" },
+              ...filterOptions.categoryTypes.map((type) => ({
+                value: type._id,
+                label: type.name,
+              })),
             ]}
           />
-
           <TableSelect
-            id="category-filter"
-            name="category"
-            value={filters.category}
-            onChange={handleFilterChange}
-            label="Category"
-            MenuItems={[
-              { value: "all", label: "All" },
-              { value: "Type1", label: "Type1" },
-              { value: "Type2", label: "Type2" },
-            ]}
+            id="price-range-filter"
+            name="priceRange"
+            value={priceRange}
+            onChange={handleFilterChange(setPriceRange)}
+            label="Price"
+            MenuItems={priceOptions.map((option) => ({
+              value: option.value,
+              label: option.label,
+            }))}
           />
-
-          <TableSelect
-            id="subcategory-filter"
-            name="subcategory"
-            value={filters.subcategory}
-            onChange={handleFilterChange}
-            label="SubCategory"
-            MenuItems={[
-              { value: "all", label: "All" },
-              { value: "Option1", label: "Option1" },
-              { value: "Option2", label: "Option2" },
-            ]}
-          />
-
           <TableSelect
             id="status-filter"
             name="isActive"
             value={filters.isActive}
-            onChange={handleFilterChange}
+            onChange={(e) => setFilters({ ...filters, isActive: e.target.value })}
             label="Status"
             MenuItems={[
-              { value: "all", label: "All" },
+              { value: "", label: "All" },
               { value: "false", label: "Pending" },
               { value: "true", label: "Approved" },
             ]}
           />
-
-          <CustomButton 
-            variant="contained" 
-            color="primary"
-            onClick={applyFilters}
-          >
+          <CustomButton variant="contained" color="primary" onClick={applyFilters}>
             APPLY
           </CustomButton>
-          <CustomButton 
-            variant="outlined" 
-            color="secondary"
-            onClick={clearFilters}
-          >
+          <CustomButton variant="outlined" color="secondary" onClick={clearFilters}>
             CLEAR
           </CustomButton>
         </Box>
       </Box>
 
-      {/* Product Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "primary.main" }}>
               <TableCell></TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                PRODUCT NAME
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                STOCK
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                PRICE
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                CATEGORY
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                SELLER
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                STATUS
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                LAST MODIFIED
-              </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                ACTIONS
-              </TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>PRODUCT NAME</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STOCK</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>PRICE</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>CATEGORY-TYPE</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>SELLER</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>STATUS</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>LAST MODIFIED</TableCell>
+              <TableCell sx={{ color: "white", fontWeight: "bold" }}>ACTIONS</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredProducts.map((product, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <Avatar
-                    variant="rounded"
-                    src={product.thumbnail.url}
-                    alt={product.title}
-                    sx={{ width: 60, height: 60 }}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/fallback-image.png";
-                    }}
-                  />
-                </TableCell>
-                <TableCell>{product.title}</TableCell>
-                <TableCell>
-                  {product.stock > 0
-                    ? `In stock (${product.stock})`
-                    : "Out of stock"}
-                </TableCell>
-                <TableCell>₹{product.discountedPrice}</TableCell>
-                <TableCell>
-                  {product?.categoryType?.name || "Unavailable"}
-                </TableCell>
-                <TableCell>
-                  {product?.seller?.companyName || "Unknown"}
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={product.isApproved ? "Approved" : "Pending"}
-                    color={product.isApproved ? "success" : "error"}
-                    sx={{
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                      borderWidth: 2,
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  {new Date(product.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <CustomButton
-                    variant="contained"
-                    color="primary"
-                    isSmall
-                    onClick={() => navigate(`/view-product/${product._id}`)} // Replace with your logic
-                  >
-                    View
-                  </CustomButton>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Avatar
+                      variant="rounded"
+                      src={product.thumbnail?.url}
+                      alt={product.title}
+                      sx={{ width: 60, height: 60 }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/fallback-image.png";
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {product.title?.length > 20 ? `${product.title.slice(0, 20)}...` : product.title}
+                  </TableCell>
+                  <TableCell>
+                    {product.stock > 0 ? `In stock (${product.stock})` : "Out of stock"}
+                  </TableCell>
+                  <TableCell>₹{product.discountedPrice || product.price}</TableCell>
+                  <TableCell>{product?.categoryType?.name || "Unavailable"}</TableCell>
+                  <TableCell>{product?.seller?.companyName || "Unknown"}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={product.isApproved ? "Approved" : "Pending"}
+                      color={product.isApproved ? "success" : "error"}
+                      sx={{ fontWeight: "bold", textTransform: "uppercase", borderWidth: 2 }}
+                    />
+                  </TableCell>
+                  <TableCell>{new Date(product.updatedAt || product.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <CustomButton
+                      variant="contained"
+                      color="primary"
+                      isSmall
+                      onClick={() => navigate(`/view-product/${product._id}`)}
+                    >
+                      View
+                    </CustomButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={9} style={{ textAlign: "center" }}>
+                  No products available.
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-      {/* Pagination */}
+
       <Box display="flex" justifyContent="center" mt={3}>
         <Pagination
           count={totalPages}
