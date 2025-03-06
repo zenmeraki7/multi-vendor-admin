@@ -57,12 +57,40 @@ const AddSeller = () => {
         defaultValues: {
             country: "",
             sellerState: "",
-            businessType: ""
+            businessType: "",
+            password: "",        
+            confirmPassword: "",
+            storeDescription: "",
+            sellerDescription: "",
+            sellerPolicy: "",
+            sellerName: "",
+            sellerShopName: "",
+            sellerEmail: "",
+            sellerContact: "",
+            storeAddress: "",
+            sellerCity: "",
+            sellerZipcode: "",
         }
     });
 
-    // Watch form values
-    const formValues = watch(["country", "sellerState", "businessType"]);
+    const formValues = watch([
+        "country", 
+        "sellerState", 
+        "businessType", 
+        "password", 
+        "confirmPassword",
+        "storeDescription",
+        "sellerDescription",
+        "sellerName",
+        "sellerShopName",
+        "sellerEmail",
+        "sellerContact",
+        "storeAddress",
+        "sellerCity",
+        "sellerZipcode",
+        "sellerPolicy",
+
+    ]);
     const [country, sellerState, businessType] = formValues;
 
     // Fetch data from backend
@@ -126,6 +154,15 @@ const AddSeller = () => {
         setValue(name, value, { shouldValidate: true });
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        formValues((prevValues) => ({
+          ...prevValues,
+          [name]: value,
+        }));
+      };
+    
+
     // API call to add seller
     const addSeller = async (sellerData, token) => {
         try {
@@ -153,12 +190,9 @@ const AddSeller = () => {
         setShowPassword((prev) => !prev);
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setValue(name, value);
-    };
-
+   
     const onSubmit = async (data) => {
+        setLoading(true);
         if (password !== confirmPassword) {
             alert("Passwords do not match");
             return;
@@ -181,9 +215,9 @@ const AddSeller = () => {
                 state: data.sellerState,
                 businessType: data.businessType,
                 password: data.password,
-                storeDescription,
-                sellerDescription,
-                sellerPolicy,
+                storeDescription: data.storeDescription,
+                sellerDescription: data.sellerDescription,
+                sellerPolicy: data.sellerPolicy,
             };
 
             await axios.post(`${BASE_URL}/api/vendor/add-vendor`, formData, {
@@ -200,11 +234,11 @@ const AddSeller = () => {
             setValue("country", "");
             setValue("sellerState", "");
             setValue("businessType", "");
-            setStoreDescription("");
-            setSellerDescription("");
-            setSellerPolicy("");
-            setPassword("");
-            setConfirmPassword("");
+            setValue("password", "");        
+            setValue("confirmPassword", ""); 
+            setValue("storeDescription", "");
+            setValue("sellerDescription", "");
+            setValue("sellerPolicy", "");
         } catch (error) {
             alert(error.response?.data?.message || error.message || "Failed to add seller");
         } finally {
@@ -226,6 +260,8 @@ const AddSeller = () => {
                             <CustomInput
                                 type="text"
                                 name="sellerName"
+                                onChange={handleChange}
+                                value={formValues.sellerName}
                                 placeholder="Enter Seller Name Here"
                                 {...register("sellerName")}
                             />
@@ -439,45 +475,41 @@ const AddSeller = () => {
                     <legend className="w-auto px-2">Security</legend>
                     <p>Set Password for Seller.</p>
                     <Row className="mb-3">
-                        <Form.Group as={Col} controlId="password">
-                            <Form.Label>Password *</Form.Label>
-                            <CustomInput
-                                type={showPassword ? "text" : "password"}
-                                icon={showPassword ? "eye" : "eye-slash"}
-                                onIconClick={togglePasswordVisibility}
-                                name="password"
-                                value={password}
-                                placeholder="Enter Password"
-                                onChange={(e) => setPassword(e.target.value)}
-                                {...register("password")}
-                            />
-                            {errors.password && (
-                                <div className="invalid-feedback d-block">
-                                    {errors.password.message}
-                                </div>
-                            )}
-                        </Form.Group>
-                    </Row>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="confirmPassword">
-                            <Form.Label>Confirm Password *</Form.Label>
-                            <CustomInput
-                                type={showPassword ? "text" : "password"}
-                                icon={showPassword ? "eye" : "eye-slash"}
-                                onIconClick={togglePasswordVisibility}
-                                name="confirmPassword"
-                                value={confirmPassword}
-                                placeholder="Confirm Password"
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                {...register("confirmPassword")}
-                            />
-                            {errors.confirmPassword && (
-                                <div className="invalid-feedback d-block">
-                                    {errors.confirmPassword.message}
-                                </div>
-                            )}
-                        </Form.Group>
-                    </Row>
+                    <Form.Group as={Col} controlId="password">
+                        <Form.Label>Password *</Form.Label>
+                        <CustomInput
+                            type={showPassword ? "text" : "password"}
+                            icon={showPassword ? "eye" : "eye-slash"}
+                            onIconClick={() => setShowPassword(!showPassword)}
+                            name="password"
+                            placeholder="Enter Password"
+                            {...register("password")}
+                        />
+                        {errors.password && (
+                            <div className="invalid-feedback d-block">
+                                {errors.password.message}
+                            </div>
+                        )}
+                    </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="confirmPassword">
+                        <Form.Label>Confirm Password *</Form.Label>
+                        <CustomInput
+                            type={showPassword ? "text" : "password"}
+                            icon={showPassword ? "eye" : "eye-slash"}
+                            onIconClick={() => setShowPassword(!showPassword)}
+                            name="confirmPassword"
+                            placeholder="Confirm Password"
+                            {...register("confirmPassword")}
+                        />
+                        {errors.confirmPassword && (
+                            <div className="invalid-feedback d-block">
+                                {errors.confirmPassword.message}
+                            </div>
+                        )}
+                    </Form.Group>
+                </Row>
                 </fieldset>
 
                 <CustomButton variant="contained" type="submit" disabled={loading}>
