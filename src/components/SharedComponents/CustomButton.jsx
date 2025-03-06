@@ -18,10 +18,10 @@ function CustomButton({ onClick, children, isActive = false, isSmall = false, va
         display: "flex",
         justifyContent: "center",
         gap: "8px", // Space between icon and text
-        transition: "all 0.2s ease",
+       transition: "all 0.2s ease",
         "&:hover": {
           backgroundColor: isActive ? "#1E40AF" : variant === "contained" ? "#1E40AF" : "#E3E8EF",
-        },
+        }, 
         ...style, 
       }}
       {...props}
