@@ -9,8 +9,9 @@ function Review() {
         <Grid item xs={12}>
           <Grid container spacing={2} alignItems="center">
             <Grid item>
+              
               <Avatar
-                alt="Gavin Casalegno"
+                alt=" Jermiah Fisher"
                 src="https://static.tvtropes.org/pmwiki/pub/images/gavincasalegno.jpg"
                 sx={{ width: 150, height: 150 }}
               />
