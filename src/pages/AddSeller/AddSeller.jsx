@@ -181,6 +181,8 @@ const AddSeller = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+
+          
         }
       );
       return response.data;
@@ -231,6 +233,7 @@ const AddSeller = () => {
         state: formData.sellerState,
         businessType: formData.businessType,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
         storeDescription: formData.storeDescription,
         sellerDescription: formData.sellerDescription,
         sellerPolicy: formData.sellerPolicy,
